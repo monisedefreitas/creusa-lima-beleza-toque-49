@@ -73,20 +73,29 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onBookingClick }) =>
               </Button>
             </div>
             
-            {/* Image and Stats */}
+            {/* Images and Stats */}
             <div className="animate-fade-in">
               <div className="relative">
-                {/* Professional photo */}
+                {/* Main professional photo */}
                 <div className="w-full h-96 bg-gradient-to-br from-sage-100 to-gold-100 rounded-2xl shadow-2xl mb-8 border border-sage-200 overflow-hidden">
                   <img 
-                    src="/lovable-uploads/4c9b8b40-7f97-4ec3-b1d3-8d39c2e42a95.png" 
+                    src="/lovable-uploads/73d8cd7b-d053-484a-b84e-0c423886228f.png" 
                     alt="Creusa Lima - Especialista em Estética e Linfoterapia"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 
+                {/* Secondary professional photo - smaller */}
+                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-gradient-to-br from-gold-100 to-sage-100 rounded-xl shadow-lg border-4 border-white overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png" 
+                    alt="Creusa Lima - Profissional"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
                 {/* Achievement cards */}
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-4 mt-12">
                   {achievements.map((achievement, index) => (
                     <Card key={index} className="border-0 shadow-lg bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
                       <CardContent className="p-6 flex items-center gap-4">

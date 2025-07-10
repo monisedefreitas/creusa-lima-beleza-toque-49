@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Phone, Instagram, Flower2 } from 'lucide-react';
 import { HeroSection } from '@/components/HeroSection';
@@ -33,7 +32,7 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img 
-                src="/lovable-uploads/d8dfb16a-e7c4-4374-84ba-f0c44cbce495.png" 
+                src="/lovable-uploads/f82463a1-3344-4535-86dd-071e92421715.png" 
                 alt="Creusa Lima - Beleza e Estética" 
                 className="h-12 w-auto"
               />
@@ -107,14 +106,14 @@ const Index = () => {
           <div className="text-center">
             <div className="mb-8 flex items-center justify-center">
               <img 
-                src="/lovable-uploads/d8dfb16a-e7c4-4374-84ba-f0c44cbce495.png" 
+                src="/lovable-uploads/f82463a1-3344-4535-86dd-071e92421715.png" 
                 alt="Creusa Lima - Beleza e Estética" 
                 className="h-16 w-auto filter brightness-0 invert"
               />
             </div>
             
             <h3 className="font-tan-mon-cheri text-2xl font-semibold mb-8 text-sage-100">
-              Beleza e Estética Premium
+              Beleza e Estética
             </h3>
             
             <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-12">
@@ -141,7 +140,7 @@ const Index = () => {
             
             <div className="border-t border-darkgreen-700 pt-8">
               <p className="text-sage-200 mb-2 font-poppins">
-                © 2024 Creusa Lima - Beleza e Estética Premium. Todos os direitos reservados.
+                © 2024 Creusa Lima - Beleza e Estética. Todos os direitos reservados.
               </p>
               <p className="text-sage-300 text-sm font-poppins mb-2">
                 Desenvolvido por Casa Criativa MI
