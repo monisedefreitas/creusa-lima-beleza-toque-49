@@ -9,19 +9,29 @@ interface HeroSectionProps {
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onBookingClick }) => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-beige-50 via-white to-sage-50">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        <img 
+          src="/lovable-uploads/46b56184-9c80-42e2-9f4b-8fb2bf567b13.png"
+          alt="Creusa Lima - Especialista em Estética"
+          className="w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-darkgreen-900/85 via-darkgreen-800/70 to-darkgreen-900/60"></div>
+      </div>
+      
       {/* Decorative Elements */}
       <div className="absolute top-20 left-10 opacity-20 animate-float">
-        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-sage-200 to-gold-200"></div>
+        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-sage-200/50 to-gold-200/50"></div>
       </div>
       <div className="absolute bottom-20 right-10 opacity-20 animate-float" style={{ animationDelay: '1s' }}>
-        <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-gold-200 to-sage-200"></div>
+        <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-gold-200/50 to-sage-200/50"></div>
       </div>
       <div className="absolute top-1/3 right-20 opacity-10">
-        <Flower2 className="w-8 h-8 text-gold-500" />
+        <Flower2 className="w-8 h-8 text-gold-300" />
       </div>
       <div className="absolute bottom-1/3 left-20 opacity-10">
-        <Flower2 className="w-6 h-6 text-sage-400" />
+        <Flower2 className="w-6 h-6 text-sage-300" />
       </div>
       
       {/* Main Content */}
@@ -33,22 +43,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBookingClick }) => {
             <span className="text-sm font-medium text-darkgreen-800 font-bauer-bodoni">20+ Anos de Excelência</span>
           </div>
           
-          <h1 className="font-tan-mon-cheri text-5xl md:text-7xl font-bold text-darkgreen-800 mb-6 leading-tight">
+          <h1 className="font-tan-mon-cheri text-5xl md:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
             20+ anos promovendo{' '}
-            <span className="text-gold-600 relative">
+            <span className="text-gold-300 relative">
               saúde, bem-estar e autoestima
-              <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-gold-400 to-gold-600 rounded"></div>
+              <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-gold-300 to-gold-400 rounded"></div>
             </span>
           </h1>
           
-          <p className="font-poppins text-xl md:text-2xl text-forest-600 max-w-4xl mx-auto mb-8 leading-relaxed">
+          <p className="font-poppins text-xl md:text-2xl text-white/90 max-w-4xl mx-auto mb-8 leading-relaxed drop-shadow-md">
             Descubra o verdadeiro poder do toque terapêutico e da estética avançada. 
             Experimente uma abordagem personalizada, onde cada detalhe é pensado para proporcionar{' '}
-            <span className="text-darkgreen-700 font-medium">resultados visíveis</span>,{' '}
-            <span className="text-gold-600 font-medium">relaxamento profundo</span> e{' '}
-            <span className="text-forest-700 font-medium">reconexão com o seu melhor</span>.
+            <span className="text-gold-200 font-medium">resultados visíveis</span>,{' '}
+            <span className="text-sage-200 font-medium">relaxamento profundo</span> e{' '}
+            <span className="text-beige-200 font-medium">reconexão com o seu melhor</span>.
             <br /><br />
-            <span className="text-darkgreen-800 font-semibold">
+            <span className="text-white font-semibold">
               Atendimentos exclusivos, com excelência e discrição.
             </span>
           </p>
@@ -66,7 +76,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBookingClick }) => {
             <Button 
               variant="outline" 
               size="lg"
-              className="border-2 border-gold-400 text-gold-700 hover:bg-gold-50 px-8 py-4 text-lg font-medium font-bauer-bodoni rounded-xl transition-all duration-300"
+              className="border-2 border-white/60 text-white hover:bg-white/20 backdrop-blur-sm px-8 py-4 text-lg font-medium font-bauer-bodoni rounded-xl transition-all duration-300"
               onClick={() => document.getElementById('sobre')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Conheça Nossa História
