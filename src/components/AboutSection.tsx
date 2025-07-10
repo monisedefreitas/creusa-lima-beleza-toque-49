@@ -81,7 +81,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onBookingClick }) =>
                   <img 
                     src="/lovable-uploads/73d8cd7b-d053-484a-b84e-0c423886228f.png" 
                     alt="Creusa Lima - Especialista em Estética e Linfoterapia"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-top"
                   />
                 </div>
                 

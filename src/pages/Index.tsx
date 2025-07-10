@@ -32,7 +32,7 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img 
-                src="/lovable-uploads/f82463a1-3344-4535-86dd-071e92421715.png" 
+                src="/lovable-uploads/new-logo.png" 
                 alt="Creusa Lima - Beleza e Estética" 
                 className="h-12 w-auto"
               />
@@ -106,7 +106,7 @@ const Index = () => {
           <div className="text-center">
             <div className="mb-8 flex items-center justify-center">
               <img 
-                src="/lovable-uploads/f82463a1-3344-4535-86dd-071e92421715.png" 
+                src="/lovable-uploads/new-logo.png" 
                 alt="Creusa Lima - Beleza e Estética" 
                 className="h-16 w-auto filter brightness-0 invert"
               />
@@ -143,7 +143,7 @@ const Index = () => {
                 © 2024 Creusa Lima - Beleza e Estética. Todos os direitos reservados.
               </p>
               <p className="text-sage-300 text-sm font-poppins mb-2">
-                Desenvolvido por Casa Criativa MI
+                Desenvolvido por <a href="http://sites.casacriativami.com/" target="_blank" rel="noopener noreferrer" className="hover:text-gold-300 transition-colors duration-300 underline">Casa Criativa MI</a>
               </p>
               <p className="text-sage-300 text-sm font-bauer-bodoni">
                 Cuidar de você é a nossa missão
