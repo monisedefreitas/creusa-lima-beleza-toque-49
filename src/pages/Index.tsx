@@ -1,17 +1,27 @@
-import React from 'react';
-import { Phone, Instagram, Flower2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Phone, Instagram, Flower2, X } from 'lucide-react';
 import { HeroSection } from '@/components/HeroSection';
 import { SectionDivider } from '@/components/SectionDivider';
 import { AboutSection } from '@/components/AboutSection';
 import { ServicesSection } from '@/components/ServicesSection';
 import { LocationSection } from '@/components/LocationSection';
+import FAQSection from '@/components/FAQSection';
+import { createWhatsAppLink, WhatsAppMessages } from '@/utils/whatsapp';
 
 const Index = () => {
-  const whatsappNumber = "+351964481966";
-  const whatsappLink = `https://wa.me/351964481966`;
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const whatsappLink = createWhatsAppLink(WhatsAppMessages.general);
 
   const handleBookingClick = () => {
-    window.open(whatsappLink, '_blank');
+    window.open(createWhatsAppLink(WhatsAppMessages.consultation), '_blank');
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -67,17 +77,91 @@ const Index = () => {
             
             {/* Mobile Menu Button */}
             <div className="md:hidden">
-              <button className="p-2 text-forest-700 hover:text-darkgreen-700">
-                <div className="space-y-1">
-                  <div className="w-6 h-0.5 bg-current"></div>
-                  <div className="w-6 h-0.5 bg-current"></div>
-                  <div className="w-6 h-0.5 bg-current"></div>
-                </div>
+              <button 
+                onClick={toggleMobileMenu}
+                className="p-2 text-forest-700 hover:text-darkgreen-700 transition-colors duration-300"
+                aria-label="Toggle mobile menu"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <div className="space-y-1">
+                    <div className="w-6 h-0.5 bg-current transition-all duration-300"></div>
+                    <div className="w-6 h-0.5 bg-current transition-all duration-300"></div>
+                    <div className="w-6 h-0.5 bg-current transition-all duration-300"></div>
+                  </div>
+                )}
               </button>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={closeMobileMenu}
+          ></div>
+          <div className="absolute top-0 right-0 w-80 h-full bg-white/95 backdrop-blur-md shadow-2xl transform transition-transform duration-300 ease-out">
+            <div className="p-6 pt-20">
+              <nav className="space-y-6">
+                <a 
+                  href="#sobre" 
+                  onClick={closeMobileMenu}
+                  className="block text-lg font-medium text-forest-700 hover:text-darkgreen-700 transition-colors duration-300 py-3 border-b border-sage-100 font-poppins"
+                >
+                  Sobre
+                </a>
+                <a 
+                  href="#servicos" 
+                  onClick={closeMobileMenu}
+                  className="block text-lg font-medium text-forest-700 hover:text-darkgreen-700 transition-colors duration-300 py-3 border-b border-sage-100 font-poppins"
+                >
+                  Serviços
+                </a>
+                <a 
+                  href="#localizacao" 
+                  onClick={closeMobileMenu}
+                  className="block text-lg font-medium text-forest-700 hover:text-darkgreen-700 transition-colors duration-300 py-3 border-b border-sage-100 font-poppins"
+                >
+                  Localização
+                </a>
+                <a 
+                  href="#contato" 
+                  onClick={closeMobileMenu}
+                  className="block text-lg font-medium text-forest-700 hover:text-darkgreen-700 transition-colors duration-300 py-3 border-b border-sage-100 font-poppins"
+                >
+                  Contato
+                </a>
+                
+                <div className="pt-6 space-y-4">
+                  <a 
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 bg-gradient-to-r from-darkgreen-600 to-darkgreen-700 text-white px-6 py-3 rounded-lg hover:from-darkgreen-700 hover:to-darkgreen-800 transition-all duration-300 font-poppins"
+                  >
+                    <Phone className="h-5 w-5" />
+                    <span>WhatsApp</span>
+                  </a>
+                  
+                  <a 
+                    href="https://instagram.com/creusalima_estetica"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 bg-gradient-to-r from-gold-500 to-gold-600 text-white px-6 py-3 rounded-lg hover:from-gold-600 hover:to-gold-700 transition-all duration-300 font-poppins"
+                  >
+                    <Instagram className="h-5 w-5" />
+                    <span>Instagram</span>
+                  </a>
+                </div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <HeroSection onBookingClick={handleBookingClick} />
@@ -99,6 +183,12 @@ const Index = () => {
 
       {/* Location Section */}
       <LocationSection />
+
+      {/* Section Divider */}
+      <SectionDivider variant="gold" />
+
+      {/* FAQ Section */}
+      <FAQSection />
 
       {/* Premium Footer */}
       <footer id="contato" className="bg-gradient-to-r from-darkgreen-900 to-darkgreen-800 text-white py-16 px-4">

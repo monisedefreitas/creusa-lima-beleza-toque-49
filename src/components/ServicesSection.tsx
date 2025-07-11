@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Flower2, Heart, Zap, Shield, Phone } from 'lucide-react';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 interface ServiceCategory {
   title: string;
@@ -17,6 +18,10 @@ interface ServicesSectionProps {
 }
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick }) => {
+  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { elementRef: cardsRef, isVisible: cardsVisible } = useScrollAnimation();
+  const { elementRef: ctaRef, isVisible: ctaVisible } = useScrollAnimation();
+
   const serviceCategories: ServiceCategory[] = [
     {
       title: "Linfoterapia Especializada",
@@ -54,7 +59,12 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
   return (
     <section id="servicos" className="py-20 px-4 bg-gradient-to-br from-beige-50 to-sage-50/30">
       <div className="container mx-auto">
-        <div className="text-center mb-16 animate-fade-in">
+        <div 
+          ref={headerRef}
+          className={`text-center mb-16 transition-all duration-800 ${
+            headerVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full border border-sage-200 mb-6">
             <Flower2 className="w-4 h-4 text-sage-500" />
             <span className="text-sm font-medium text-darkgreen-800 font-bauer-bodoni">Excelência em Cada Detalhe</span>
@@ -68,11 +78,16 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
           </p>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div 
+          ref={cardsRef}
+          className="grid md:grid-cols-3 gap-8 mb-16"
+        >
           {serviceCategories.map((category, index) => (
             <Card 
               key={index} 
-              className={`group hover:shadow-2xl transition-all duration-500 border-0 bg-white/90 backdrop-blur-sm ${
+              className={`group hover:shadow-2xl transition-all duration-500 border-0 bg-white/90 backdrop-blur-sm hover-lift ${
+                cardsVisible ? `animate-fade-in-up animate-delay-${index * 100 + 100}` : 'opacity-0 translate-y-8'
+              } ${
                 category.highlight 
                   ? 'ring-2 ring-gold-200 shadow-xl transform hover:scale-105' 
                   : 'hover:transform hover:scale-105'
@@ -117,8 +132,13 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
           ))}
         </div>
         
-        <div className="max-w-4xl mx-auto">
-          <Card className="border-0 shadow-xl bg-gradient-to-r from-darkgreen-900 to-darkgreen-800 text-white overflow-hidden">
+        <div 
+          ref={ctaRef}
+          className="max-w-4xl mx-auto"
+        >
+          <Card className={`border-0 shadow-xl bg-gradient-to-r from-darkgreen-900 to-darkgreen-800 text-white overflow-hidden transition-all duration-800 ${
+            ctaVisible ? 'animate-scale-in' : 'opacity-0 scale-95'
+          }`}>
             <CardContent className="p-12 text-center relative">
               <div className="absolute top-4 right-4 opacity-20">
                 <Flower2 className="w-16 h-16" />

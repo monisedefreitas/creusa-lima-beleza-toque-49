@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Clock, Car, Phone } from 'lucide-react';
+import GoogleMap from './GoogleMap';
 
 export const LocationSection: React.FC = () => {
   const locationFeatures = [
@@ -95,24 +96,9 @@ export const LocationSection: React.FC = () => {
             
             {/* Map Area */}
             <div className="space-y-6">
-              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden">
+              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden hover-lift">
                 <CardContent className="p-0">
-                  <div className="h-80 bg-gradient-to-br from-emerald-100 to-gold-100 flex items-center justify-center relative">
-                    <div className="text-center p-8">
-                      <MapPin className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
-                      <h4 className="font-playfair text-xl font-semibold text-emerald-900 mb-2">
-                        Mapa Interativo
-                      </h4>
-                      <p className="text-slate-600">
-                        Google Maps será incorporado aqui
-                      </p>
-                    </div>
-                    
-                    {/* Decorative pin */}
-                    <div className="absolute top-20 left-1/2 transform -translate-x-1/2">
-                      <div className="w-4 h-4 bg-emerald-600 rounded-full animate-pulse"></div>
-                    </div>
-                  </div>
+                  <GoogleMap className="h-80" />
                 </CardContent>
               </Card>
               
