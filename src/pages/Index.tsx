@@ -7,24 +7,18 @@ import { LocationSection } from "@/components/LocationSection";
 import FAQSection from "@/components/FAQSection";
 import { Footer } from "@/components/Footer";
 import SEOManager from "@/components/SEO/SEOManager";
-import EnhancedWhatsApp from "@/components/WhatsApp/EnhancedWhatsApp";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import BookingModal from "@/components/BookingSystem/BookingModal";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Settings } from "lucide-react";
 
 const Index = () => {
-  const [showBookingDialog, setShowBookingDialog] = useState(false);
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleBookingClick = () => {
-    setShowBookingDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setShowBookingDialog(false);
+    // Booking functionality is now handled by the BookingModal component
   };
 
   return (
@@ -61,7 +55,7 @@ const Index = () => {
         )}
 
         <main id="main-content">
-      <HeroSection onBookingClick={() => {}} />
+          <HeroSection onBookingClick={handleBookingClick} />
           <AboutSection onBookingClick={handleBookingClick} />
           <ServicesSection onBookingClick={handleBookingClick} />
           <LocationSection />
@@ -69,32 +63,6 @@ const Index = () => {
         </main>
 
         <Footer />
-
-        {/* Booking Dialog */}
-        <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-center font-tan-mon-cheri text-2xl text-darkgreen-900">
-                Agende a sua Consulta
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-center text-forest-600">
-                Entre em contacto connosco para agendar a sua consulta personalizada
-              </p>
-              <EnhancedWhatsApp />
-              <div className="text-center pt-4">
-                <Button
-                  variant="outline"
-                  onClick={handleCloseDialog}
-                  className="w-full"
-                >
-                  Fechar
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </>
   );

@@ -92,6 +92,95 @@ export type Database = {
         }
         Relationships: []
       }
+      appointment_services: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          id: string
+          price: number
+          service_id: string
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          id?: string
+          price?: number
+          service_id: string
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          id?: string
+          price?: number
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_services_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          appointment_date: string
+          client_email: string | null
+          client_name: string
+          client_phone: string
+          created_at: string
+          id: string
+          notes: string | null
+          status: string
+          time_slot_id: string
+          total_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_date: string
+          client_email?: string | null
+          client_name: string
+          client_phone: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          time_slot_id: string
+          total_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          client_email?: string | null
+          client_name?: string
+          client_phone?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          time_slot_id?: string
+          total_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_time_slot_id_fkey"
+            columns: ["time_slot_id"]
+            isOneToOne: false
+            referencedRelation: "time_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       banners: {
         Row: {
           button_link: string | null
@@ -140,6 +229,36 @@ export type Database = {
           subtitle?: string | null
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      business_hours: {
+        Row: {
+          close_time: string
+          created_at: string
+          day_of_week: number
+          id: string
+          is_active: boolean
+          open_time: string
+          updated_at: string
+        }
+        Insert: {
+          close_time: string
+          created_at?: string
+          day_of_week: number
+          id?: string
+          is_active?: boolean
+          open_time: string
+          updated_at?: string
+        }
+        Update: {
+          close_time?: string
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          is_active?: boolean
+          open_time?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -401,6 +520,36 @@ export type Database = {
           updated_at?: string | null
           url?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      time_slots: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          is_available: boolean
+          max_concurrent: number
+          time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          is_available?: boolean
+          max_concurrent?: number
+          time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          is_available?: boolean
+          max_concurrent?: number
+          time?: string
+          updated_at?: string
         }
         Relationships: []
       }

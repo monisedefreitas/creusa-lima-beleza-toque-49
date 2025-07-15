@@ -1,112 +1,33 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { 
   Calendar, 
   Clock, 
   Phone, 
   Mail, 
   User, 
-  Edit2, 
   Check, 
   X, 
   MessageSquare,
-  Filter,
   Search
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
-import type { Tables } from '@/integrations/supabase/types';
-
-type TimeSlot = {
-  id: string;
-  time: string;
-  duration_minutes: number;
-  is_available: boolean;
-  max_concurrent: number;
-  created_at: string;
-  updated_at: string;
-};
-
-type AppointmentService = {
-  id: string;
-  appointment_id: string;
-  service_id: string;
-  price: number;
-  created_at: string;
-  services: Tables<'services'>;
-};
-
-type Appointment = {
-  id: string;
-  client_name: string;
-  client_phone: string;
-  client_email: string | null;
-  appointment_date: string;
-  time_slot_id: string;
-  status: string;
-  notes: string | null;
-  total_price: number | null;
-  created_at: string;
-  updated_at: string;
-  time_slots: TimeSlot | null;
-  appointment_services: AppointmentService[];
-};
+import { useAppointments, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
 
 const AppointmentsManager: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  // Fetch appointments with related data
-  const { data: appointments, isLoading } = useQuery({
-    queryKey: ['appointments', selectedStatus, selectedDate],
-    queryFn: async () => {
-      // Use simple query for now since RPC functions may not be working
-      const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .limit(0);
-
-      if (error) {
-        console.log('Appointments system not ready yet');
-        return []; // Return empty array for now
-      }
-      
-      return []; // Return empty array until database is properly configured
-    }
-  });
-
-  // Update appointment status - disabled for now
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      throw new Error('Appointment system not configured yet');
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      toast({
-        title: "Aviso",
-        description: "Sistema de marcações em configuração.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Sistema em Configuração",
-        description: "O sistema de marcações está a ser configurado.",
-        variant: "destructive",
-      });
-    }
-  });
+  const { data: appointments, isLoading } = useAppointments();
+  const updateStatusMutation = useUpdateAppointmentStatus();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -128,10 +49,14 @@ const AppointmentsManager: React.FC = () => {
     }
   };
 
-  const filteredAppointments = appointments?.filter(appointment =>
-    appointment.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.client_phone.includes(searchTerm)
-  ) || [];
+  const filteredAppointments = appointments?.filter(appointment => {
+    const matchesSearch = appointment.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         appointment.client_phone.includes(searchTerm);
+    const matchesStatus = selectedStatus === 'all' || appointment.status === selectedStatus;
+    const matchesDate = !selectedDate || appointment.appointment_date === selectedDate;
+    
+    return matchesSearch && matchesStatus && matchesDate;
+  }) || [];
 
   const todayAppointments = appointments?.filter(apt => 
     apt.appointment_date === format(new Date(), 'yyyy-MM-dd') &&
@@ -139,9 +64,14 @@ const AppointmentsManager: React.FC = () => {
   ) || [];
 
   const pendingCount = appointments?.filter(apt => apt.status === 'pending').length || 0;
+  const totalRevenue = appointments?.reduce((sum, apt) => sum + (apt.total_price || 0), 0) || 0;
 
   if (isLoading) {
-    return <div>Carregando marcações...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
@@ -203,9 +133,7 @@ const AppointmentsManager: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Receita</p>
-                <p className="text-2xl font-bold">
-                  €{appointments?.reduce((sum, apt) => sum + (apt.total_price || 0), 0).toFixed(2)}
-                </p>
+                <p className="text-2xl font-bold">€{totalRevenue.toFixed(2)}</p>
               </div>
               <MessageSquare className="h-8 w-8 text-purple-600" />
             </div>
@@ -309,9 +237,9 @@ const AppointmentsManager: React.FC = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-700 mb-1">Serviços:</p>
                       <div className="space-y-1">
-                        {appointment.appointment_services?.map((as, index) => (
-                          <div key={index} className="text-sm text-gray-600">
-                            • {as.services?.name}
+                        {appointment.appointment_services?.map((service) => (
+                          <div key={service.id} className="text-sm text-gray-600">
+                            • {service.services?.name} (€{service.price})
                           </div>
                         ))}
                       </div>
@@ -380,7 +308,7 @@ const AppointmentsManager: React.FC = () => {
           <Card>
             <CardContent className="p-8 text-center">
               <p className="text-gray-500">
-                Sistema de marcações em configuração. As marcações aparecerão aqui quando o sistema estiver ativo.
+                Nenhuma marcação encontrada com os filtros aplicados.
               </p>
             </CardContent>
           </Card>

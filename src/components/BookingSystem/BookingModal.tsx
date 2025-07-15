@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,35 +8,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { CalendarDays, Clock, Phone, User, Mail, MessageCircle } from 'lucide-react';
-import { format, addDays, isBefore, startOfDay } from 'date-fns';
+import { CalendarDays, Clock, User } from 'lucide-react';
+import { format, isBefore, startOfDay } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { useTimeSlots, useBusinessHours, useBookedSlotsForDate, useCreateAppointment } from '@/hooks/useAppointments';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Service = Tables<'services'>;
-
-type TimeSlot = {
-  id: string;
-  time: string;
-  duration_minutes: number;
-  is_available: boolean;
-  max_concurrent: number;
-  created_at: string;
-  updated_at: string;
-};
-
-type BusinessHours = {
-  id: string;
-  day_of_week: number;
-  open_time: string;
-  close_time: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-};
 
 interface BookingModalProps {
   children: React.ReactNode;
@@ -54,9 +35,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
     notes: ''
   });
 
-  const { toast } = useToast();
-
-  // Fetch services
   const { data: services } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
@@ -71,98 +49,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
     }
   });
 
-  // Fetch time slots using direct query for now
-  const { data: timeSlots } = useQuery({
-    queryKey: ['time-slots'],
-    queryFn: async () => {
-      // Use a basic select for now until RPC functions are working
-      const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .limit(0);
-      
-      if (error) console.log('Time slots not available yet');
-      
-      // Mock data for now
-      return [
-        { id: '1', time: '09:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
-        { id: '2', time: '10:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
-        { id: '3', time: '11:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
-        { id: '4', time: '14:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
-        { id: '5', time: '15:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
-        { id: '6', time: '16:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
-      ] as TimeSlot[];
-    }
-  });
-
-  // Fetch business hours using direct query for now
-  const { data: businessHours } = useQuery({
-    queryKey: ['business-hours'],
-    queryFn: async () => {
-      // Mock data for now - Monday to Saturday
-      return [
-        { id: '1', day_of_week: 1, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
-        { id: '2', day_of_week: 2, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
-        { id: '3', day_of_week: 3, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
-        { id: '4', day_of_week: 4, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
-        { id: '5', day_of_week: 5, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
-        { id: '6', day_of_week: 6, open_time: '09:00', close_time: '17:00', is_active: true, created_at: '', updated_at: '' },
-      ] as BusinessHours[];
-    }
-  });
-
-  // Check availability for selected date
-  const { data: existingAppointments } = useQuery({
-    queryKey: ['appointments', selectedDate?.toISOString()],
-    queryFn: async () => {
-      if (!selectedDate) return [];
-      
-      // Mock empty data for now since appointments table may not exist yet
-      return [];
-    },
-    enabled: !!selectedDate
-  });
-
-  // Create appointment mutation
-  const createAppointmentMutation = useMutation({
-    mutationFn: async () => {
-      if (!selectedDate || !selectedTimeSlot || selectedServices.length === 0) {
-        throw new Error('Missing required data');
-      }
-
-      // Calculate total price
-      const selectedServicesData = services?.filter(s => selectedServices.includes(s.id)) || [];
-      const totalPrice = selectedServicesData.reduce((sum, service) => {
-        const price = parseFloat(service.price_range?.split('-')[0]?.replace('€', '') || '0');
-        return sum + price;
-      }, 0);
-
-      // For now, simulate appointment creation with a simple alert
-      toast({
-        title: "Sistema em Configuração",
-        description: "O sistema de marcações está a ser configurado. Por favor, contacte diretamente via WhatsApp.",
-      });
-      
-      // Open WhatsApp with booking details
-      const message = `Olá! Gostaria de marcar uma consulta para ${format(selectedDate, 'dd/MM/yyyy')} às ${timeSlots?.find(slot => slot.id === selectedTimeSlot)?.time}. Serviços: ${services?.filter(s => selectedServices.includes(s.id)).map(s => s.name).join(', ')}. Nome: ${clientData.name}, Telefone: ${clientData.phone}`;
-      window.open(`https://wa.me/351964481966?text=${encodeURIComponent(message)}`, '_blank');
-      
-      setIsOpen(false);
-      resetForm();
-      return true;
-    },
-    onSuccess: () => {
-      // Success handled above
-    },
-    onError: (error) => {
-      toast({
-        title: "Erro",
-        description: "Erro ao processar a marcação. Tente contactar via WhatsApp.",
-        variant: "destructive",
-      });
-      console.error('Booking error:', error);
-    }
-  });
+  const { data: timeSlots } = useTimeSlots();
+  const { data: businessHours } = useBusinessHours();
+  const { data: bookedSlots } = useBookedSlotsForDate(selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '');
+  const createAppointmentMutation = useCreateAppointment();
 
   const resetForm = () => {
     setStep(1);
@@ -180,9 +70,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
   };
 
   const getAvailableTimeSlots = () => {
-    if (!timeSlots || !existingAppointments) return [];
-    
-    const bookedSlots = existingAppointments.map((apt: any) => apt.time_slot_id);
+    if (!timeSlots || !bookedSlots) return [];
     return timeSlots.filter(slot => !bookedSlots.includes(slot.id));
   };
 
@@ -192,6 +80,25 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
         ? prev.filter(id => id !== serviceId)
         : [...prev, serviceId]
     );
+  };
+
+  const handleSubmit = () => {
+    if (!selectedDate || !selectedTimeSlot || selectedServices.length === 0) return;
+
+    createAppointmentMutation.mutate({
+      client_name: clientData.name,
+      client_phone: clientData.phone,
+      client_email: clientData.email || undefined,
+      appointment_date: format(selectedDate, 'yyyy-MM-dd'),
+      time_slot_id: selectedTimeSlot,
+      notes: clientData.notes || undefined,
+      service_ids: selectedServices
+    }, {
+      onSuccess: () => {
+        setIsOpen(false);
+        resetForm();
+      }
+    });
   };
 
   const canProceedFromStep1 = selectedServices.length > 0;
@@ -405,7 +312,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                   Voltar
                 </Button>
                 <Button 
-                  onClick={() => createAppointmentMutation.mutate()}
+                  onClick={handleSubmit}
                   disabled={!canSubmit || createAppointmentMutation.isPending}
                 >
                   {createAppointmentMutation.isPending ? 'A Criar...' : 'Confirmar Marcação'}
