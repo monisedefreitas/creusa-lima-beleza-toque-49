@@ -16,21 +16,16 @@ import NotFound from "./pages/NotFound";
 import AuthPage from "./components/Auth/AuthPage";
 import AdminRoutes from "./pages/AdminRoutes";
 
-// Create QueryClient with error handling
+// Create QueryClient with updated configuration
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 2,
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
-      onError: (error) => {
-        console.error('Query error:', error);
-      },
     },
     mutations: {
-      onError: (error) => {
-        console.error('Mutation error:', error);
-      },
+      retry: 1,
     },
   },
 });
