@@ -33,8 +33,8 @@ const App = () => (
             <Toaster />
             <Sonner />
             <SkipLinks />
-            <GoogleAnalytics />
             <BrowserRouter>
+              <GoogleAnalytics />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<AuthPage />} />
