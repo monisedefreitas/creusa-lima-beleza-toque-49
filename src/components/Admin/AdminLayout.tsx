@@ -17,7 +17,8 @@ import {
   Home,
   Palette,
   Phone,
-  Instagram
+  Instagram,
+  Calendar
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -37,16 +38,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   const menuItems = [
     { path: '/admin', icon: Home, label: 'Dashboard', exact: true },
-    { path: '/admin/settings', icon: Settings, label: 'Configurações' },
-    { path: '/admin/content', icon: FileText, label: 'Conteúdo' },
+    { path: '/admin/appointments', icon: Calendar, label: 'Marcações' },
+    { path: '/admin/contacts', icon: Phone, label: 'Contactos' },
     { path: '/admin/services', icon: Star, label: 'Serviços' },
     { path: '/admin/faqs', icon: MessageSquare, label: 'FAQs' },
     { path: '/admin/media', icon: Image, label: 'Galeria' },
-    { path: '/admin/contacts', icon: Phone, label: 'Contactos' },
     { path: '/admin/social', icon: Instagram, label: 'Redes Sociais' },
     { path: '/admin/addresses', icon: MapPin, label: 'Moradas' },
     { path: '/admin/banners', icon: Palette, label: 'Banners' },
     { path: '/admin/users', icon: Users, label: 'Utilizadores' },
+    { path: '/admin/settings', icon: Settings, label: 'Configurações' },
   ];
 
   const isActive = (path: string, exact = false) => {
