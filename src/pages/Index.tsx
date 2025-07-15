@@ -61,7 +61,7 @@ const Index = () => {
         )}
 
         <main id="main-content">
-          <HeroSection onBookingClick={handleBookingClick} />
+      <HeroSection onBookingClick={() => {}} />
           <AboutSection onBookingClick={handleBookingClick} />
           <ServicesSection onBookingClick={handleBookingClick} />
           <LocationSection />

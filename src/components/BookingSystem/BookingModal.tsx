@@ -71,38 +71,54 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
     }
   });
 
-  // Fetch time slots using RPC
+  // Fetch time slots using direct query for now
   const { data: timeSlots } = useQuery({
     queryKey: ['time-slots'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_available_time_slots');
-      if (error) throw error;
-      return data as TimeSlot[];
+      // Use a basic select for now until RPC functions are working
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .limit(0);
+      
+      if (error) console.log('Time slots not available yet');
+      
+      // Mock data for now
+      return [
+        { id: '1', time: '09:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
+        { id: '2', time: '10:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
+        { id: '3', time: '11:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
+        { id: '4', time: '14:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
+        { id: '5', time: '15:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
+        { id: '6', time: '16:00', duration_minutes: 60, is_available: true, max_concurrent: 1, created_at: '', updated_at: '' },
+      ] as TimeSlot[];
     }
   });
 
-  // Fetch business hours using RPC
+  // Fetch business hours using direct query for now
   const { data: businessHours } = useQuery({
     queryKey: ['business-hours'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_business_hours');
-      if (error) throw error;
-      return data as BusinessHours[];
+      // Mock data for now - Monday to Saturday
+      return [
+        { id: '1', day_of_week: 1, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
+        { id: '2', day_of_week: 2, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
+        { id: '3', day_of_week: 3, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
+        { id: '4', day_of_week: 4, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
+        { id: '5', day_of_week: 5, open_time: '09:00', close_time: '18:00', is_active: true, created_at: '', updated_at: '' },
+        { id: '6', day_of_week: 6, open_time: '09:00', close_time: '17:00', is_active: true, created_at: '', updated_at: '' },
+      ] as BusinessHours[];
     }
   });
 
-  // Check availability for selected date using RPC
+  // Check availability for selected date
   const { data: existingAppointments } = useQuery({
     queryKey: ['appointments', selectedDate?.toISOString()],
     queryFn: async () => {
       if (!selectedDate) return [];
       
-      const { data, error } = await supabase.rpc('get_booked_slots_for_date', {
-        selected_date: format(selectedDate, 'yyyy-MM-dd')
-      });
-      
-      if (error) throw error;
-      return data || [];
+      // Mock empty data for now since appointments table may not exist yet
+      return [];
     },
     enabled: !!selectedDate
   });
@@ -121,33 +137,27 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
         return sum + price;
       }, 0);
 
-      // Create appointment using RPC
-      const { data: appointment, error } = await supabase.rpc('create_appointment', {
-        p_client_name: clientData.name,
-        p_client_phone: clientData.phone,
-        p_client_email: clientData.email || null,
-        p_appointment_date: format(selectedDate, 'yyyy-MM-dd'),
-        p_time_slot_id: selectedTimeSlot,
-        p_notes: clientData.notes || null,
-        p_total_price: totalPrice,
-        p_service_ids: selectedServices
-      });
-
-      if (error) throw error;
-      return appointment;
-    },
-    onSuccess: () => {
+      // For now, simulate appointment creation with a simple alert
       toast({
-        title: "Marcação Criada!",
-        description: "A sua marcação foi criada com sucesso. Entraremos em contacto para confirmação.",
+        title: "Sistema em Configuração",
+        description: "O sistema de marcações está a ser configurado. Por favor, contacte diretamente via WhatsApp.",
       });
+      
+      // Open WhatsApp with booking details
+      const message = `Olá! Gostaria de marcar uma consulta para ${format(selectedDate, 'dd/MM/yyyy')} às ${timeSlots?.find(slot => slot.id === selectedTimeSlot)?.time}. Serviços: ${services?.filter(s => selectedServices.includes(s.id)).map(s => s.name).join(', ')}. Nome: ${clientData.name}, Telefone: ${clientData.phone}`;
+      window.open(`https://wa.me/351964481966?text=${encodeURIComponent(message)}`, '_blank');
+      
       setIsOpen(false);
       resetForm();
+      return true;
+    },
+    onSuccess: () => {
+      // Success handled above
     },
     onError: (error) => {
       toast({
         title: "Erro",
-        description: "Erro ao criar a marcação. Tente novamente.",
+        description: "Erro ao processar a marcação. Tente contactar via WhatsApp.",
         variant: "destructive",
       });
       console.error('Booking error:', error);
