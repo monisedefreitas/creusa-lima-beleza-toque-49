@@ -2,7 +2,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -12,6 +12,7 @@ interface Props {
 interface State {
   hasError: boolean;
   error?: Error;
+  errorInfo?: ErrorInfo;
 }
 
 class ErrorBoundary extends Component<Props, State> {
@@ -21,15 +22,20 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): State {
+    console.error('ErrorBoundary caught error:', error);
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to analytics or monitoring service
     console.error('Error Boundary caught an error:', error, errorInfo);
     
+    this.setState({
+      error,
+      errorInfo
+    });
+    
     // Track error if Google Analytics is available
-    if (window.gtag) {
+    if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'exception', {
         description: error.message,
         fatal: false
@@ -42,7 +48,11 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   handleReset = () => {
-    this.setState({ hasError: false, error: undefined });
+    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+  };
+
+  handleGoHome = () => {
+    window.location.href = '/';
   };
 
   render() {
@@ -78,6 +88,15 @@ class ErrorBoundary extends Component<Props, State> {
                 
                 <Button
                   variant="outline"
+                  onClick={this.handleGoHome}
+                  className="w-full"
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Ir para Início
+                </Button>
+                
+                <Button
+                  variant="outline"
                   onClick={this.handleReload}
                   className="w-full"
                 >
@@ -87,12 +106,30 @@ class ErrorBoundary extends Component<Props, State> {
 
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="mt-4 text-left">
-                  <summary className="cursor-pointer text-sm text-gray-500">
-                    Detalhes técnicos
+                  <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
+                    Detalhes técnicos (clique para expandir)
                   </summary>
-                  <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
-                    {this.state.error.stack}
-                  </pre>
+                  <div className="mt-2 text-xs bg-gray-100 p-3 rounded overflow-auto max-h-40">
+                    <div className="mb-2">
+                      <strong>Erro:</strong> {this.state.error.message}
+                    </div>
+                    {this.state.error.stack && (
+                      <div className="mb-2">
+                        <strong>Stack:</strong>
+                        <pre className="whitespace-pre-wrap text-xs">
+                          {this.state.error.stack}
+                        </pre>
+                      </div>
+                    )}
+                    {this.state.errorInfo && (
+                      <div>
+                        <strong>Component Stack:</strong>
+                        <pre className="whitespace-pre-wrap text-xs">
+                          {this.state.errorInfo.componentStack}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
                 </details>
               )}
             </CardContent>
