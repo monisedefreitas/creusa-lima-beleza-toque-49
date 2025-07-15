@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Flower2, Heart, Zap, Shield, Phone } from 'lucide-react';
+import { CheckCircle, Flower2, Heart, Zap, Shield, Phone, Instagram } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 interface ServiceCategory {
@@ -55,6 +55,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
       ]
     }
   ];
+
+  const handleInstagramClick = () => {
+    window.open('https://instagram.com/creusalima_estetica', '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <section id="servicos" className="py-20 px-4 bg-gradient-to-br from-beige-50 to-sage-50/30">
@@ -132,49 +136,68 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
           ))}
         </div>
         
+        {/* Banner destacado "Cada pessoa merece um cuidado único" */}
         <div 
           ref={ctaRef}
-          className="max-w-4xl mx-auto"
+          className="max-w-4xl mx-auto mb-12"
         >
-          <Card className={`border-0 shadow-xl bg-gradient-to-r from-darkgreen-900 to-darkgreen-800 text-white overflow-hidden transition-all duration-800 ${
+          <Card className={`border-0 shadow-2xl bg-gradient-to-r from-darkgreen-900 via-darkgreen-800 to-darkgreen-900 text-white overflow-hidden relative transition-all duration-800 ${
             ctaVisible ? 'animate-scale-in' : 'opacity-0 scale-95'
           }`}>
             <CardContent className="p-12 text-center relative">
+              {/* Background decorative elements */}
+              <div className="absolute inset-0 bg-gradient-to-r from-darkgreen-900/90 to-darkgreen-800/90"></div>
               <div className="absolute top-4 right-4 opacity-20">
                 <Flower2 className="w-16 h-16" />
               </div>
               <div className="absolute bottom-4 left-4 opacity-20">
                 <Heart className="w-12 h-12" />
               </div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-5">
+                <div className="w-64 h-64 rounded-full border-2 border-gold-300"></div>
+              </div>
               
-              <h3 className="font-tan-mon-cheri text-3xl md:text-4xl font-bold mb-6">
-                Cada pessoa merece um cuidado único
-              </h3>
-              <p className="font-poppins text-xl text-sage-100 mb-8 leading-relaxed">
-                Quer saber qual tratamento é o mais indicado para si?<br />
-                <span className="text-gold-300 font-medium">
-                  Entre em contacto e receba uma avaliação personalizada.
-                </span>
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="bg-white text-darkgreen-900 hover:bg-gold-50 px-8 py-4 text-lg font-medium font-bauer-bodoni rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-                  onClick={onBookingClick}
-                >
-                  <Phone className="w-5 h-5 mr-2" />
-                  Entre em Contacto
-                </Button>
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 bg-gold-500/20 backdrop-blur-sm px-6 py-2 rounded-full border border-gold-300/30 mb-6">
+                  <Heart className="w-4 h-4 text-gold-300" />
+                  <span className="text-sm font-medium text-gold-200 font-bauer-bodoni">Filosofia de Cuidado</span>
+                </div>
                 
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 text-lg font-medium font-bauer-bodoni rounded-xl transition-all duration-300"
-                  onClick={() => window.open('https://instagram.com/creusalima_estetica', '_blank')}
-                >
-                  Veja no Instagram
-                </Button>
+                <h3 className="font-tan-mon-cheri text-4xl md:text-5xl font-bold mb-8 leading-tight">
+                  Cada pessoa merece um{' '}
+                  <span className="text-gold-300 relative">
+                    cuidado único
+                    <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-gold-300 to-gold-400 rounded"></div>
+                  </span>
+                </h3>
+                
+                <p className="font-poppins text-xl text-sage-100 mb-8 leading-relaxed max-w-3xl mx-auto">
+                  Quer saber qual tratamento é o mais indicado para si?<br />
+                  <span className="text-gold-300 font-medium text-2xl">
+                    Entre em contacto e receba uma avaliação personalizada.
+                  </span>
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button 
+                    size="lg" 
+                    className="bg-white text-darkgreen-900 hover:bg-gold-50 px-8 py-4 text-lg font-medium font-bauer-bodoni rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                    onClick={onBookingClick}
+                  >
+                    <Phone className="w-5 h-5 mr-2" />
+                    Entre em Contacto
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className="border-2 border-white text-white hover:bg-white/10 px-8 py-4 text-lg font-medium font-bauer-bodoni rounded-xl transition-all duration-300 transform hover:scale-105"
+                    onClick={handleInstagramClick}
+                  >
+                    <Instagram className="w-5 h-5 mr-2" />
+                    Veja no Instagram
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

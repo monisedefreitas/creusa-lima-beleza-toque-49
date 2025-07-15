@@ -5,6 +5,7 @@ import { AboutSection } from "@/components/AboutSection";
 import { ServicesSection } from "@/components/ServicesSection";
 import { LocationSection } from "@/components/LocationSection";
 import FAQSection from "@/components/FAQSection";
+import { Footer } from "@/components/Footer";
 import SEOManager from "@/components/SEO/SEOManager";
 import EnhancedWhatsApp from "@/components/WhatsApp/EnhancedWhatsApp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -66,6 +67,8 @@ const Index = () => {
           <LocationSection />
           <FAQSection />
         </main>
+
+        <Footer />
 
         {/* Booking Dialog */}
         <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>

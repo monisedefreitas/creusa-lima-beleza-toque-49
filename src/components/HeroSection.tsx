@@ -8,6 +8,16 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onBookingClick }) => {
+  const handleScrollToAbout = () => {
+    const aboutSection = document.getElementById('sobre');
+    if (aboutSection) {
+      aboutSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -76,8 +86,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onBookingClick }) => {
             <Button 
               variant="outline" 
               size="lg"
-              className="border-2 border-white/60 text-white hover:bg-white/20 backdrop-blur-sm px-8 py-4 text-lg font-medium font-bauer-bodoni rounded-xl transition-all duration-300"
-              onClick={() => document.getElementById('sobre')?.scrollIntoView({ behavior: 'smooth' })}
+              className="border-2 border-white/60 text-white hover:bg-white/20 backdrop-blur-sm px-8 py-4 text-lg font-medium font-bauer-bodoni rounded-xl transition-all duration-300 hover:scale-105"
+              onClick={handleScrollToAbout}
             >
               Conheça Nossa História
             </Button>

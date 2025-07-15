@@ -93,9 +93,20 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     scroll-behavior: smooth;
+  }
+
+  /* Melhor suporte para scroll suave */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 }
 
@@ -148,6 +159,11 @@ All colors MUST be HSL.
   .hover-lift:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Smooth scroll para navegação interna */
+  .smooth-scroll {
+    scroll-behavior: smooth;
   }
 }
 
