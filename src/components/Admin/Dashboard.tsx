@@ -9,7 +9,9 @@ import {
   MessageSquare, 
   Image,
   TrendingUp,
-  Calendar
+  Calendar,
+  CheckCircle,
+  Clock
 } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
@@ -20,51 +22,57 @@ const Dashboard: React.FC = () => {
         { count: servicesCount },
         { count: faqsCount },
         { count: mediaCount },
-        { count: adminsCount }
+        { count: adminsCount },
+        { count: appointmentsCount },
+        { count: pendingAppointmentsCount }
       ] = await Promise.all([
         supabase.from('services').select('*', { count: 'exact', head: true }),
         supabase.from('faqs').select('*', { count: 'exact', head: true }),
         supabase.from('media_gallery').select('*', { count: 'exact', head: true }),
-        supabase.from('admin_users').select('*', { count: 'exact', head: true })
+        supabase.from('admin_users').select('*', { count: 'exact', head: true }),
+        supabase.from('appointments').select('*', { count: 'exact', head: true }),
+        supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('status', 'pending')
       ]);
 
       return {
         services: servicesCount || 0,
         faqs: faqsCount || 0,
         media: mediaCount || 0,
-        admins: adminsCount || 0
+        admins: adminsCount || 0,
+        appointments: appointmentsCount || 0,
+        pendingAppointments: pendingAppointmentsCount || 0
       };
     }
   });
 
   const statCards = [
     {
+      title: 'Marcações',
+      value: stats?.appointments || 0,
+      icon: Calendar,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50'
+    },
+    {
+      title: 'Pendentes',
+      value: stats?.pendingAppointments || 0,
+      icon: Clock,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-50'
+    },
+    {
       title: 'Serviços',
       value: stats?.services || 0,
       icon: Star,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-green-600',
+      bgColor: 'bg-green-50'
     },
     {
       title: 'FAQs',
       value: stats?.faqs || 0,
       icon: MessageSquare,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50'
-    },
-    {
-      title: 'Mídia',
-      value: stats?.media || 0,
-      icon: Image,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50'
-    },
-    {
-      title: 'Administradores',
-      value: stats?.admins || 0,
-      icon: Users,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50'
     }
   ];
 
@@ -132,10 +140,21 @@ const Dashboard: React.FC = () => {
               <div className="flex items-center p-3 bg-gray-50 rounded-lg">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Sistema inicializado</p>
-                  <p className="text-xs text-gray-500">Há poucos minutos</p>
+                  <p className="text-sm font-medium">Painel admin funcional</p>
+                  <p className="text-xs text-gray-500">Sistema corrigido com sucesso</p>
                 </div>
               </div>
+              {stats?.pendingAppointments > 0 && (
+                <div className="flex items-center p-3 bg-yellow-50 rounded-lg">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">
+                      {stats.pendingAppointments} marcação{stats.pendingAppointments > 1 ? 'ões' : ''} pendente{stats.pendingAppointments > 1 ? 's' : ''}
+                    </p>
+                    <p className="text-xs text-gray-500">Requer atenção</p>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -148,14 +167,14 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-2 gap-3">
               <Card className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
                 <div className="text-center">
-                  <Star className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                  <p className="text-sm font-medium">Serviços</p>
+                  <Calendar className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                  <p className="text-sm font-medium">Marcações</p>
                 </div>
               </Card>
               <Card className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
                 <div className="text-center">
-                  <MessageSquare className="h-6 w-6 mx-auto mb-2 text-green-600" />
-                  <p className="text-sm font-medium">FAQs</p>
+                  <Star className="h-6 w-6 mx-auto mb-2 text-green-600" />
+                  <p className="text-sm font-medium">Serviços</p>
                 </div>
               </Card>
             </div>

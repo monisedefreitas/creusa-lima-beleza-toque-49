@@ -1,70 +1,57 @@
 
-import React, { useState } from "react";
-import { HeroSection } from "@/components/HeroSection";
-import { AboutSection } from "@/components/AboutSection";
-import { ServicesSection } from "@/components/ServicesSection";
-import { LocationSection } from "@/components/LocationSection";
-import FAQSection from "@/components/FAQSection";
-import { Footer } from "@/components/Footer";
-import SEOManager from "@/components/SEO/SEOManager";
-import BookingModal from "@/components/BookingSystem/BookingModal";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { Settings } from "lucide-react";
+import React from 'react';
+import Navigation from '@/components/Navigation';
+import HeroSection from '@/components/HeroSection';
+import AboutSection from '@/components/AboutSection';
+import ServicesSection from '@/components/ServicesSection';
+import FAQSection from '@/components/FAQSection';
+import LocationSection from '@/components/LocationSection';
+import Footer from '@/components/Footer';
+import EnhancedWhatsApp from '@/components/WhatsApp/EnhancedWhatsApp';
+import SEOManager from '@/components/SEO/SEOManager';
+import SkipLinks from '@/components/Accessibility/SkipLinks';
+import SectionDivider from '@/components/SectionDivider';
 
-const Index = () => {
-  const { user, isAdmin } = useAuth();
-  const navigate = useNavigate();
-
-  const handleBookingClick = () => {
-    // Booking functionality is now handled by the BookingModal component
-  };
-
+const Index: React.FC = () => {
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-sage-50 to-white">
       <SEOManager />
-      <div className="min-h-screen bg-white">
-        {/* Admin Access Button */}
-        {user && isAdmin && (
-          <div className="fixed top-4 right-4 z-50">
-            <Button
-              onClick={() => navigate('/admin')}
-              variant="outline"
-              size="sm"
-              className="bg-white/90 backdrop-blur-sm"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Admin
-            </Button>
-          </div>
-        )}
-
-        {/* Auth Button for non-logged users */}
-        {!user && (
-          <div className="fixed top-4 right-4 z-50">
-            <Button
-              onClick={() => navigate('/auth')}
-              variant="outline"
-              size="sm"
-              className="bg-white/90 backdrop-blur-sm"
-            >
-              Entrar
-            </Button>
-          </div>
-        )}
-
-        <main id="main-content">
-          <HeroSection onBookingClick={handleBookingClick} />
-          <AboutSection onBookingClick={handleBookingClick} />
-          <ServicesSection onBookingClick={handleBookingClick} />
-          <LocationSection />
+      <SkipLinks />
+      <Navigation />
+      
+      <main className="pt-16">
+        <section id="hero">
+          <HeroSection />
+        </section>
+        
+        <SectionDivider />
+        
+        <section id="about">
+          <AboutSection />
+        </section>
+        
+        <SectionDivider />
+        
+        <section id="services">
+          <ServicesSection />
+        </section>
+        
+        <SectionDivider />
+        
+        <section id="faq">
           <FAQSection />
-        </main>
-
-        <Footer />
-      </div>
-    </>
+        </section>
+        
+        <SectionDivider />
+        
+        <section id="contact">
+          <LocationSection />
+        </section>
+      </main>
+      
+      <Footer />
+      <EnhancedWhatsApp />
+    </div>
   );
 };
 

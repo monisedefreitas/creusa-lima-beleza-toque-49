@@ -1,100 +1,154 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Award, Heart, Shield, Users } from "lucide-react";
-import BookingModal from "@/components/BookingSystem/BookingModal";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { 
+  Heart, 
+  Award, 
+  Users, 
+  Clock,
+  CheckCircle,
+  Calendar
+} from 'lucide-react';
+import LazyImage from '@/components/Performance/LazyImage';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import BookingModal from '@/components/BookingSystem/BookingModal';
 
-interface AboutSectionProps {
-  onBookingClick: () => void;
-}
+const AboutSection: React.FC = () => {
+  const { ref, isVisible } = useScrollAnimation();
+  const [isBookingModalOpen, setIsBookingModalOpen] = React.useState(false);
 
-export const AboutSection: React.FC<AboutSectionProps> = ({ onBookingClick }) => {
+  const features = [
+    {
+      icon: Heart,
+      title: 'Cuidado Personalizado',
+      description: 'Cada tratamento é adaptado às suas necessidades específicas'
+    },
+    {
+      icon: Award,
+      title: 'Experiência Comprovada',
+      description: 'Mais de 15 anos de experiência em medicina natural'
+    },
+    {
+      icon: Users,
+      title: 'Milhares de Clientes',
+      description: 'Mais de 1000 pessoas já transformaram a sua saúde'
+    },
+    {
+      icon: Clock,
+      title: 'Resultados Duradouros',
+      description: 'Foco em soluções sustentáveis e de longo prazo'
+    }
+  ];
+
+  const achievements = [
+    'Formação em Medicina Natural e Terapias Complementares',
+    'Especialização em Fitoterapia e Aromaterapia',
+    'Certificação em Medicina Tradicional Chinesa',
+    'Membro da Associação Portuguesa de Medicina Natural'
+  ];
+
   return (
-    <section id="about" className="py-20 bg-white">
+    <section ref={ref} className="py-20 bg-white">
       <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Image Column */}
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Image Section */}
+          <div className={`relative ${isVisible ? 'animate-fade-in-right' : 'opacity-0'}`}>
             <div className="relative">
-              <div className="aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
-                <img 
-                  src="/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png" 
-                  alt="Dra. Creusa Lima - Medicina Estética" 
-                  className="w-full h-full object-cover"
-                />
+              <LazyImage
+                src="/lovable-uploads/73d8cd7b-d053-484a-b84e-0c423886228f.png"
+                alt="Creusa Lima no seu consultório"
+                className="w-full h-auto rounded-2xl shadow-xl"
+                width={600}
+                height={700}
+              />
+              
+              {/* Experience Badge */}
+              <div className="absolute top-6 right-6 bg-darkgreen-800 text-white p-4 rounded-xl shadow-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">15+</div>
+                  <div className="text-sm">Anos</div>
+                </div>
               </div>
-              {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-sage-200 rounded-full opacity-60"></div>
-              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-sage-100 rounded-full opacity-40"></div>
             </div>
-            
-            {/* Content Column */}
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-4xl md:text-5xl font-bold text-darkgreen-900 mb-6">
-                  <span className="font-tan-mon-cheri">Dra. Creusa Lima</span>
-                </h2>
-                <p className="text-lg text-forest-600 leading-relaxed mb-6">
-                  Com mais de 15 anos de experiência em medicina estética, a Dra. Creusa Lima 
-                  dedica-se a proporcionar tratamentos seguros e eficazes, sempre respeitando 
-                  a naturalidade e harmonia facial de cada paciente.
-                </p>
-                <p className="text-lg text-forest-600 leading-relaxed">
-                  Especializada em harmonização facial, preenchimentos e procedimentos anti-aging, 
-                  combina técnicas avançadas com um olhar artístico único para realçar a beleza 
-                  natural de cada pessoa.
-                </p>
+          </div>
+
+          {/* Content Section */}
+          <div className={`space-y-8 ${isVisible ? 'animate-fade-in-left' : 'opacity-0'}`}>
+            <div className="space-y-4">
+              <div className="text-darkgreen-800 font-semibold text-lg">
+                Sobre Mim
               </div>
               
-              {/* Qualifications Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="border-sage-200 hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4 text-center">
-                    <Award className="h-8 w-8 text-darkgreen-800 mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-darkgreen-900">Certificada</div>
-                    <div className="text-xs text-forest-600">Ordem dos Médicos</div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-sage-200 hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4 text-center">
-                    <Heart className="h-8 w-8 text-darkgreen-800 mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-darkgreen-900">Cuidado</div>
-                    <div className="text-xs text-forest-600">Personalizado</div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-sage-200 hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4 text-center">
-                    <Shield className="h-8 w-8 text-darkgreen-800 mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-darkgreen-900">Segurança</div>
-                    <div className="text-xs text-forest-600">Máxima</div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-sage-200 hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4 text-center">
-                    <Users className="h-8 w-8 text-darkgreen-800 mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-darkgreen-900">1000+</div>
-                    <div className="text-xs text-forest-600">Pacientes</div>
-                  </CardContent>
-                </Card>
-              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                Olá, sou{' '}
+                <span className="text-darkgreen-800">Creusa Lima</span>
+              </h2>
               
-              {/* CTA Button */}
-              <BookingModal>
-                <Button 
-                  size="lg" 
-                  className="bg-darkgreen-800 hover:bg-darkgreen-900 text-white px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                >
-                  Agendar Consulta Personalizada
-                </Button>
-              </BookingModal>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Há mais de 15 anos dedico-me à medicina natural e terapias complementares, 
+                ajudando pessoas a encontrar o equilíbrio e bem-estar através de tratamentos 
+                naturais e personalizados.
+              </p>
+              
+              <p className="text-lg text-gray-600 leading-relaxed">
+                A minha missão é proporcionar cuidados de saúde holísticos que respeitam 
+                a individualidade de cada pessoa, promovendo a cura natural e o bem-estar 
+                duradouro sem dependência de medicamentos químicos.
+              </p>
             </div>
+
+            {/* Achievements */}
+            <div className="space-y-3">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Formações e Certificações
+              </h3>
+              {achievements.map((achievement, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-darkgreen-800 flex-shrink-0 mt-1" />
+                  <span className="text-gray-700">{achievement}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Features Grid */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {features.map((feature, index) => (
+                <div key={index} className="flex gap-4">
+                  <div className="w-12 h-12 bg-sage-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="h-6 w-6 text-darkgreen-800" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">
+                      {feature.title}
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <Button
+              onClick={() => setIsBookingModalOpen(true)}
+              size="lg"
+              className="bg-darkgreen-800 hover:bg-darkgreen-900 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Calendar className="h-5 w-5 mr-2" />
+              Agendar Consulta
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+      />
     </section>
   );
 };
+
+export default AboutSection;
