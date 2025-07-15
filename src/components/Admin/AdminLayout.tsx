@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { 
@@ -20,7 +20,11 @@ import {
   Instagram
 } from 'lucide-react';
 
-const AdminLayout: React.FC = () => {
+interface AdminLayoutProps {
+  children: React.ReactNode;
+}
+
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
@@ -126,7 +130,7 @@ const AdminLayout: React.FC = () => {
 
         {/* Page Content */}
         <main className="p-6">
-          <Outlet />
+          {children}
         </main>
       </div>
 
