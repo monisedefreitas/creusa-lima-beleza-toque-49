@@ -1,35 +1,29 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Phone, Calendar, Star } from 'lucide-react';
 import BookingModal from '@/components/BookingSystem/BookingModal';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-
 const HeroSection: React.FC = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const { elementRef, isVisible } = useScrollAnimation();
-
+  const {
+    elementRef,
+    isVisible
+  } = useScrollAnimation();
   const scrollToContact = () => {
     const contactSection = document.getElementById('contact');
     if (contactSection) {
       contactSection.scrollIntoView({
         behavior: 'smooth',
-        block: 'start',
+        block: 'start'
       });
     }
   };
-
-  return (
-    <section 
-      ref={elementRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/lovable-uploads/46b56184-9c80-42e2-9f4b-8fb2bf567b13.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
+  return <section ref={elementRef} className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/lovable-uploads/46b56184-9c80-42e2-9f4b-8fb2bf567b13.png')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
+  }}>
       {/* Background Pattern Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-darkgreen-800/20 to-sage-600/20"></div>
 
@@ -58,21 +52,12 @@ const HeroSection: React.FC = () => {
 
             {/* Call to Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => setIsBookingModalOpen(true)}
-                size="lg"
-                className="bg-darkgreen-800 hover:bg-darkgreen-900 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-              >
+              <Button onClick={() => setIsBookingModalOpen(true)} size="lg" className="bg-darkgreen-800 hover:bg-darkgreen-900 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
                 <Calendar className="h-5 w-5 mr-2" />
                 Marcar Consulta
               </Button>
               
-              <Button
-                onClick={scrollToContact}
-                variant="outline"
-                size="lg"
-                className="px-8 py-4 text-lg font-semibold border-2 border-white text-white hover:bg-white hover:text-darkgreen-800 transition-all duration-300"
-              >
+              <Button onClick={scrollToContact} variant="outline" size="lg" className="px-8 py-4 text-lg font-semibold border-2 border-white hover:bg-white transition-all duration-300 text-lime-950">
                 <Phone className="h-5 w-5 mr-2" />
                 Contactar
               </Button>
@@ -112,27 +97,22 @@ const HeroSection: React.FC = () => {
 
       {/* Booking Modal */}
       <BookingModal>
-        <div style={{ display: 'none' }} />
+        <div style={{
+        display: 'none'
+      }} />
       </BookingModal>
       
-      {isBookingModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {isBookingModalOpen && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-4">Marcar Consulta</h3>
             <p className="text-gray-600 mb-4">
               Para marcar a sua consulta, por favor contacte-nos através do WhatsApp ou telefone.
             </p>
-            <Button
-              onClick={() => setIsBookingModalOpen(false)}
-              className="w-full"
-            >
+            <Button onClick={() => setIsBookingModalOpen(false)} className="w-full">
               Fechar
             </Button>
           </div>
-        </div>
-      )}
-    </section>
-  );
+        </div>}
+    </section>;
 };
-
 export default HeroSection;

@@ -1,30 +1,21 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Clock, Phone } from 'lucide-react';
 import GoogleMap from './GoogleMap';
-
 export const LocationSection: React.FC = () => {
-  const locationFeatures = [
-    {
-      icon: <Clock className="w-5 h-5 text-gold-600" />,
-      title: "Horários Flexíveis",
-      description: "Agendamento conforme sua disponibilidade"
-    },
-    {
-      icon: <Phone className="w-5 h-5 text-emerald-600" />,
-      title: "Atendimento Personalizado",
-      description: "Consulta prévia para melhor atendimento"
-    }
-  ];
-
-  return (
-    <section id="localizacao" className="py-20 px-4 bg-gradient-to-br from-emerald-50/50 to-gold-50/30">
+  const locationFeatures = [{
+    icon: <Clock className="w-5 h-5 text-gold-600" />,
+    title: "Horários Flexíveis",
+    description: "Agendamento conforme sua disponibilidade"
+  }, {
+    icon: <Phone className="w-5 h-5 text-emerald-600" />,
+    title: "Atendimento Personalizado",
+    description: "Consulta prévia para melhor atendimento"
+  }];
+  return <section id="localizacao" className="py-20 px-4 bg-gradient-to-br from-emerald-50/50 to-gold-50/30">
       <div className="container mx-auto">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-emerald-900 mb-6">
-            Nossa Localização Premium
-          </h2>
+          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-emerald-900 mb-6">Nossa Localização</h2>
           <p className="font-inter text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
             Encontre-nos no coração de Carcavelos, em um espaço pensado para o seu bem-estar
           </p>
@@ -53,15 +44,13 @@ export const LocationSection: React.FC = () => {
                   </div>
                   
                   <div className="space-y-4">
-                    {locationFeatures.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-3 p-4 bg-gradient-to-r from-slate-50 to-emerald-50 rounded-lg">
+                    {locationFeatures.map((feature, index) => <div key={index} className="flex items-center gap-3 p-4 bg-gradient-to-r from-slate-50 to-emerald-50 rounded-lg">
                         {feature.icon}
                         <div>
                           <h4 className="font-semibold text-emerald-900 text-sm">{feature.title}</h4>
                           <p className="text-slate-600 text-sm">{feature.description}</p>
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
               </Card>
@@ -123,6 +112,5 @@ export const LocationSection: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
