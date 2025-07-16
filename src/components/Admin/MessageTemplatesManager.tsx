@@ -216,7 +216,7 @@ const MessageTemplatesManager: React.FC = () => {
                     {availableVariables.map((variable) => (
                       <div key={variable} className="flex items-center justify-between p-2 border rounded">
                         <div>
-                          <span className="font-mono text-sm">{{'{' + variable + '}'}}}</span>
+                          <span className="font-mono text-sm">{`{{${variable}}}`}</span>
                           <p className="text-xs text-gray-600">{variableDescriptions[variable]}</p>
                         </div>
                         <Button
@@ -355,7 +355,7 @@ const MessageTemplatesManager: React.FC = () => {
                   {availableVariables.map((variable) => (
                     <div key={variable} className="flex items-center justify-between p-2 border rounded">
                       <div>
-                        <span className="font-mono text-sm">{{'{' + variable + '}'}}}</span>
+                        <span className="font-mono text-sm">{`{{${variable}}}`}</span>
                         <p className="text-xs text-gray-600">{variableDescriptions[variable]}</p>
                       </div>
                       <Button
