@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Clock, Euro } from 'lucide-react';
 
 const ServicesSection: React.FC = () => {
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
   const { data: services, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
@@ -22,6 +25,16 @@ const ServicesSection: React.FC = () => {
       return data;
     }
   });
+
+  const handleServiceClick = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    setIsBookingModalOpen(true);
+  };
+
+  const handleBookingClose = () => {
+    setIsBookingModalOpen(false);
+    setSelectedServiceId(null);
+  };
 
   if (isLoading) {
     return (
@@ -62,7 +75,11 @@ const ServicesSection: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services?.map((service) => (
-            <Card key={service.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+            <Card 
+              key={service.id} 
+              className="group hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer transform hover:scale-105"
+              onClick={() => handleServiceClick(service.id)}
+            >
               {/* Service Image */}
               <div className="aspect-video overflow-hidden bg-gray-100">
                 {service.image_url ? (
@@ -83,7 +100,13 @@ const ServicesSection: React.FC = () => {
 
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                  <h3 
+                    className="text-xl font-semibold text-gray-900 group-hover:text-primary transition-colors cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleServiceClick(service.id);
+                    }}
+                  >
                     {service.name}
                   </h3>
                   {service.is_featured && (
@@ -120,11 +143,15 @@ const ServicesSection: React.FC = () => {
                   </p>
                 )}
 
-                <BookingModal>
-                  <Button className="w-full group-hover:bg-primary/90 transition-colors">
-                    Marcar Consulta
-                  </Button>
-                </BookingModal>
+                <Button 
+                  className="w-full group-hover:bg-primary/90 transition-colors text-lg py-3"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleServiceClick(service.id);
+                  }}
+                >
+                  Marcar Consulta
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -136,6 +163,12 @@ const ServicesSection: React.FC = () => {
           </div>
         )}
       </div>
+
+      <BookingModal 
+        isOpen={isBookingModalOpen}
+        onClose={handleBookingClose}
+        preSelectedServiceId={selectedServiceId}
+      />
     </section>
   );
 };

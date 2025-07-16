@@ -2,18 +2,38 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Navigation } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface GoogleMapProps {
   className?: string;
 }
 
 const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
-  // Espaço Sinergia location coordinates - Aveiro
-  const lat = 40.6405;
-  const lng = -8.6538;
+  const { data: addresses } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('is_active', true)
+        .order('is_primary', { ascending: false })
+        .order('order_index');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Use primary address or first active address
+  const primaryAddress = addresses?.find(addr => addr.is_primary) || addresses?.[0];
+  
+  // Default coordinates (Aveiro) if no address configured
+  const lat = primaryAddress?.latitude || 40.6405;
+  const lng = primaryAddress?.longitude || -8.6538;
   const zoom = 16;
   
-  // Google Maps embed URL with the exact location
+  // Google Maps embed URL with the location
   const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3048.5!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDM4JzI1LjgiTiA4wrAzOScxMy43Ilc!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
 
   const handleNavigate = () => {
@@ -32,7 +52,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          title="Localização do Espaço Sinergia - Aveiro"
+          title={`Localização - ${primaryAddress?.name || 'Espaço Sinergia'}`}
           className="rounded-xl"
         />
         
@@ -50,6 +70,12 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
           Iniciar Navegação
         </Button>
       </div>
+      
+      {primaryAddress && (
+        <div className="mt-2 text-center text-sm text-gray-600">
+          {primaryAddress.street_address}, {primaryAddress.city}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { CalendarDays, Clock, User } from 'lucide-react';
+import { CalendarDays, Clock, User, X } from 'lucide-react';
 import { format, isBefore, startOfDay } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useTimeSlots, useBusinessHours, useBookedSlotsForDate, useCreateAppointment } from '@/hooks/useAppointments';
@@ -19,11 +19,12 @@ import type { Tables } from '@/integrations/supabase/types';
 type Service = Tables<'services'>;
 
 interface BookingModalProps {
-  children: React.ReactNode;
+  isOpen: boolean;
+  onClose: () => void;
+  preSelectedServiceId?: string | null;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, preSelectedServiceId }) => {
   const [step, setStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>();
@@ -54,13 +55,29 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
   const { data: bookedSlots } = useBookedSlotsForDate(selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '');
   const createAppointmentMutation = useCreateAppointment();
 
+  // Effect to handle pre-selected service
+  useEffect(() => {
+    if (preSelectedServiceId && services) {
+      setSelectedServices([preSelectedServiceId]);
+    }
+  }, [preSelectedServiceId, services]);
+
   const resetForm = () => {
     setStep(1);
     setSelectedDate(undefined);
     setSelectedTimeSlot(undefined);
-    setSelectedServices([]);
+    setSelectedServices(preSelectedServiceId ? [preSelectedServiceId] : []);
     setClientData({ name: '', phone: '', email: '', notes: '' });
   };
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedServices(preSelectedServiceId ? [preSelectedServiceId] : []);
+    } else {
+      resetForm();
+    }
+  }, [isOpen, preSelectedServiceId]);
 
   const isDateAvailable = (date: Date) => {
     const dayOfWeek = date.getDay();
@@ -82,6 +99,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
     );
   };
 
+  const handleServiceCardClick = (serviceId: string) => {
+    handleServiceToggle(serviceId);
+  };
+
   const handleSubmit = () => {
     if (!selectedDate || !selectedTimeSlot || selectedServices.length === 0) return;
 
@@ -95,8 +116,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
       service_ids: selectedServices
     }, {
       onSuccess: () => {
-        setIsOpen(false);
-        resetForm();
+        onClose();
       }
     });
   };
@@ -105,19 +125,21 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
   const canProceedFromStep2 = selectedDate && selectedTimeSlot;
   const canSubmit = clientData.name && clientData.phone;
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">Marcar Consulta</DialogTitle>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <DialogTitle className="text-xl sm:text-2xl">Marcar Consulta</DialogTitle>
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+            <X className="h-4 w-4" />
+          </Button>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Progress Steps */}
-          <div className="flex items-center justify-center space-x-4">
+          <div className="flex items-center justify-center space-x-2 sm:space-x-4">
             {[1, 2, 3].map((num) => (
               <div key={num} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -125,7 +147,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                 }`}>
                   {num}
                 </div>
-                {num < 3 && <div className={`w-8 h-0.5 ${step > num ? 'bg-primary' : 'bg-gray-200'}`} />}
+                {num < 3 && <div className={`w-4 sm:w-8 h-0.5 ${step > num ? 'bg-primary' : 'bg-gray-200'}`} />}
               </div>
             ))}
           </div>
@@ -137,22 +159,31 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                 <User className="h-5 w-5 mr-2" />
                 Selecione os Serviços
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {services?.map((service) => (
-                  <Card key={service.id} className={`cursor-pointer transition-all ${
-                    selectedServices.includes(service.id) ? 'ring-2 ring-primary' : ''
-                  }`}>
+                  <Card 
+                    key={service.id} 
+                    className={`cursor-pointer transition-all hover:shadow-md active:scale-95 ${
+                      selectedServices.includes(service.id) ? 'ring-2 ring-primary bg-primary/5' : ''
+                    }`}
+                    onClick={() => handleServiceCardClick(service.id)}
+                  >
                     <CardContent className="p-4">
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-start space-x-3">
                         <Checkbox
                           checked={selectedServices.includes(service.id)}
                           onCheckedChange={() => handleServiceToggle(service.id)}
+                          className="mt-1"
                         />
-                        <div className="flex-1">
-                          <h4 className="font-medium">{service.name}</h4>
-                          <p className="text-sm text-gray-600">{service.short_description}</p>
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-primary font-semibold">{service.price_range}</span>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-base sm:text-lg leading-tight">{service.name}</h4>
+                          {service.short_description && (
+                            <p className="text-sm text-gray-600 mt-1">{service.short_description}</p>
+                          )}
+                          <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
+                            {service.price_range && (
+                              <span className="text-primary font-semibold text-sm sm:text-base">{service.price_range}</span>
+                            )}
                             {service.duration_minutes && (
                               <span className="text-sm text-gray-500 flex items-center">
                                 <Clock className="h-3 w-3 mr-1" />
@@ -166,10 +197,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                   </Card>
                 ))}
               </div>
-              <div className="flex justify-end">
+              <div className="flex justify-end pt-4">
                 <Button 
                   onClick={() => setStep(2)} 
                   disabled={!canProceedFromStep1}
+                  className="w-full sm:w-auto"
                 >
                   Continuar
                 </Button>
@@ -193,7 +225,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                     onSelect={setSelectedDate}
                     disabled={(date) => !isDateAvailable(date)}
                     locale={pt}
-                    className="rounded-md border"
+                    className="rounded-md border w-full"
                   />
                 </div>
                 
@@ -208,7 +240,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                           key={slot.id}
                           variant={selectedTimeSlot === slot.id ? "default" : "outline"}
                           onClick={() => setSelectedTimeSlot(slot.id)}
-                          className="text-sm"
+                          className="text-sm py-3"
                         >
                           {slot.time}
                         </Button>
@@ -218,13 +250,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                 )}
               </div>
               
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={() => setStep(1)}>
+              <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
+                <Button variant="outline" onClick={() => setStep(1)} className="w-full sm:w-auto">
                   Voltar
                 </Button>
                 <Button 
                   onClick={() => setStep(3)} 
                   disabled={!canProceedFromStep2}
+                  className="w-full sm:w-auto"
                 >
                   Continuar
                 </Button>
@@ -240,7 +273,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                 Os Seus Dados
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Nome Completo *</Label>
                   <Input
@@ -248,6 +281,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                     value={clientData.name}
                     onChange={(e) => setClientData(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="O seu nome completo"
+                    className="mt-1"
                   />
                 </div>
                 
@@ -258,6 +292,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                     value={clientData.phone}
                     onChange={(e) => setClientData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder="+351 964 481 966"
+                    className="mt-1"
                   />
                 </div>
               </div>
@@ -270,6 +305,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                   value={clientData.email}
                   onChange={(e) => setClientData(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="seuemail@exemplo.com"
+                  className="mt-1"
                 />
               </div>
               
@@ -281,6 +317,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                   onChange={(e) => setClientData(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Alguma informação adicional..."
                   rows={3}
+                  className="mt-1"
                 />
               </div>
 
@@ -307,13 +344,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ children }) => {
                 </CardContent>
               </Card>
               
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={() => setStep(2)}>
+              <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
+                <Button variant="outline" onClick={() => setStep(2)} className="w-full sm:w-auto">
                   Voltar
                 </Button>
                 <Button 
                   onClick={handleSubmit}
                   disabled={!canSubmit || createAppointmentMutation.isPending}
+                  className="w-full sm:w-auto"
                 >
                   {createAppointmentMutation.isPending ? 'A Criar...' : 'Confirmar Marcação'}
                 </Button>

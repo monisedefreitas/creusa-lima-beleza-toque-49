@@ -1,11 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 const HeroSection: React.FC = () => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
   const {
     data: contentSettings
   } = useQuery({
@@ -61,18 +63,37 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-sage-50 to-sage-100">
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/20"></div>
-      
+    <section id="home" className={`relative min-h-screen flex items-center justify-center transition-all duration-500 ${
+      heroBackgroundImage && !imageLoaded ? 'bg-gradient-to-br from-sage-50 to-sage-100' : ''
+    }`}>
       {/* Background Image - only show if defined in admin */}
       {heroBackgroundImage && (
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat" 
-          style={{
-            backgroundImage: `url('${heroBackgroundImage}')`
-          }} 
-        />
+        <>
+          <div 
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              backgroundImage: `url('${heroBackgroundImage}')`
+            }} 
+          />
+          <img
+            src={heroBackgroundImage}
+            alt="Background"
+            className="hidden"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
+          />
+          {/* Overlay only when image is loaded */}
+          <div className={`absolute inset-0 bg-black/20 transition-opacity duration-500 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}></div>
+        </>
+      )}
+      
+      {/* Fallback gradient when no image or image not loaded */}
+      {(!heroBackgroundImage || !imageLoaded) && (
+        <div className="absolute inset-0 bg-gradient-to-br from-sage-50 to-sage-100"></div>
       )}
       
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
