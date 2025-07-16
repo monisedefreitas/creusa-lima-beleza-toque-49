@@ -34,6 +34,48 @@ export const getWhatsAppMessage = async (templateType: string, variables: Record
   }
 };
 
+export const getAvailableVariables = (): string[] => {
+  return [
+    'client_name',
+    'appointment_date',
+    'appointment_time',
+    'services_list',
+    'total_price',
+    'clinic_name',
+    'clinic_phone',
+    'clinic_address',
+    'new_date',
+    'new_time'
+  ];
+};
+
+export const getVariableDescriptions = (): Record<string, string> => {
+  return {
+    'client_name': 'Nome do cliente',
+    'appointment_date': 'Data da consulta',
+    'appointment_time': 'Hora da consulta',
+    'services_list': 'Lista de serviços',
+    'total_price': 'Preço total',
+    'clinic_name': 'Nome da clínica',
+    'clinic_phone': 'Telefone da clínica',
+    'clinic_address': 'Endereço da clínica',
+    'new_date': 'Nova data (reagendamento)',
+    'new_time': 'Nova hora (reagendamento)'
+  };
+};
+
+export const processMessageTemplate = (template: string, variables: Record<string, string>): string => {
+  let processedTemplate = template;
+  
+  // Replace variables in the format {{variable_name}}
+  Object.entries(variables).forEach(([key, value]) => {
+    const regex = new RegExp(`{{${key}}}`, 'g');
+    processedTemplate = processedTemplate.replace(regex, value);
+  });
+  
+  return processedTemplate;
+};
+
 const getDefaultTemplate = (templateType: string, variables: Record<string, string>): string => {
   const { 
     clientName = '{clientName}', 
@@ -84,7 +126,7 @@ Olá ${clientName}!
 Esperamos que tenha ficado satisfeita com o nosso serviço de ${serviceName}! 
 
 🌟 A sua opinião é muito importante para nós! 
-📝 Pode deixar a sua avaliação em: https://meusite.com/avaliar
+📝 Pode deixar a sua avaliação no nosso site: https://www.nossaempresa.com
 
 Até à próxima! 💖
 
@@ -140,7 +182,7 @@ Já passaram alguns dias desde a sua última visita para ${serviceName}.
 
 Como está a sentir-se com o resultado? 
 
-🌟 Adoraríamos saber a sua opinião em: https://meusite.com/avaliar
+🌟 Adoraríamos saber a sua opinião no nosso site: https://www.nossaempresa.com
 
 Para marcar a sua próxima consulta: ${businessPhone}
 
@@ -206,7 +248,7 @@ Olá ${clientName}!
 Esperamos que tenha ficado satisfeita com o nosso serviço de ${serviceName}! 
 
 🌟 A sua opinião é muito importante para nós! 
-📝 Pode deixar a sua avaliação em: https://meusite.com/avaliar
+📝 Pode deixar a sua avaliação no nosso site: https://www.nossaempresa.com
 
 Até à próxima! 💖
 
