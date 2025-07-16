@@ -47,7 +47,7 @@ export const generateWhatsAppVariables = (appointment: any) => {
     appointment_time: appointment.time_slots?.time || '',
     services_list: servicesList,
     total_price: appointment.total_price ? `€${appointment.total_price}` : '',
-    clinic_name: 'Nossa Clínica',
+    clinic_name: 'Creusa Lima',
     clinic_phone: '+351 964 481 966',
     clinic_address: 'Rua das Flores, 123, 1200-123 Lisboa'
   };
@@ -57,7 +57,7 @@ export const getMessageTemplates = () => {
   return {
     whatsapp_confirmation: {
       name: 'Confirmação de Marcação',
-      content: `Olá {{client_name}}!
+      content: `Olá {{client_name}}! 😊
 
 A sua marcação foi confirmada para o dia {{appointment_date}} às {{appointment_time}}.
 
@@ -66,32 +66,37 @@ Serviços agendados:
 
 Total: {{total_price}}
 
-Aguardamos por si!
+Aguardamos por si! 🌿
 
-Obrigada! 🌿`
+Obrigada! ✨`
     },
     whatsapp_arrival_confirmation: {
       name: 'Confirmação de Vinda da Cliente',
-      content: `Olá {{client_name}}!
+      content: `Olá {{client_name}}! 😊
 
 Esperamos por si amanhã, dia {{appointment_date}} às {{appointment_time}}, para o seu tratamento de:
 {{services_list}}
 
 Por favor confirme a sua presença respondendo a esta mensagem.
 
-Obrigada! 🌿`
+Obrigada! 🌿✨`
     },
     whatsapp_review_request: {
       name: 'Pedido de Avaliação no Google Maps',
-      content: `Olá {{client_name}}!
+      content: `Olá {{client_name}}! 😊
 
-Esperamos que tenha ficado satisfeita com o seu tratamento de {{services_list}}.
+Esperamos que tenha ficado satisfeita com o seu tratamento! ✨
 
-A sua opinião é muito importante para nós! Poderia deixar uma avaliação no nosso Google Maps?
+A sua opinião é muito importante para nós e ajuda outras pessoas a conhecerem o nosso trabalho. 💝
 
-Link direto: https://g.page/r/[SEU_LINK_GOOGLE_MAPS]/review
+Poderia deixar uma avaliação no nosso Google Maps? Será muito rápido e significa muito para nós! ⭐
 
-Muito obrigada! ⭐`
+🔗 Link direto: https://g.page/r/[SEU_LINK_GOOGLE_MAPS]/review
+
+Muito obrigada pelo seu tempo e confiança! 🙏💚
+
+Com carinho,
+Creusa Lima 🌿`
     }
   };
 };

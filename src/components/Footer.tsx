@@ -1,9 +1,62 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export const Footer: React.FC = () => {
+  const { data: contactInfo } = useQuery({
+    queryKey: ['footer-contact-info'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('contact_info')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: addresses } = useQuery({
+    queryKey: ['footer-addresses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: socialMedia } = useQuery({
+    queryKey: ['footer-social-media'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('social_media')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const getContactByType = (type: string) => {
+    return contactInfo?.find(contact => contact.type === type);
+  };
+
+  const primaryAddress = addresses?.find(addr => addr.is_primary) || addresses?.[0];
+  
+  const getSocialByPlatform = (platform: string) => {
+    return socialMedia?.find(social => social.platform === platform);
+  };
+
   return (
     <footer className="bg-gradient-to-br from-darkgreen-900 to-darkgreen-800 text-white py-16">
       <div className="container mx-auto px-4">
@@ -17,22 +70,26 @@ export const Footer: React.FC = () => {
               20+ anos promovendo saúde, bem-estar e autoestima através do toque terapêutico e estética avançada.
             </p>
             <div className="flex gap-4">
-              <a 
-                href="https://instagram.com/creusalima_estetica" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="p-2 bg-gold-600 hover:bg-gold-700 rounded-full transition-colors duration-300"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a 
-                href="https://facebook.com/creusalima.estetica" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="p-2 bg-gold-600 hover:bg-gold-700 rounded-full transition-colors duration-300"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
+              {getSocialByPlatform('instagram') && (
+                <a 
+                  href={getSocialByPlatform('instagram')?.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="p-2 bg-gold-600 hover:bg-gold-700 rounded-full transition-colors duration-300"
+                >
+                  <Instagram className="w-5 h-5" />
+                </a>
+              )}
+              {getSocialByPlatform('facebook') && (
+                <a 
+                  href={getSocialByPlatform('facebook')?.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="p-2 bg-gold-600 hover:bg-gold-700 rounded-full transition-colors duration-300"
+                >
+                  <Facebook className="w-5 h-5" />
+                </a>
+              )}
             </div>
           </div>
 
@@ -42,25 +99,33 @@ export const Footer: React.FC = () => {
               Contacto
             </h4>
             <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-sage-300 mt-1 flex-shrink-0" />
-                <div className="font-poppins text-sm text-sage-200">
-                  <p>+351 XXX XXX XXX</p>
-                  <p className="text-xs text-sage-300">WhatsApp disponível</p>
+              {getContactByType('phone') && (
+                <div className="flex items-start gap-3">
+                  <Phone className="w-4 h-4 text-sage-300 mt-1 flex-shrink-0" />
+                  <div className="font-poppins text-sm text-sage-200">
+                    <p>{getContactByType('phone')?.value}</p>
+                    <p className="text-xs text-sage-300">WhatsApp disponível</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-sage-300 mt-1 flex-shrink-0" />
-                <p className="font-poppins text-sm text-sage-200">
-                  creusa.lima@email.com
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-sage-300 mt-1 flex-shrink-0" />
-                <p className="font-poppins text-sm text-sage-200">
-                  Lisboa, Portugal
-                </p>
-              </div>
+              )}
+              {getContactByType('email') && (
+                <div className="flex items-start gap-3">
+                  <Mail className="w-4 h-4 text-sage-300 mt-1 flex-shrink-0" />
+                  <p className="font-poppins text-sm text-sage-200">
+                    {getContactByType('email')?.value}
+                  </p>
+                </div>
+              )}
+              {primaryAddress && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-4 h-4 text-sage-300 mt-1 flex-shrink-0" />
+                  <div className="font-poppins text-sm text-sage-200">
+                    <p>{primaryAddress.street_address}</p>
+                    <p>{primaryAddress.postal_code} {primaryAddress.city}</p>
+                    <p>{primaryAddress.country}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
