@@ -143,10 +143,13 @@ const FixedAppointmentsManager: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      console.log('Starting appointment creation process...');
+      
       // Create or update client
       let clientId = selectedClientId;
       
       if (!clientId) {
+        console.log('Creating new client...');
         const { data: clientData, error: clientError } = await supabase
           .from('clients')
           .insert([{
@@ -157,11 +160,18 @@ const FixedAppointmentsManager: React.FC = () => {
           .select()
           .single();
 
-        if (clientError) throw clientError;
+        if (clientError) {
+          console.error('Client creation error:', clientError);
+          throw clientError;
+        }
         clientId = clientData.id;
+        console.log('Client created with ID:', clientId);
       }
 
-      // Create appointment
+      // Create appointment with proper date formatting
+      const appointmentDate = format(formData.appointment_date!, 'yyyy-MM-dd');
+      console.log('Creating appointment with date:', appointmentDate);
+      
       const { data: appointmentData, error: appointmentError } = await supabase
         .from('appointments')
         .insert([{
@@ -169,29 +179,76 @@ const FixedAppointmentsManager: React.FC = () => {
           client_name: formData.client_name,
           client_phone: formData.client_phone,
           client_email: formData.client_email || null,
-          appointment_date: format(formData.appointment_date, 'yyyy-MM-dd'),
+          appointment_date: appointmentDate,
           time_slot_id: formData.time_slot_id,
           notes: formData.notes || null,
           status: formData.status,
+          total_price: 0, // Will be calculated after services are added
         }])
         .select()
         .single();
 
-      if (appointmentError) throw appointmentError;
+      if (appointmentError) {
+        console.error('Appointment creation error:', appointmentError);
+        throw appointmentError;
+      }
+      console.log('Appointment created with ID:', appointmentData.id);
 
-      // Create appointment services
+      // Create appointment services and calculate total price
       if (formData.selected_services.length > 0) {
-        const appointmentServices = formData.selected_services.map(serviceId => ({
-          appointment_id: appointmentData.id,
-          service_id: serviceId,
-          price: 0, // You might want to get actual prices
-        }));
+        console.log('Adding services to appointment...');
+        
+        const { data: servicesData, error: servicesSelectError } = await supabase
+          .from('services')
+          .select('id, price_range')
+          .in('id', formData.selected_services);
+
+        if (servicesSelectError) {
+          console.error('Services fetch error:', servicesSelectError);
+          throw servicesSelectError;
+        }
+
+        let totalPrice = 0;
+        const appointmentServices = formData.selected_services.map(serviceId => {
+          const service = servicesData?.find(s => s.id === serviceId);
+          // Extract first price from range (e.g., "€45-€60" -> 45)
+          let price = 0;
+          if (service?.price_range) {
+            const match = service.price_range.match(/€?(\d+)/);
+            if (match) {
+              price = parseInt(match[1]);
+            }
+          }
+          totalPrice += price;
+          
+          return {
+            appointment_id: appointmentData.id,
+            service_id: serviceId,
+            price: price,
+          };
+        });
 
         const { error: servicesError } = await supabase
           .from('appointment_services')
           .insert(appointmentServices);
 
-        if (servicesError) throw servicesError;
+        if (servicesError) {
+          console.error('Appointment services creation error:', servicesError);
+          throw servicesError;
+        }
+
+        // Update appointment with total price
+        const { error: updateError } = await supabase
+          .from('appointments')
+          .update({ total_price: totalPrice })
+          .eq('id', appointmentData.id);
+
+        if (updateError) {
+          console.error('Price update error:', updateError);
+          throw updateError;
+        }
+
+        console.log('Services added successfully, total price:', totalPrice);
       }
 
       toast({
@@ -213,11 +270,11 @@ const FixedAppointmentsManager: React.FC = () => {
       setSelectedClientId('');
       setShowClientSelect(false);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating appointment:', error);
       toast({
         title: "Erro",
-        description: "Erro ao criar marcação",
+        description: `Erro ao criar marcação: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive",
       });
     } finally {

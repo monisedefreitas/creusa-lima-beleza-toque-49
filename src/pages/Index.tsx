@@ -4,6 +4,7 @@ import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import AboutSection from '@/components/AboutSection';
 import ServicesSection from '@/components/ServicesSection';
+import TestimonialsSection from '@/components/TestimonialsSection';
 import FAQSection from '@/components/FAQSection';
 import LocationSection from '@/components/LocationSection';
 import Footer from '@/components/Footer';
@@ -34,6 +35,12 @@ const Index: React.FC = () => {
         
         <section id="services">
           <ServicesSection />
+        </section>
+        
+        <SectionDivider />
+        
+        <section id="testimonials">
+          <TestimonialsSection />
         </section>
         
         <SectionDivider />

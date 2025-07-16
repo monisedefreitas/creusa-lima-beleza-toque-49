@@ -33,7 +33,7 @@ Equipa {{clinic_name}} 💚`,
   },
   {
     id: 'review_request',
-    name: 'Pedido de Avaliação',
+    name: 'Pedido de Avaliação no Site',
     type: 'review_request',
     content: `Olá {{client_name}}! 😊
 
@@ -41,10 +41,10 @@ Esperamos que tenha ficado satisfeita com o seu tratamento de {{service_name}} c
 
 A sua opinião é muito importante para nós e ajuda outras pessoas a conhecerem o nosso trabalho. 
 
-💝 **Poderia partilhar a sua experiência?**
+💝 **Poderia partilhar a sua experiência no nosso site?**
 
-Deixe-nos uma avaliação no Google Maps:
-{{review_link}}
+Deixe-nos uma avaliação aqui:
+{{site_testimonial_link}}
 
 ⭐ A sua avaliação demora apenas 1 minuto e significa muito para a nossa pequena clínica!
 
@@ -56,7 +56,7 @@ Com carinho,
 Equipa {{clinic_name}} 💚
 
 P.S.: Estamos sempre aqui para qualquer esclarecimento! 😘`,
-    variables: ['client_name', 'service_name', 'review_link', 'clinic_name'],
+    variables: ['client_name', 'service_name', 'site_testimonial_link', 'clinic_name'],
     is_default: false
   },
   {
@@ -87,6 +87,33 @@ Estamos ansiosos por recebê-la! ✨
 Equipa {{clinic_name}} 💚`,
     variables: ['client_name', 'appointment_date', 'appointment_time', 'service_name', 'clinic_address', 'clinic_name'],
     is_default: false
+  },
+  {
+    id: 'reschedule_notification',
+    name: 'Notificação de Reagendamento',
+    type: 'reschedule_notification',
+    content: `Olá {{client_name}}! 😊
+
+📅 **Consulta Reagendada com Sucesso!**
+
+A sua consulta foi reagendada para:
+
+🗓️ **Nova Data:** {{appointment_date}}
+🕐 **Horário:** {{appointment_time}}
+💆‍♀️ **Serviço:** {{service_name}}
+📍 **Local:** {{clinic_address}}
+
+💡 **Lembretes importantes:**
+• Chegue 10 minutos antes da hora marcada
+• Confirme a sua presença respondendo a esta mensagem
+• Em caso de nova impossibilidade, avise com 24h de antecedência
+
+Obrigada pela sua compreensão e estamos ansiosos por recebê-la na nova data! ✨
+
+Com os melhores cumprimentos,
+Equipa {{clinic_name}} 💚`,
+    variables: ['client_name', 'appointment_date', 'appointment_time', 'service_name', 'clinic_address', 'clinic_name'],
+    is_default: false
   }
 ];
 
@@ -102,7 +129,7 @@ export const getAvailableVariables = () => [
   'clinic_address',
   'clinic_phone',
   'maps_link',
-  'review_link'
+  'site_testimonial_link'
 ];
 
 // Variable descriptions for the admin interface
@@ -117,7 +144,7 @@ export const getVariableDescriptions = () => ({
   'clinic_address': 'Endereço da clínica',
   'clinic_phone': 'Telefone da clínica',
   'maps_link': 'Link para navegação GPS',
-  'review_link': 'Link para avaliação no Google'
+  'site_testimonial_link': 'Link para avaliação no site'
 });
 
 // Process message template by replacing variables
