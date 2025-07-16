@@ -433,50 +433,136 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_tags: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       media_gallery: {
         Row: {
           alt_text: string | null
           category: string | null
           created_at: string | null
           description: string | null
+          dimensions: string | null
+          file_size: number | null
           file_type: Database["public"]["Enums"]["media_type"]
           file_url: string
           id: string
           is_active: boolean | null
           is_featured: boolean | null
           order_index: number | null
+          service_id: string | null
           title: string | null
           updated_at: string | null
+          upload_date: string | null
         }
         Insert: {
           alt_text?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
+          dimensions?: string | null
+          file_size?: number | null
           file_type: Database["public"]["Enums"]["media_type"]
           file_url: string
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
           order_index?: number | null
+          service_id?: string | null
           title?: string | null
           updated_at?: string | null
+          upload_date?: string | null
         }
         Update: {
           alt_text?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
+          dimensions?: string | null
+          file_size?: number | null
           file_type?: Database["public"]["Enums"]["media_type"]
           file_url?: string
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
           order_index?: number | null
+          service_id?: string | null
           title?: string | null
           updated_at?: string | null
+          upload_date?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "media_gallery_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_gallery_tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          media_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          media_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          media_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_gallery_tags_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media_gallery"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_gallery_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_tags"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message_templates: {
         Row: {
