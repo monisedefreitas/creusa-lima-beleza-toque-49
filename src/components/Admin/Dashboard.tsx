@@ -1,15 +1,103 @@
+
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Calendar, 
+  Users, 
+  Star, 
+  MessageSquare, 
+  CheckCircle,
+  Clock,
+  Euro,
+  TrendingUp
+} from 'lucide-react';
 import MobileDashboard from './MobileDashboard';
 
 const Dashboard: React.FC = () => {
   const isMobile = useIsMobile();
 
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: async () => {
+      const [
+        { count: servicesCount },
+        { count: faqsCount },
+        { count: adminsCount },
+        { count: appointmentsCount },
+        { count: pendingAppointmentsCount }
+      ] = await Promise.all([
+        supabase.from('services').select('*', { count: 'exact', head: true }),
+        supabase.from('faqs').select('*', { count: 'exact', head: true }),
+        supabase.from('admin_users').select('*', { count: 'exact', head: true }),
+        supabase.from('appointments').select('*', { count: 'exact', head: true }),
+        supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('status', 'pending')
+      ]);
+
+      return {
+        services: servicesCount || 0,
+        faqs: faqsCount || 0,
+        admins: adminsCount || 0,
+        appointments: appointmentsCount || 0,
+        pendingAppointments: pendingAppointmentsCount || 0
+      };
+    }
+  });
+
+  const statCards = [
+    {
+      title: 'Total Marcações',
+      value: stats?.appointments || 0,
+      icon: Calendar,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50'
+    },
+    {
+      title: 'Pendentes',
+      value: stats?.pendingAppointments || 0,
+      icon: Clock,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-50'
+    },
+    {
+      title: 'Serviços',
+      value: stats?.services || 0,
+      icon: Star,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50'
+    },
+    {
+      title: 'FAQs',
+      value: stats?.faqs || 0,
+      icon: MessageSquare,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50'
+    }
+  ];
+
   if (isMobile) {
     return <MobileDashboard />;
   }
 
-  
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-16 bg-gray-200 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -57,8 +145,8 @@ const Dashboard: React.FC = () => {
               <div className="flex items-center p-3 bg-gray-50 rounded-lg">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Painel admin funcional</p>
-                  <p className="text-xs text-gray-500">Sistema corrigido com sucesso</p>
+                  <p className="text-sm font-medium">Painel admin otimizado para mobile</p>
+                  <p className="text-xs text-gray-500">Sistema atualizado com sucesso</p>
                 </div>
               </div>
               {stats?.pendingAppointments > 0 && (
