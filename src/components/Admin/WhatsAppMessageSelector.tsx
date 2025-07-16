@@ -264,7 +264,7 @@ ${variables.clinic_name}`
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {Object.entries(variableDescriptions).map(([key, description]) => (
                   <div key={key} className="flex flex-col">
-                    <code className="text-blue-700 font-mono">{{${key}}}</code>
+                    <code className="text-blue-700 font-mono">{`{{${key}}}`}</code>
                     <span className="text-blue-600">{description}</span>
                   </div>
                 ))}
