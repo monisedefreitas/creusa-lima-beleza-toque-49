@@ -9,7 +9,6 @@ import {
   Scissors, 
   Settings, 
   LogOut, 
-  Image,
   MessageSquare,
   Globe,
   Clock,
@@ -71,11 +70,6 @@ const AdminLayout: React.FC = () => {
       icon: Users, 
       label: 'Utilizadores', 
       path: '/admin/users' 
-    },
-    { 
-      icon: Image, 
-      label: 'Galeria', 
-      path: '/admin/media' 
     },
     { 
       icon: FileText, 

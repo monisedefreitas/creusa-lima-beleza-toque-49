@@ -7,7 +7,6 @@ import ServicesSection from '@/components/ServicesSection';
 import FAQSection from '@/components/FAQSection';
 import LocationSection from '@/components/LocationSection';
 import { Footer } from '@/components/Footer';
-import GallerySection from '@/components/Gallery/GallerySection';
 import FloatingWhatsApp from '@/components/WhatsApp/FloatingWhatsApp';
 import SEOManager from '@/components/SEO/SEOManager';
 import SkipLinks from '@/components/Accessibility/SkipLinks';
@@ -35,12 +34,6 @@ const Index: React.FC = () => {
         
         <section id="services">
           <ServicesSection />
-        </section>
-        
-        <SectionDivider />
-        
-        <section id="gallery">
-          <GallerySection />
         </section>
         
         <SectionDivider />
