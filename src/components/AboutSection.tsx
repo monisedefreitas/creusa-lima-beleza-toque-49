@@ -13,9 +13,27 @@ import { Button } from '@/components/ui/button';
 import LazyImage from '@/components/Performance/LazyImage';
 import TestimonialForm from '@/components/TestimonialForm';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const AboutSection: React.FC = () => {
   const [showTestimonialForm, setShowTestimonialForm] = useState(false);
+
+  const { data: contentSections } = useQuery({
+    queryKey: ['content-sections-about'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('content_sections')
+        .select('*')
+        .eq('section_type', 'about_section')
+        .eq('is_active', true);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const aboutContent = contentSections?.[0];
 
   const stats = [
     {
@@ -25,7 +43,7 @@ const AboutSection: React.FC = () => {
     },
     {
       icon: Calendar,
-      value: "3+",
+      value: "20+",
       label: "Anos de Experiência"
     },
     {
@@ -41,10 +59,10 @@ const AboutSection: React.FC = () => {
   ];
 
   const achievements = [
-    "Formação em Estética e Cosmética",
-    "Especialização em Tratamentos Faciais",
-    "Certificação em Microagulhamento",
-    "Curso Avançado de Limpeza de Pele"
+    "Especialista em Linfoterapia",
+    "Tratamentos Pós-Operatório",
+    "Estética Corporal e Facial",
+    "Terapias de Bem-Estar"
   ];
 
   return (
@@ -66,22 +84,35 @@ const AboutSection: React.FC = () => {
               <h3 className="text-2xl font-bold text-darkgreen-800">Minha História</h3>
             </div>
             
-            <p className="text-gray-600 leading-relaxed">
-              Olá! Sou apaixonada pela arte de cuidar da pele e realçar a beleza natural de cada pessoa. 
-              Com mais de 3 anos de experiência na área da estética, dedico-me a proporcionar tratamentos 
-              personalizados que vão além da beleza exterior.
-            </p>
-            
-            <p className="text-gray-600 leading-relaxed">
-              Acredito que cada cliente é único e merece um cuidado especial. Por isso, 
-              invisto constantemente em formação e nas melhores técnicas para garantir 
-              resultados excepcionais e uma experiência relaxante.
-            </p>
+            {aboutContent?.content ? (
+              <div className="space-y-4 text-gray-600 leading-relaxed">
+                {aboutContent.content.split('\n\n').map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4 text-gray-600 leading-relaxed">
+                <p>
+                  De Salvador – Bahia para Portugal, trago comigo mais de 20 anos de experiência dedicados ao cuidado de pessoas. 
+                  Acredito que cada corpo tem uma história única e merece atenção, respeito e presença.
+                </p>
+                
+                <p>
+                  Especialista em linfoterapia, pós-operatório e estética, atuo promovendo saúde, recuperação e qualidade de vida. 
+                  Meu compromisso é oferecer tratamentos sob medida, alicerçados em conhecimento, sensibilidade e ética profissional.
+                </p>
+
+                <p>
+                  O toque terapêutico é a minha ferramenta para devolver equilíbrio, bem-estar e autoconfiança aos meus clientes. 
+                  Atendimento em ambiente discreto, seguro e acolhedor.
+                </p>
+              </div>
+            )}
 
             <div className="space-y-3">
               <h4 className="text-lg font-semibold text-darkgreen-800 flex items-center gap-2">
                 <Award className="w-5 h-5 text-sage-600" />
-                Formações e Certificações
+                Especializações
               </h4>
               <ul className="space-y-2">
                 {achievements.map((achievement, index) => (

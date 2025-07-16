@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { MapPin, Clock, Star, Phone, Mail } from 'lucide-react';
+import { MapPin, Clock, MessageSquare, Phone, Mail } from 'lucide-react';
 import GoogleMap from './GoogleMap';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,20 +47,45 @@ const LocationSection: React.FC = () => {
     }
   });
 
-  const getSettingValue = (key: string) => {
-    return settings?.find(s => s.key === key)?.value || '';
-  };
+  const { data: businessHours } = useQuery({
+    queryKey: ['business-hours'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('business_hours')
+        .select('*')
+        .order('day_of_week');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const primaryAddress = addresses?.find(addr => addr.is_primary) || addresses?.[0];
-  const googleMapsReviewLink = getSettingValue('google_maps_review_link') || 
-    'https://www.google.com/search?q=cl%C3%ADnica+medicina+est%C3%A9tica';
 
-  const handleGoogleReview = () => {
-    window.open(googleMapsReviewLink, '_blank');
+  const handleTestimonialClick = () => {
+    const element = document.querySelector('#testimonials');
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
   };
 
   const getContactByType = (type: string) => {
     return contactInfo?.find(contact => contact.type === type);
+  };
+
+  const formatBusinessHours = () => {
+    if (!businessHours) return [];
+    
+    const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    
+    return businessHours.map(hour => ({
+      day: dayNames[hour.day_of_week],
+      time: hour.is_active ? `${hour.open_time.slice(0,5)} - ${hour.close_time.slice(0,5)}` : 'Fechado',
+      isActive: hour.is_active
+    }));
   };
 
   return (
@@ -89,11 +114,11 @@ const LocationSection: React.FC = () => {
             </p>
             
             <Button 
-              onClick={handleGoogleReview}
+              onClick={handleTestimonialClick}
               className="bg-gold-500 hover:bg-gold-600 text-darkgreen-900 font-semibold px-6 py-3 transition-all duration-300 hover:scale-105 shadow-lg"
             >
-              <Star className="h-5 w-5 mr-2" />
-              Avaliar no Google Maps
+              <MessageSquare className="h-5 w-5 mr-2" />
+              Enviar Depoimento
             </Button>
           </div>
         </div>
@@ -120,8 +145,8 @@ const LocationSection: React.FC = () => {
                     </div>
                   ) : (
                     <div className="text-forest-600 space-y-1">
-                      <p className="font-medium">Rua das Flores, 123</p>
-                      <p>1200-123 Lisboa</p>
+                      <p className="font-medium">R. Fernando Lopes Graça 379 B</p>
+                      <p>2775-571 Carcavelos</p>
                       <p>Portugal</p>
                     </div>
                   )}
@@ -140,18 +165,31 @@ const LocationSection: React.FC = () => {
                     Horário de Funcionamento
                   </h3>
                   <div className="space-y-1 text-forest-600 text-sm">
-                    <div className="flex justify-between">
-                      <span>Segunda a Sexta:</span>
-                      <span className="font-medium">9h00 - 19h00</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Sábado:</span>
-                      <span className="font-medium">9h00 - 17h00</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Domingo:</span>
-                      <span className="font-medium text-red-600">Fechado</span>
-                    </div>
+                    {formatBusinessHours().length > 0 ? (
+                      formatBusinessHours().map((schedule, index) => (
+                        <div key={index} className="flex justify-between">
+                          <span>{schedule.day}:</span>
+                          <span className={`font-medium ${!schedule.isActive ? 'text-red-600' : ''}`}>
+                            {schedule.time}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex justify-between">
+                          <span>Segunda a Sexta:</span>
+                          <span className="font-medium">9h00 - 18h00</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Sábado:</span>
+                          <span className="font-medium">9h00 - 13h00</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Domingo:</span>
+                          <span className="font-medium text-red-600">Fechado</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

@@ -76,7 +76,7 @@ const Navigation: React.FC = () => {
             )}
             
             <Button
-              onClick={() => scrollToSection('#contact')}
+              onClick={() => scrollToSection('#services')}
               className="bg-darkgreen-800 hover:bg-darkgreen-900 text-white"
             >
               <Phone className="h-4 w-4 mr-2" />
@@ -123,7 +123,7 @@ const Navigation: React.FC = () => {
               )}
               
               <Button
-                onClick={() => scrollToSection('#contact')}
+                onClick={() => scrollToSection('#services')}
                 className="w-full mt-2 bg-darkgreen-800 hover:bg-darkgreen-900 text-white"
               >
                 <Phone className="h-4 w-4 mr-2" />

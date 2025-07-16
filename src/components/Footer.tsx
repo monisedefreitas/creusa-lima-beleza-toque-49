@@ -1,8 +1,61 @@
 
 import React from 'react';
 import { Heart, Globe, Mail, Phone } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const Footer: React.FC = () => {
+  const { data: contactInfo } = useQuery({
+    queryKey: ['contact-info'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('contact_info')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: businessHours } = useQuery({
+    queryKey: ['business-hours'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('business_hours')
+        .select('*')
+        .order('day_of_week');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const getContactByType = (type: string) => {
+    return contactInfo?.find(contact => contact.type === type);
+  };
+
+  const formatBusinessHours = () => {
+    if (!businessHours) return [];
+    
+    const activeHours = businessHours.filter(hour => hour.is_active);
+    const inactiveHours = businessHours.filter(hour => !hour.is_active);
+    
+    return [
+      ...activeHours.map(hour => ({
+        day: hour.day_of_week === 1 ? 'Segunda - Sexta' : hour.day_of_week === 6 ? 'Sábado' : '',
+        time: `${hour.open_time.slice(0,5)} - ${hour.close_time.slice(0,5)}`,
+        isActive: true
+      })).filter(h => h.day),
+      ...inactiveHours.map(hour => ({
+        day: 'Domingo',
+        time: 'Fechado',
+        isActive: false
+      }))
+    ];
+  };
+
   return (
     <footer className="bg-darkgreen-800 text-white py-12">
       <div className="container mx-auto px-4">
@@ -11,16 +64,16 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-sage-100">Cuidados de Beleza</h3>
             <p className="text-gray-300 text-sm leading-relaxed">
-              Especializada em tratamentos estéticos personalizados, oferecendo cuidados de qualidade 
-              para realçar a sua beleza natural com técnicas modernas e produtos de excelência.
+              Especializada em linfoterapia, pós-operatório e estética, oferecendo cuidados de qualidade 
+              para realçar a sua beleza natural com técnicas modernas e tratamentos personalizados.
             </p>
             <div className="flex items-center gap-2 text-sm text-gray-300">
               <Phone className="w-4 h-4" />
-              <span>+351 123 456 789</span>
+              <span>{getContactByType('phone')?.value || '+351 964 481 966'}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-300">
               <Mail className="w-4 h-4" />
-              <span>info@exemplo.pt</span>
+              <span>{getContactByType('email')?.value || 'Limadesouzacreusa@gmail.com'}</span>
             </div>
           </div>
 
@@ -39,18 +92,29 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-sage-100">Horários</h3>
             <ul className="space-y-2 text-sm text-gray-300">
-              <li className="flex justify-between">
-                <span>Segunda - Sexta:</span>
-                <span>9:00 - 19:00</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Sábado:</span>
-                <span>9:00 - 17:00</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Domingo:</span>
-                <span>Fechado</span>
-              </li>
+              {formatBusinessHours().length > 0 ? (
+                formatBusinessHours().map((schedule, index) => (
+                  <li key={index} className="flex justify-between">
+                    <span>{schedule.day}:</span>
+                    <span className={schedule.isActive ? '' : 'text-red-400'}>{schedule.time}</span>
+                  </li>
+                ))
+              ) : (
+                <>
+                  <li className="flex justify-between">
+                    <span>Segunda - Sexta:</span>
+                    <span>9:00 - 18:00</span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Sábado:</span>
+                    <span>9:00 - 13:00</span>
+                  </li>
+                  <li className="flex justify-between">
+                    <span>Domingo:</span>
+                    <span className="text-red-400">Fechado</span>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
         </div>
@@ -64,7 +128,7 @@ const Footer: React.FC = () => {
               <Heart className="w-4 h-4 text-sage-400 fill-current" />
               <span>pela</span>
               <a 
-                href="https://casacriativami.pt" 
+                href="http://sites.casacriativami.com/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-sage-300 hover:text-sage-200 font-medium transition-colors flex items-center gap-1"
@@ -89,7 +153,7 @@ const Footer: React.FC = () => {
               </p>
               <div className="flex justify-center items-center gap-4 text-xs text-gray-400">
                 <a 
-                  href="https://casacriativami.pt" 
+                  href="http://sites.casacriativami.com/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="hover:text-sage-300 transition-colors"
