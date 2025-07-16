@@ -1,27 +1,112 @@
 
 import React from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, Globe, Mail, Phone } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gray-900 text-white py-8">
+    <footer className="bg-darkgreen-800 text-white py-12">
       <div className="container mx-auto px-4">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
-            <span>Desenvolvido com</span>
-            <Heart className="w-4 h-4 text-red-500 fill-current" />
-            <span>pela</span>
-            <a 
-              href="https://casacriativami.pt" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-pink-400 hover:text-pink-300 font-medium transition-colors"
-            >
-              Casa Criativa MI
-            </a>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {/* Sobre o Negócio */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-sage-100">Cuidados de Beleza</h3>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Especializada em tratamentos estéticos personalizados, oferecendo cuidados de qualidade 
+              para realçar a sua beleza natural com técnicas modernas e produtos de excelência.
+            </p>
+            <div className="flex items-center gap-2 text-sm text-gray-300">
+              <Phone className="w-4 h-4" />
+              <span>+351 123 456 789</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-300">
+              <Mail className="w-4 h-4" />
+              <span>info@exemplo.pt</span>
+            </div>
           </div>
-          <div className="mt-2 text-xs text-gray-500">
-            © {new Date().getFullYear()} Todos os direitos reservados
+
+          {/* Links Úteis */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-sage-100">Links Úteis</h3>
+            <ul className="space-y-2 text-sm">
+              <li><a href="#services" className="text-gray-300 hover:text-sage-200 transition-colors">Serviços</a></li>
+              <li><a href="#about" className="text-gray-300 hover:text-sage-200 transition-colors">Sobre Mim</a></li>
+              <li><a href="#faq" className="text-gray-300 hover:text-sage-200 transition-colors">FAQ</a></li>
+              <li><a href="#contact" className="text-gray-300 hover:text-sage-200 transition-colors">Contacto</a></li>
+            </ul>
+          </div>
+
+          {/* Horários */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-sage-100">Horários</h3>
+            <ul className="space-y-2 text-sm text-gray-300">
+              <li className="flex justify-between">
+                <span>Segunda - Sexta:</span>
+                <span>9:00 - 19:00</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Sábado:</span>
+                <span>9:00 - 17:00</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Domingo:</span>
+                <span>Fechado</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Separador */}
+        <div className="border-t border-darkgreen-700 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            {/* Créditos de Desenvolvimento */}
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+              <span>Desenvolvido com</span>
+              <Heart className="w-4 h-4 text-sage-400 fill-current" />
+              <span>pela</span>
+              <a 
+                href="https://casacriativami.pt" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sage-300 hover:text-sage-200 font-medium transition-colors flex items-center gap-1"
+              >
+                <Globe className="w-4 h-4" />
+                Casa Criativa MI
+              </a>
+            </div>
+
+            {/* Copyright */}
+            <div className="text-xs text-gray-500 text-center md:text-right">
+              <p>© {new Date().getFullYear()} Todos os direitos reservados</p>
+              <p className="mt-1">Soluções digitais profissionais</p>
+            </div>
+          </div>
+
+          {/* Informação adicional sobre a Casa Criativa MI */}
+          <div className="mt-6 pt-6 border-t border-darkgreen-700">
+            <div className="text-center">
+              <p className="text-xs text-gray-400 mb-2">
+                <strong className="text-sage-300">Casa Criativa MI</strong> - Agência especializada em desenvolvimento web e soluções digitais
+              </p>
+              <div className="flex justify-center items-center gap-4 text-xs text-gray-400">
+                <a 
+                  href="https://casacriativami.pt" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-sage-300 transition-colors"
+                >
+                  Website
+                </a>
+                <span>•</span>
+                <a 
+                  href="mailto:info@casacriativami.pt" 
+                  className="hover:text-sage-300 transition-colors"
+                >
+                  Contacto
+                </a>
+                <span>•</span>
+                <span>Madeira, Portugal</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

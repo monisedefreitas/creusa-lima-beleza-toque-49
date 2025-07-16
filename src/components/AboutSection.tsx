@@ -48,10 +48,10 @@ const AboutSection: React.FC = () => {
   ];
 
   return (
-    <section id="about" className="py-20 bg-gradient-to-br from-pink-50 to-purple-50">
+    <section id="about" className="py-20 bg-gradient-to-br from-sage-50 to-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-darkgreen-800 mb-6">
             Sobre Mim
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -62,8 +62,8 @@ const AboutSection: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-6">
-              <User className="w-8 h-8 text-pink-600" />
-              <h3 className="text-2xl font-bold text-gray-800">Minha História</h3>
+              <User className="w-8 h-8 text-sage-600" />
+              <h3 className="text-2xl font-bold text-darkgreen-800">Minha História</h3>
             </div>
             
             <p className="text-gray-600 leading-relaxed">
@@ -79,14 +79,14 @@ const AboutSection: React.FC = () => {
             </p>
 
             <div className="space-y-3">
-              <h4 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                <Award className="w-5 h-5 text-pink-600" />
+              <h4 className="text-lg font-semibold text-darkgreen-800 flex items-center gap-2">
+                <Award className="w-5 h-5 text-sage-600" />
                 Formações e Certificações
               </h4>
               <ul className="space-y-2">
                 {achievements.map((achievement, index) => (
                   <li key={index} className="flex items-center gap-2 text-gray-600">
-                    <Star className="w-4 h-4 text-yellow-500" />
+                    <Star className="w-4 h-4 text-gold-500" />
                     {achievement}
                   </li>
                 ))}
@@ -98,7 +98,7 @@ const AboutSection: React.FC = () => {
             <LazyImage 
               src="/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png" 
               alt="Profile Image" 
-              className="rounded-2xl shadow-lg border border-pink-100 w-full h-auto max-w-md"
+              className="rounded-2xl shadow-lg border border-sage-200 w-full h-auto max-w-md"
             />
           </div>
         </div>
@@ -106,9 +106,9 @@ const AboutSection: React.FC = () => {
         {/* Stats Section */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
           {stats.map((stat, index) => (
-            <div key={index} className="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
-              <stat.icon className="w-8 h-8 text-pink-600 mx-auto mb-3" />
-              <div className="text-2xl font-bold text-gray-800 mb-1">{stat.value}</div>
+            <div key={index} className="text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-sage-100">
+              <stat.icon className="w-8 h-8 text-sage-600 mx-auto mb-3" />
+              <div className="text-2xl font-bold text-darkgreen-800 mb-1">{stat.value}</div>
               <div className="text-sm text-gray-600">{stat.label}</div>
             </div>
           ))}
@@ -116,7 +116,7 @@ const AboutSection: React.FC = () => {
 
         {/* Call to Action */}
         <div className="text-center">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">
+          <h3 className="text-2xl font-bold text-darkgreen-800 mb-4">
             Partilhe a Sua Experiência
           </h3>
           <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
@@ -126,7 +126,7 @@ const AboutSection: React.FC = () => {
           
           <Dialog open={showTestimonialForm} onOpenChange={setShowTestimonialForm}>
             <DialogTrigger asChild>
-              <Button size="lg" className="bg-pink-600 hover:bg-pink-700">
+              <Button size="lg" className="bg-sage-600 hover:bg-sage-700 text-white">
                 <MessageSquare className="w-5 h-5 mr-2" />
                 Enviar Depoimento
               </Button>
