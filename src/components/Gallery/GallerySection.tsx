@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,9 +7,70 @@ import { Eye, X, ChevronLeft, ChevronRight, Image as ImageIcon, AlertCircle } fr
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import LazyImage from '@/components/Performance/LazyImage';
 import type { Tables } from '@/integrations/supabase/types';
 
 type MediaItem = Tables<'media_gallery'>;
+
+// Imagens locais de exemplo
+const sampleImages = [
+  {
+    id: 'sample-1',
+    file_url: '/lovable-uploads/46b56184-9c80-42e2-9f4b-8fb2bf567b13.png',
+    title: 'Tratamento Facial',
+    category: 'Facial',
+    description: 'Resultado de tratamento de rejuvenescimento facial',
+    alt_text: 'Antes e depois de tratamento facial',
+    file_type: 'image' as const,
+    is_active: true,
+    is_featured: true,
+    order_index: 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: 'sample-2',
+    file_url: '/lovable-uploads/73d8cd7b-d053-484a-b84e-0c423886228f.png',
+    title: 'Harmonização Facial',
+    category: 'Harmonização',
+    description: 'Tratamento de harmonização com preenchimento',
+    alt_text: 'Resultado de harmonização facial',
+    file_type: 'image' as const,
+    is_active: true,
+    is_featured: false,
+    order_index: 2,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: 'sample-3',
+    file_url: '/lovable-uploads/f82463a1-3344-4535-86dd-071e92421715.png',
+    title: 'Tratamento Corporal',
+    category: 'Corporal',
+    description: 'Resultado de tratamento de modelagem corporal',
+    alt_text: 'Antes e depois de tratamento corporal',
+    file_type: 'image' as const,
+    is_active: true,
+    is_featured: true,
+    order_index: 3,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: 'sample-4',
+    file_url: '/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png',
+    title: 'Rejuvenescimento',
+    category: 'Anti-idade',
+    description: 'Tratamento completo de rejuvenescimento',
+    alt_text: 'Resultado de tratamento anti-idade',
+    file_type: 'image' as const,
+    is_active: true,
+    is_featured: false,
+    order_index: 4,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }
+];
 
 const GallerySection: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<MediaItem | null>(null);
@@ -19,7 +79,7 @@ const GallerySection: React.FC = () => {
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const { elementRef, isVisible } = useScrollAnimation();
 
-  const { data: gallery, isLoading } = useQuery({
+  const { data: dbGallery, isLoading } = useQuery({
     queryKey: ['media_gallery'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,6 +93,15 @@ const GallerySection: React.FC = () => {
       return data as MediaItem[];
     }
   });
+
+  // Combinar imagens do banco com imagens de exemplo
+  const gallery = React.useMemo(() => {
+    const combinedGallery = [...sampleImages];
+    if (dbGallery && dbGallery.length > 0) {
+      combinedGallery.push(...dbGallery);
+    }
+    return combinedGallery;
+  }, [dbGallery]);
 
   const categories = React.useMemo(() => {
     if (!gallery) return [];
@@ -87,32 +156,6 @@ const GallerySection: React.FC = () => {
     );
   }
 
-  if (!gallery || gallery.length === 0) {
-    return (
-      <section ref={elementRef} className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}>
-              <h2 className="text-4xl md:text-5xl font-bold text-darkgreen-900 mb-6">
-                <span className="font-tan-mon-cheri">Galeria</span>
-              </h2>
-              <p className="text-xl text-forest-600 max-w-3xl mx-auto leading-relaxed">
-                A galeria será exibida aqui quando imagens forem adicionadas pelo administrador.
-              </p>
-            </div>
-            
-            <div className="text-center py-12">
-              <ImageIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">
-                Nenhuma imagem encontrada na galeria.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section ref={elementRef} className="py-20 bg-white">
       <div className="container mx-auto px-4">
@@ -130,11 +173,11 @@ const GallerySection: React.FC = () => {
           {/* Category Filter */}
           {categories.length > 0 && (
             <div className={`flex justify-center mb-8 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 justify-center">
                 <Button
                   variant={selectedCategory === 'all' ? 'default' : 'outline'}
                   onClick={() => setSelectedCategory('all')}
-                  className="mb-2"
+                  className="mb-2 bg-darkgreen-800 hover:bg-darkgreen-900"
                 >
                   Todos
                 </Button>
@@ -143,7 +186,7 @@ const GallerySection: React.FC = () => {
                     key={category}
                     variant={selectedCategory === category ? 'default' : 'outline'}
                     onClick={() => setSelectedCategory(category)}
-                    className="mb-2"
+                    className={`mb-2 ${selectedCategory === category ? 'bg-darkgreen-800 hover:bg-darkgreen-900' : ''}`}
                   >
                     {category}
                   </Button>
@@ -157,7 +200,7 @@ const GallerySection: React.FC = () => {
             {filteredGallery.map((item, index) => (
               <Card 
                 key={item.id} 
-                className="group cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden"
+                className="group cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden border-sage-200 hover:border-darkgreen-300"
                 onClick={() => !imageErrors.has(item.id) && handleImageClick(item, index)}
               >
                 <CardContent className="p-0 relative">
@@ -168,12 +211,11 @@ const GallerySection: React.FC = () => {
                         <p className="text-sm text-center px-4">Imagem não disponível</p>
                       </div>
                     ) : (
-                      <img 
+                      <LazyImage 
                         src={item.file_url}
                         alt={item.alt_text || item.title || 'Imagem da galeria'}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        loading="lazy"
-                        onError={() => handleImageError(item.id)}
+                        onLoad={() => {}}
                       />
                     )}
                   </div>
@@ -194,7 +236,7 @@ const GallerySection: React.FC = () => {
                         <h3 className="text-white font-semibold text-sm">{item.title}</h3>
                       )}
                       {item.category && (
-                        <Badge variant="secondary" className="mt-1 text-xs">
+                        <Badge variant="secondary" className="mt-1 text-xs bg-sage-600 text-white">
                           {item.category}
                         </Badge>
                       )}
@@ -202,7 +244,7 @@ const GallerySection: React.FC = () => {
                   )}
 
                   {item.is_featured && !imageErrors.has(item.id) && (
-                    <Badge className="absolute top-2 right-2 bg-darkgreen-800">
+                    <Badge className="absolute top-2 right-2 bg-darkgreen-800 text-white">
                       Destacado
                     </Badge>
                   )}
@@ -248,11 +290,11 @@ const GallerySection: React.FC = () => {
 
           {selectedImage && (
             <div className="relative w-full h-full flex items-center justify-center p-8">
-              <img 
+              <LazyImage 
                 src={selectedImage.file_url}
                 alt={selectedImage.alt_text || selectedImage.title || 'Imagem da galeria'}
                 className="max-w-full max-h-full object-contain"
-                onError={() => handleImageError(selectedImage.id)}
+                onLoad={() => {}}
               />
 
               {/* Navigation Buttons */}
@@ -298,6 +340,28 @@ const GallerySection: React.FC = () => {
       </Dialog>
     </section>
   );
+};
+
+const handleNext = () => {
+  if (filteredGallery && currentIndex < filteredGallery.length - 1) {
+    const newIndex = currentIndex + 1;
+    setCurrentIndex(newIndex);
+    setSelectedImage(filteredGallery[newIndex]);
+  }
+};
+
+const handlePrevious = () => {
+  if (currentIndex > 0) {
+    const newIndex = currentIndex - 1;
+    setCurrentIndex(newIndex);
+    setSelectedImage(filteredGallery[newIndex]);
+  }
+};
+
+const handleKeyDown = (e: React.KeyboardEvent) => {
+  if (e.key === 'ArrowRight') handleNext();
+  if (e.key === 'ArrowLeft') handlePrevious();
+  if (e.key === 'Escape') setSelectedImage(null);
 };
 
 export default GallerySection;
