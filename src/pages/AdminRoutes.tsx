@@ -13,6 +13,8 @@ import MediaManager from '@/components/Admin/MediaManager';
 import SocialMediaManager from '@/components/Admin/SocialMediaManager';
 import AddressesManager from '@/components/Admin/AddressesManager';
 import UsersManager from '@/components/Admin/UsersManager';
+import BannersManager from '@/components/Admin/BannersManager';
+import SettingsManager from '@/components/Admin/SettingsManager';
 
 const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAdmin, loading } = useAuth();
@@ -46,6 +48,8 @@ const AdminRoutes: React.FC = () => {
           <Route path="/media" element={<MediaManager />} />
           <Route path="/social" element={<SocialMediaManager />} />
           <Route path="/addresses" element={<AddressesManager />} />
+          <Route path="/banners" element={<BannersManager />} />
+          <Route path="/settings" element={<SettingsManager />} />
           <Route path="/users" element={<UsersManager />} />
         </Routes>
       </AdminLayout>

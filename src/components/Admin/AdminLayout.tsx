@@ -48,8 +48,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { path: '/admin/social', icon: Instagram, label: 'Redes Sociais' },
     { path: '/admin/addresses', icon: MapPin, label: 'Moradas' },
     { path: '/admin/banners', icon: Palette, label: 'Banners' },
-    { path: '/admin/users', icon: Users, label: 'Utilizadores' },
     { path: '/admin/settings', icon: Settings, label: 'Configurações' },
+    { path: '/admin/users', icon: Users, label: 'Utilizadores' },
   ];
 
   const isActive = (path: string, exact = false) => {
