@@ -31,9 +31,10 @@ interface TimeSlot {
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  preSelectedServiceId?: string | null;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
+const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, preSelectedServiceId }) => {
   const [step, setStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
@@ -55,6 +56,15 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
       fetchTimeSlots();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (preSelectedServiceId && services.length > 0) {
+      const preSelectedService = services.find(service => service.id === preSelectedServiceId);
+      if (preSelectedService) {
+        setSelectedServices([preSelectedService]);
+      }
+    }
+  }, [preSelectedServiceId, services]);
 
   const fetchServices = async () => {
     try {
@@ -145,16 +155,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
       });
 
       // Reset form and close modal
-      setStep(1);
-      setSelectedDate(undefined);
-      setSelectedTimeSlot(null);
-      setSelectedServices([]);
-      setClientInfo({
-        name: '',
-        phone: '',
-        email: '',
-        notes: ''
-      });
+      resetForm();
       onClose();
 
     } catch (error) {
@@ -246,6 +247,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
                           <Label 
                             htmlFor={`service-${service.id}`}
                             className="text-base font-medium cursor-pointer"
+                            onClick={() => {
+                              const isChecked = selectedServices.some(s => s.id === service.id);
+                              handleServiceToggle(service, !isChecked);
+                            }}
                           >
                             {service.name}
                           </Label>
