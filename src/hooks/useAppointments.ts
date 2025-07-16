@@ -240,7 +240,12 @@ export const useUpdateAppointmentStatus = () => {
 
       let statusHistory = [];
       try {
-        statusHistory = JSON.parse(currentAppointment?.status_history || '[]');
+        const historyData = currentAppointment?.status_history;
+        if (typeof historyData === 'string') {
+          statusHistory = JSON.parse(historyData);
+        } else if (Array.isArray(historyData)) {
+          statusHistory = historyData;
+        }
       } catch (e) {
         statusHistory = [];
       }

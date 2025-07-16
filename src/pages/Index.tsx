@@ -3,7 +3,7 @@ import React from 'react';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import AboutSection from '@/components/AboutSection';
-import { ServicesSection } from '@/components/ServicesSection';
+import ServicesSection from '@/components/ServicesSection';
 import FAQSection from '@/components/FAQSection';
 import LocationSection from '@/components/LocationSection';
 import { Footer } from '@/components/Footer';

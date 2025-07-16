@@ -9,8 +9,8 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 interface WhatsAppMessageSelectorProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
   appointment: {
     id: string;
     client_name: string;
@@ -22,12 +22,14 @@ interface WhatsAppMessageSelectorProps {
     }>;
     total_price?: number;
   };
+  onSend?: (message: string, type: string) => Promise<void>;
 }
 
 const WhatsAppMessageSelector: React.FC<WhatsAppMessageSelectorProps> = ({
-  isOpen,
+  isOpen = true,
   onClose,
-  appointment
+  appointment,
+  onSend
 }) => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
 
@@ -87,20 +89,28 @@ Obrigado! 🙏`
     }
   };
 
-  const handleSendMessage = (templateKey: string) => {
+  const handleSendMessage = async (templateKey: string) => {
     const template = messageTemplates[templateKey as keyof typeof messageTemplates];
-    const message = encodeURIComponent(template.template);
-    const phoneNumber = appointment.client_phone.replace(/[^0-9]/g, '');
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
     
-    window.open(whatsappUrl, '_blank');
-    onClose();
+    if (onSend) {
+      await onSend(template.template, templateKey);
+    } else {
+      // Fallback para abrir WhatsApp diretamente
+      const message = encodeURIComponent(template.template);
+      const phoneNumber = appointment.client_phone.replace(/[^0-9]/g, '');
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+      window.open(whatsappUrl, '_blank');
+    }
+    
+    if (onClose) onClose();
   };
 
   const copyToClipboard = (templateKey: string) => {
     const template = messageTemplates[templateKey as keyof typeof messageTemplates];
     navigator.clipboard.writeText(template.template);
   };
+
+  if (!isOpen && isOpen !== undefined) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

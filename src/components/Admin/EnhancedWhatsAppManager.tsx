@@ -8,11 +8,13 @@ import WhatsAppMessageSelector from './WhatsAppMessageSelector';
 interface EnhancedWhatsAppManagerProps {
   appointment: any;
   onClose?: () => void;
+  isOpen?: boolean;
 }
 
 const EnhancedWhatsAppManager: React.FC<EnhancedWhatsAppManagerProps> = ({ 
   appointment, 
-  onClose 
+  onClose,
+  isOpen = true
 }) => {
   const updateStatusMutation = useUpdateAppointmentStatus();
   const createNotificationMutation = useCreateNotification();
@@ -21,7 +23,7 @@ const EnhancedWhatsAppManager: React.FC<EnhancedWhatsAppManagerProps> = ({
   const handleSendWhatsApp = async (message: string, type: string) => {
     try {
       // Update appointment status if it's a confirmation
-      if (type === 'whatsapp_confirmation') {
+      if (type === 'confirmation') {
         await updateStatusMutation.mutateAsync({ 
           id: appointment.id, 
           status: 'confirmed' 
@@ -60,10 +62,10 @@ const EnhancedWhatsAppManager: React.FC<EnhancedWhatsAppManagerProps> = ({
 
   const getMessageTypeLabel = (type: string) => {
     const labels = {
-      'whatsapp_confirmation': 'Confirmação de Marcação',
-      'whatsapp_arrival_confirmation': 'Confirmação de Vinda',
-      'whatsapp_review_request': 'Pedido de Avaliação',
-      'custom': 'Mensagem Personalizada'
+      'confirmation': 'Confirmação de Marcação',
+      'reminder': 'Lembrete de Marcação',
+      'cancellation': 'Cancelamento de Marcação',
+      'reschedule': 'Reagendamento'
     };
     return labels[type as keyof typeof labels] || 'Mensagem WhatsApp';
   };
@@ -72,6 +74,8 @@ const EnhancedWhatsAppManager: React.FC<EnhancedWhatsAppManagerProps> = ({
     <WhatsAppMessageSelector 
       appointment={appointment} 
       onSend={handleSendWhatsApp}
+      isOpen={isOpen}
+      onClose={onClose}
     />
   );
 };
