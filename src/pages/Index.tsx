@@ -6,7 +6,7 @@ import AboutSection from '@/components/AboutSection';
 import ServicesSection from '@/components/ServicesSection';
 import FAQSection from '@/components/FAQSection';
 import LocationSection from '@/components/LocationSection';
-import { Footer } from '@/components/Footer';
+import Footer from '@/components/Footer';
 import FloatingWhatsApp from '@/components/WhatsApp/FloatingWhatsApp';
 import SEOManager from '@/components/SEO/SEOManager';
 import SkipLinks from '@/components/Accessibility/SkipLinks';

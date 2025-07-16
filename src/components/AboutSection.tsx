@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   User, 
@@ -63,9 +64,7 @@ const AboutSection: React.FC = () => {
             <LazyImage 
               src="/images/profile.jpg" 
               alt="Profile Image" 
-              className="rounded-2xl shadow-lg border border-pink-100"
-              width={500}
-              height={600}
+              className="rounded-2xl shadow-lg border border-pink-100 w-full h-auto"
             />
           </div>
           
