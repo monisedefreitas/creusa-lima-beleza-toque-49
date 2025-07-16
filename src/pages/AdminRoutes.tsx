@@ -26,7 +26,7 @@ const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (!user || !isAdmin) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" state={{ from: { pathname: '/admin' } }} replace />;
   }
 
   return <>{children}</>;

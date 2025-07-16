@@ -1,10 +1,14 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Phone } from 'lucide-react';
+import { Menu, X, Phone, Settings } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const Navigation: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
 
   const menuItems = [
     { label: 'Início', href: '#hero' },
@@ -21,6 +25,15 @@ const Navigation: React.FC = () => {
         behavior: 'smooth',
         block: 'start',
       });
+    }
+    setIsMenuOpen(false);
+  };
+
+  const handleAdminAccess = () => {
+    if (user && isAdmin) {
+      navigate('/admin');
+    } else {
+      navigate('/auth', { state: { from: { pathname: '/admin' } } });
     }
     setIsMenuOpen(false);
   };
@@ -49,6 +62,19 @@ const Navigation: React.FC = () => {
                 {item.label}
               </button>
             ))}
+            
+            {/* Admin Access Button */}
+            {(user && isAdmin) && (
+              <Button
+                onClick={handleAdminAccess}
+                variant="outline"
+                className="border-darkgreen-800 text-darkgreen-800 hover:bg-darkgreen-800 hover:text-white"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Admin
+              </Button>
+            )}
+            
             <Button
               onClick={() => scrollToSection('#contact')}
               className="bg-darkgreen-800 hover:bg-darkgreen-900 text-white"
@@ -83,6 +109,19 @@ const Navigation: React.FC = () => {
                   {item.label}
                 </button>
               ))}
+              
+              {/* Admin Access Button Mobile */}
+              {(user && isAdmin) && (
+                <Button
+                  onClick={handleAdminAccess}
+                  variant="outline"
+                  className="w-full mt-2 border-darkgreen-800 text-darkgreen-800 hover:bg-darkgreen-800 hover:text-white"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Painel Admin
+                </Button>
+              )}
+              
               <Button
                 onClick={() => scrollToSection('#contact')}
                 className="w-full mt-2 bg-darkgreen-800 hover:bg-darkgreen-900 text-white"

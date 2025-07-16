@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -15,16 +15,34 @@ const AuthPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
   
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
+  // Check if user came from an admin route
+  const from = location.state?.from?.pathname || '/';
+  const isFromAdminRoute = from.startsWith('/admin');
+
   useEffect(() => {
-    if (user) {
-      navigate('/');
+    if (user && !loading && !hasRedirected) {
+      console.log('User authenticated, isAdmin:', isAdmin, 'from:', from);
+      
+      // Wait a bit for isAdmin to be determined
+      setTimeout(() => {
+        if (isAdmin && (isFromAdminRoute || from === '/admin')) {
+          console.log('Redirecting admin to:', from.startsWith('/admin') ? from : '/admin');
+          navigate(from.startsWith('/admin') ? from : '/admin');
+        } else {
+          console.log('Redirecting regular user to home');
+          navigate('/');
+        }
+        setHasRedirected(true);
+      }, 500);
     }
-  }, [user, navigate]);
+  }, [user, isAdmin, loading, navigate, from, isFromAdminRoute, hasRedirected]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
