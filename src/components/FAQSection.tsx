@@ -1,38 +1,70 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Flower2, HelpCircle } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import type { Tables } from '@/integrations/supabase/types';
+
+type FAQ = Tables<'faqs'>;
 
 const FAQSection: React.FC = () => {
   const { elementRef, isVisible } = useScrollAnimation();
 
-  const faqs = [
-    {
-      question: "O que é linfoterapia e quais os seus benefícios?",
-      answer: "A linfoterapia é uma técnica especializada que estimula o sistema linfático, ajudando a eliminar toxinas, reduzir inchaços e melhorar a circulação. É especialmente benéfica para recuperação pós-operatória, tratamentos oncológicos (com autorização médica) e bem-estar geral."
-    },
-    {
-      question: "Os tratamentos são dolorosos?",
-      answer: "Nossos tratamentos são desenvolvidos para serem confortáveis e relaxantes. Utilizamos técnicas suaves e equipamentos de última geração que garantem eficácia sem desconforto. Sempre adaptamos a intensidade às suas necessidades e sensibilidade."
-    },
-    {
-      question: "Quantas sessões são necessárias para ver resultados?",
-      answer: "O número de sessões varia conforme o tratamento e objetivo individual. Na consulta inicial, fazemos uma avaliação personalizada e criamos um plano de tratamento adequado às suas necessidades específicas."
-    },
-    {
-      question: "Posso fazer tratamentos durante a gravidez?",
-      answer: "Sim! Oferecemos massagens especializadas para gestantes, sempre com técnicas seguras e adaptadas a cada fase da gravidez. É importante informar sobre a gestação durante o agendamento para prepararmos o atendimento adequado."
-    },
-    {
-      question: "Como funciona o agendamento?",
-      answer: "O agendamento é feito através do WhatsApp ou telefone. Oferecemos horários flexíveis para se adequar à sua rotina. Recomendamos agendar com antecedência para garantir a disponibilidade no horário desejado."
-    },
-    {
-      question: "Há estacionamento disponível?",
-      answer: "Sim, o Espaço Sinergia oferece fácil acesso e estacionamento disponível. Localizado em Carcavelos, também temos acesso fácil por transporte público (metro e autocarro)."
+  const { data: faqs, isLoading } = useQuery({
+    queryKey: ['faqs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('faqs')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index');
+      
+      if (error) throw error;
+      return data as FAQ[];
     }
-  ];
+  });
+
+  if (isLoading) {
+    return (
+      <section className="py-20 px-4 bg-gradient-to-br from-sage-50/50 to-beige-50/30">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-darkgreen-800 mx-auto"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!faqs || faqs.length === 0) {
+    return (
+      <section className="py-20 px-4 bg-gradient-to-br from-sage-50/50 to-beige-50/30">
+        <div className="container mx-auto max-w-4xl">
+          <div 
+            ref={elementRef}
+            className={`text-center mb-16 transition-all duration-800 ${
+              isVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'
+            }`}
+          >
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full border border-sage-200 mb-6">
+              <HelpCircle className="w-4 h-4 text-sage-500" />
+              <span className="text-sm font-medium text-darkgreen-800 font-bauer-bodoni">Dúvidas Frequentes</span>
+            </div>
+            
+            <h2 className="font-tan-mon-cheri text-4xl md:text-5xl font-bold text-darkgreen-900 mb-6">
+              Perguntas & Respostas
+            </h2>
+            <p className="font-poppins text-xl text-forest-600 max-w-3xl mx-auto leading-relaxed">
+              As perguntas frequentes serão exibidas aqui quando forem adicionadas pelo administrador.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 px-4 bg-gradient-to-br from-sage-50/50 to-beige-50/30">
@@ -63,7 +95,7 @@ const FAQSection: React.FC = () => {
             <Accordion type="single" collapsible className="space-y-4">
               {faqs.map((faq, index) => (
                 <AccordionItem 
-                  key={index} 
+                  key={faq.id} 
                   value={`item-${index}`}
                   className="border border-sage-100 rounded-lg px-6 py-2 hover:shadow-md transition-all duration-300"
                 >

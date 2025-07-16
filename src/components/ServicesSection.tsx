@@ -31,7 +31,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
     }
   });
 
-  const { data: banners } = useQuery({
+  const { data: banners, isLoading: bannersLoading } = useQuery({
     queryKey: ['services-banners'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -72,7 +72,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
           </div>
 
           {/* Services Banners */}
-          {banners && banners.length > 0 && (
+          {!bannersLoading && banners && banners.length > 0 && (
             <div className="mb-12">
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {banners.map((banner) => (
@@ -110,6 +110,17 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
                     )}
                   </Card>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Message when no banners exist */}
+          {!bannersLoading && (!banners || banners.length === 0) && (
+            <div className="mb-12 text-center">
+              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-sage-200 max-w-2xl mx-auto">
+                <p className="text-forest-600 text-sm">
+                  Os banners de promoções e destaques aparecerão aqui quando forem adicionados pelo administrador.
+                </p>
               </div>
             </div>
           )}

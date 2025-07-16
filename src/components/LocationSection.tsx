@@ -1,16 +1,11 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Clock, Car, Phone } from 'lucide-react';
+import { MapPin, Clock, Phone } from 'lucide-react';
 import GoogleMap from './GoogleMap';
 
 export const LocationSection: React.FC = () => {
   const locationFeatures = [
-    {
-      icon: <Car className="w-5 h-5 text-emerald-600" />,
-      title: "Estacionamento",
-      description: "Fácil acesso e estacionamento disponível"
-    },
     {
       icon: <Clock className="w-5 h-5 text-gold-600" />,
       title: "Horários Flexíveis",
@@ -70,28 +65,6 @@ export const LocationSection: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
-              
-              {/* Facilities Preview */}
-              <Card className="border-0 shadow-lg bg-gradient-to-r from-emerald-800 to-emerald-900 text-white">
-                <CardContent className="p-8 text-center">
-                  <h3 className="font-playfair text-2xl font-semibold mb-4">
-                    Ambiente Acolhedor & Profissional
-                  </h3>
-                  <p className="font-inter text-emerald-100 leading-relaxed mb-6">
-                    Um espaço pensado para proporcionar máximo conforto e tranquilidade durante seus tratamentos.
-                  </p>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="bg-white/10 p-3 rounded-lg">
-                      <div className="font-semibold">Higiene Premium</div>
-                      <div className="text-emerald-200">Protocolos rigorosos</div>
-                    </div>
-                    <div className="bg-white/10 p-3 rounded-lg">
-                      <div className="font-semibold">Equipamentos</div>
-                      <div className="text-emerald-200">Tecnologia avançada</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
             
             {/* Map Area */}
@@ -114,6 +87,39 @@ export const LocationSection: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+          
+          {/* Full-width Facilities Section */}
+          <div className="mt-16">
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-emerald-800 to-emerald-900 text-white">
+              <CardContent className="p-12 text-center">
+                <h3 className="font-playfair text-3xl md:text-4xl font-semibold mb-6">
+                  Ambiente Acolhedor & Profissional
+                </h3>
+                <p className="font-inter text-emerald-100 leading-relaxed mb-8 text-lg max-w-4xl mx-auto">
+                  Um espaço pensado para proporcionar máximo conforto e tranquilidade durante seus tratamentos.
+                  Cada detalhe foi cuidadosamente planeado para criar uma experiência única e relaxante.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+                  <div className="bg-white/10 p-6 rounded-lg">
+                    <div className="font-semibold text-lg mb-2">Higiene Premium</div>
+                    <div className="text-emerald-200">Protocolos rigorosos de limpeza e segurança</div>
+                  </div>
+                  <div className="bg-white/10 p-6 rounded-lg">
+                    <div className="font-semibold text-lg mb-2">Equipamentos</div>
+                    <div className="text-emerald-200">Tecnologia avançada e certificada</div>
+                  </div>
+                  <div className="bg-white/10 p-6 rounded-lg">
+                    <div className="font-semibold text-lg mb-2">Conforto</div>
+                    <div className="text-emerald-200">Ambiente climatizado e acolhedor</div>
+                  </div>
+                  <div className="bg-white/10 p-6 rounded-lg">
+                    <div className="font-semibold text-lg mb-2">Privacidade</div>
+                    <div className="text-emerald-200">Espaços reservados e discretos</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

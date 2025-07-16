@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Eye, X, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { Eye, X, ChevronLeft, ChevronRight, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
@@ -16,6 +16,7 @@ const GallerySection: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<MediaItem | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const { elementRef, isVisible } = useScrollAnimation();
 
   const { data: gallery, isLoading } = useQuery({
@@ -44,6 +45,10 @@ const GallerySection: React.FC = () => {
     if (selectedCategory === 'all') return gallery;
     return gallery.filter(item => item.category === selectedCategory);
   }, [gallery, selectedCategory]);
+
+  const handleImageError = (imageId: string) => {
+    setImageErrors(prev => new Set([...prev, imageId]));
+  };
 
   const handleImageClick = (image: MediaItem, index: number) => {
     setSelectedImage(image);
@@ -83,7 +88,29 @@ const GallerySection: React.FC = () => {
   }
 
   if (!gallery || gallery.length === 0) {
-    return null;
+    return (
+      <section ref={elementRef} className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className={`text-center mb-16 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}>
+              <h2 className="text-4xl md:text-5xl font-bold text-darkgreen-900 mb-6">
+                <span className="font-tan-mon-cheri">Galeria</span>
+              </h2>
+              <p className="text-xl text-forest-600 max-w-3xl mx-auto leading-relaxed">
+                A galeria será exibida aqui quando imagens forem adicionadas pelo administrador.
+              </p>
+            </div>
+            
+            <div className="text-center py-12">
+              <ImageIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">
+                Nenhuma imagem encontrada na galeria.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -131,27 +158,37 @@ const GallerySection: React.FC = () => {
               <Card 
                 key={item.id} 
                 className="group cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden"
-                onClick={() => handleImageClick(item, index)}
+                onClick={() => !imageErrors.has(item.id) && handleImageClick(item, index)}
               >
                 <CardContent className="p-0 relative">
-                  <div className="aspect-square overflow-hidden">
-                    <img 
-                      src={item.file_url}
-                      alt={item.alt_text || item.title || 'Imagem da galeria'}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      loading="lazy"
-                    />
+                  <div className="aspect-square overflow-hidden bg-gray-100">
+                    {imageErrors.has(item.id) ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                        <AlertCircle className="h-8 w-8 mb-2" />
+                        <p className="text-sm text-center px-4">Imagem não disponível</p>
+                      </div>
+                    ) : (
+                      <img 
+                        src={item.file_url}
+                        alt={item.alt_text || item.title || 'Imagem da galeria'}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        loading="lazy"
+                        onError={() => handleImageError(item.id)}
+                      />
+                    )}
                   </div>
                   
                   {/* Overlay */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Eye className="h-8 w-8 text-white" />
+                  {!imageErrors.has(item.id) && (
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <Eye className="h-8 w-8 text-white" />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Info Overlay */}
-                  {(item.title || item.category) && (
+                  {(item.title || item.category) && !imageErrors.has(item.id) && (
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                       {item.title && (
                         <h3 className="text-white font-semibold text-sm">{item.title}</h3>
@@ -164,7 +201,7 @@ const GallerySection: React.FC = () => {
                     </div>
                   )}
 
-                  {item.is_featured && (
+                  {item.is_featured && !imageErrors.has(item.id) && (
                     <Badge className="absolute top-2 right-2 bg-darkgreen-800">
                       Destacado
                     </Badge>
@@ -215,6 +252,7 @@ const GallerySection: React.FC = () => {
                 src={selectedImage.file_url}
                 alt={selectedImage.alt_text || selectedImage.title || 'Imagem da galeria'}
                 className="max-w-full max-h-full object-contain"
+                onError={() => handleImageError(selectedImage.id)}
               />
 
               {/* Navigation Buttons */}
