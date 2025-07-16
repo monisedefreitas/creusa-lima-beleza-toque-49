@@ -68,24 +68,53 @@ Aguardamos por si! ✨`
     cancellation: {
       title: 'Cancelamento de Marcação',
       description: 'Informar sobre o cancelamento',
-      template: `Olá ${appointment.client_name},
+      template: `Olá ${appointment.client_name}! 😔
 
-Informamos que a sua marcação do dia ${format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })} às ${appointment.time_slots?.time || 'N/A'} foi cancelada.
+Lamentamos informar que a sua consulta foi cancelada:
 
-Se desejar reagendar, por favor entre em contacto connosco.
+📅 **Consulta cancelada:**
+• **Data:** ${format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })}
+• **Hora:** ${appointment.time_slots?.time || 'N/A'}
+• **Serviço:** ${appointment.appointment_services?.map(s => s.services?.name).join(', ') || 'N/A'}
 
-Obrigado pela compreensão.`
+💡 **Para reagendar:**
+Por favor contacte-nos para marcar uma nova data que seja conveniente para si.
+
+Pedimos desculpa por qualquer inconveniente causado.
+
+Com os melhores cumprimentos! 💚`
     },
     reschedule: {
       title: 'Reagendamento',
       description: 'Propor novo agendamento',
-      template: `Olá ${appointment.client_name},
+      template: `Olá ${appointment.client_name}! 📅
 
 Precisamos de reagendar a sua marcação do dia ${format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })}.
 
 Por favor entre em contacto para escolhermos uma nova data que seja conveniente para si.
 
-Obrigado! 🙏`
+Obrigado pela compreensão! 🙏`
+    },
+    reminder_24h: {
+      title: 'Lembrete 24h',
+      description: 'Lembrete enviado 24 horas antes',
+      template: `Olá ${appointment.client_name}! 🔔
+
+**Lembrete: Consulta amanhã!**
+
+📅 **Detalhes da sua consulta:**
+• **Data:** ${format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })}
+• **Hora:** ${appointment.time_slots?.time || 'N/A'}
+• **Serviço:** ${appointment.appointment_services?.map(s => s.services?.name).join(', ') || 'N/A'}
+
+💡 **Preparação:**
+• Vista roupa confortável
+• Chegue 10 minutos mais cedo
+• Traga documento de identificação
+
+Se tiver alguma dúvida ou imprevisto, contacte-nos!
+
+Até amanhã! ✨`
     }
   };
 

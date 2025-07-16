@@ -1,204 +1,117 @@
 
 import React from 'react';
 import { MapPin, Phone, Mail, Clock, Instagram, Facebook } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 
-export const Footer: React.FC = () => {
-  const { data: contactInfo } = useQuery({
-    queryKey: ['footer-contact-info'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('contact_info')
-        .select('*')
-        .eq('is_active', true)
-        .order('order_index');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: addresses } = useQuery({
-    queryKey: ['footer-addresses'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('addresses')
-        .select('*')
-        .eq('is_active', true)
-        .order('order_index');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: socialMedia } = useQuery({
-    queryKey: ['footer-social-media'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('social_media')
-        .select('*')
-        .eq('is_active', true)
-        .order('order_index');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const getContactByType = (type: string) => {
-    return contactInfo?.find(contact => contact.type === type);
-  };
-
-  const primaryAddress = addresses?.find(addr => addr.is_primary) || addresses?.[0];
-  
-  const getSocialByPlatform = (platform: string) => {
-    return socialMedia?.find(social => social.platform === platform);
-  };
-
+const Footer: React.FC = () => {
   return (
-    <footer className="bg-gradient-to-br from-darkgreen-900 to-darkgreen-800 text-white py-16">
+    <footer className="bg-gray-900 text-white py-16">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          
           {/* Brand Section */}
-          <div className="md:col-span-1">
-            <h3 className="font-tan-mon-cheri text-2xl font-bold text-gold-300 mb-4">
-              Creusa Lima
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+              Estética & Bem-estar
             </h3>
-            <p className="font-poppins text-sage-200 leading-relaxed mb-4">
-              20+ anos promovendo saúde, bem-estar e autoestima através do toque terapêutico e estética avançada.
+            <p className="text-gray-400 leading-relaxed">
+              Transformando vidas através da beleza e do bem-estar. 
+              Cada tratamento é uma experiência única de renovação e autoestima.
             </p>
-            <div className="flex gap-4">
-              {getSocialByPlatform('instagram') && (
-                <a 
-                  href={getSocialByPlatform('instagram')?.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="p-2 bg-gold-600 hover:bg-gold-700 rounded-full transition-colors duration-300"
-                >
-                  <Instagram className="w-5 h-5" />
-                </a>
-              )}
-              {getSocialByPlatform('facebook') && (
-                <a 
-                  href={getSocialByPlatform('facebook')?.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="p-2 bg-gold-600 hover:bg-gold-700 rounded-full transition-colors duration-300"
-                >
-                  <Facebook className="w-5 h-5" />
-                </a>
-              )}
+            <div className="flex space-x-4">
+              <a 
+                href="#" 
+                className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+              >
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a 
+                href="#" 
+                className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+              >
+                <Facebook className="h-5 w-5" />
+              </a>
             </div>
           </div>
 
           {/* Contact Info */}
-          <div>
-            <h4 className="font-bauer-bodoni text-lg font-semibold text-gold-300 mb-4">
-              Contacto
-            </h4>
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold text-pink-400">Contacto</h4>
             <div className="space-y-3">
-              {getContactByType('phone') && (
-                <div className="flex items-start gap-3">
-                  <Phone className="w-4 h-4 text-sage-300 mt-1 flex-shrink-0" />
-                  <div className="font-poppins text-sm text-sage-200">
-                    <p>{getContactByType('phone')?.value}</p>
-                    <p className="text-xs text-sage-300">WhatsApp disponível</p>
-                  </div>
+              <div className="flex items-center space-x-3 text-gray-400">
+                <MapPin className="h-5 w-5 text-pink-400" />
+                <span>Rua da Beleza, 123<br />4000-000 Porto</span>
+              </div>
+              <div className="flex items-center space-x-3 text-gray-400">
+                <Phone className="h-5 w-5 text-pink-400" />
+                <span>+351 123 456 789</span>
+              </div>
+              <div className="flex items-center space-x-3 text-gray-400">
+                <Mail className="h-5 w-5 text-pink-400" />
+                <span>info@estetica.pt</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Business Hours */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold text-pink-400">Horários</h4>
+            <div className="space-y-2 text-gray-400">
+              <div className="flex items-center space-x-3">
+                <Clock className="h-5 w-5 text-pink-400" />
+                <div>
+                  <p className="font-medium">Segunda - Sexta</p>
+                  <p>09:00 - 19:00</p>
                 </div>
-              )}
-              {getContactByType('email') && (
-                <div className="flex items-start gap-3">
-                  <Mail className="w-4 h-4 text-sage-300 mt-1 flex-shrink-0" />
-                  <p className="font-poppins text-sm text-sage-200">
-                    {getContactByType('email')?.value}
-                  </p>
-                </div>
-              )}
-              {primaryAddress && (
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-sage-300 mt-1 flex-shrink-0" />
-                  <div className="font-poppins text-sm text-sage-200">
-                    <p>{primaryAddress.street_address}</p>
-                    <p>{primaryAddress.postal_code} {primaryAddress.city}</p>
-                    <p>{primaryAddress.country}</p>
-                  </div>
-                </div>
-              )}
+              </div>
+              <div className="ml-8">
+                <p className="font-medium">Sábado</p>
+                <p>09:00 - 17:00</p>
+              </div>
+              <div className="ml-8">
+                <p className="font-medium">Domingo</p>
+                <p>Fechado</p>
+              </div>
             </div>
           </div>
 
           {/* Services */}
-          <div>
-            <h4 className="font-bauer-bodoni text-lg font-semibold text-gold-300 mb-4">
-              Serviços
-            </h4>
-            <ul className="space-y-2 font-poppins text-sm text-sage-200">
-              <li className="hover:text-gold-300 transition-colors cursor-pointer">
-                Linfoterapia
-              </li>
-              <li className="hover:text-gold-300 transition-colors cursor-pointer">
-                Drenagem Linfática
-              </li>
-              <li className="hover:text-gold-300 transition-colors cursor-pointer">
-                Pós-Operatório
-              </li>
-              <li className="hover:text-gold-300 transition-colors cursor-pointer">
-                Radiofrequência
-              </li>
-              <li className="hover:text-gold-300 transition-colors cursor-pointer">
-                Massagens Terapêuticas
-              </li>
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold text-pink-400">Serviços</h4>
+            <ul className="space-y-2 text-gray-400">
+              <li className="hover:text-pink-400 transition-colors cursor-pointer">Limpeza de Pele</li>
+              <li className="hover:text-pink-400 transition-colors cursor-pointer">Tratamentos Faciais</li>
+              <li className="hover:text-pink-400 transition-colors cursor-pointer">Massagens</li>
+              <li className="hover:text-pink-400 transition-colors cursor-pointer">Depilação</li>
+              <li className="hover:text-pink-400 transition-colors cursor-pointer">Manicure & Pedicure</li>
             </ul>
-          </div>
-
-          {/* Schedule */}
-          <div>
-            <h4 className="font-bauer-bodoni text-lg font-semibold text-gold-300 mb-4">
-              Horários
-            </h4>
-            <div className="space-y-2 font-poppins text-sm text-sage-200">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-sage-300" />
-                <div>
-                  <p>Segunda - Sexta</p>
-                  <p className="text-xs text-sage-300">09:00 - 19:00</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-sage-300" />
-                <div>
-                  <p>Sábado</p>
-                  <p className="text-xs text-sage-300">09:00 - 17:00</p>
-                </div>
-              </div>
-              <div className="mt-3 p-3 bg-gold-900/30 rounded-lg">
-                <p className="text-xs text-gold-200 font-medium">
-                  Atendimento por marcação prévia
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="border-t border-sage-700 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="font-poppins text-sm text-sage-300">
-              © 2024 Creusa Lima - Especialista em Estética. Todos os direitos reservados.
-            </p>
-            <div className="flex gap-6 font-poppins text-xs text-sage-400">
-              <a href="#" className="hover:text-gold-300 transition-colors">
-                Política de Privacidade
-              </a>
-              <a href="#" className="hover:text-gold-300 transition-colors">
-                Termos de Serviço
-              </a>
-            </div>
+        <div className="border-t border-gray-800 my-8"></div>
+
+        {/* Bottom Section */}
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div className="text-gray-400 text-sm">
+            © 2024 Estética & Bem-estar. Todos os direitos reservados.
+          </div>
+          
+          {/* Site Authorship */}
+          <div className="text-gray-400 text-sm">
+            Site desenvolvido por{' '}
+            <a 
+              href="http://sites.casacriativami.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-pink-400 hover:text-pink-300 transition-colors font-medium"
+            >
+              Casa Criativa MI
+            </a>
           </div>
         </div>
       </div>
     </footer>
   );
 };
+
+export default Footer;

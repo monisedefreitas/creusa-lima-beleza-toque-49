@@ -1,12 +1,15 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { 
+  User, 
   Heart, 
+  Star, 
   Award, 
-  Users, 
-  Clock,
-  CheckCircle,
+  Clock, 
+  CheckCircle, 
+  Sparkles, 
+  Users,
+  Target,
+  Zap,
   Calendar
 } from 'lucide-react';
 import LazyImage from '@/components/Performance/LazyImage';
@@ -14,127 +17,130 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const AboutSection: React.FC = () => {
   const { elementRef, isVisible } = useScrollAnimation();
-  const [isBookingModalOpen, setIsBookingModalOpen] = React.useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
-  const features = [
-    {
-      icon: Heart,
-      title: 'Cuidado Personalizado',
-      description: 'Cada tratamento é adaptado às suas necessidades específicas'
-    },
-    {
-      icon: Award,
-      title: 'Experiência Comprovada',
-      description: 'Mais de 15 anos de experiência em medicina natural'
-    },
-    {
-      icon: Users,
-      title: 'Milhares de Clientes',
-      description: 'Mais de 1000 pessoas já transformaram a sua saúde'
-    },
-    {
-      icon: Clock,
-      title: 'Resultados Duradouros',
-      description: 'Foco em soluções sustentáveis e de longo prazo'
+  const scrollToServices = () => {
+    const servicesSection = document.getElementById('services');
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
-  ];
+  };
 
   const achievements = [
-    'Formação em Medicina Natural e Terapias Complementares',
-    'Especialização em Fitoterapia e Aromaterapia',
-    'Certificação em Medicina Tradicional Chinesa',
-    'Membro da Associação Portuguesa de Medicina Natural'
+    { icon: User, count: 350, label: 'Clientes Felizes' },
+    { icon: Heart, count: 98, label: 'Recomendações' },
+    { icon: Star, count: 4.9, label: 'Avaliação Média' },
+    { icon: Award, count: 12, label: 'Anos de Experiência' },
   ];
 
   return (
-    <section ref={elementRef} className="py-20 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Image Section */}
-          <div className={`relative ${isVisible ? 'animate-fade-in-right' : 'opacity-0'}`}>
-            <div className="relative">
-              <LazyImage
-                src="/lovable-uploads/73d8cd7b-d053-484a-b84e-0c423886228f.png"
-                alt="Creusa Lima no seu consultório"
-                className="w-full h-auto rounded-2xl shadow-xl"
-              />
-              
-              {/* Experience Badge */}
-              <div className="absolute top-6 right-6 bg-darkgreen-800 text-white p-4 rounded-xl shadow-lg">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">15+</div>
-                  <div className="text-sm">Anos</div>
-                </div>
-              </div>
-            </div>
+    <section 
+      id="about" 
+      className="py-20 bg-gradient-to-br from-pink-50 to-purple-50 relative overflow-hidden"
+      ref={elementRef}
+    >
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Sobre Mim</h2>
+          <p className="text-gray-600 text-lg">
+            Uma paixão por realçar a beleza natural e promover o bem-estar.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left content with image */}
+          <div className={`relative ${isVisible ? 'animate-fade-in-left' : 'opacity-0'}`}>
+            <LazyImage 
+              src="/images/profile.jpg" 
+              alt="Profile Image" 
+              className="rounded-2xl shadow-lg border border-pink-100"
+              width={500}
+              height={600}
+            />
           </div>
-
-          {/* Content Section */}
-          <div className={`space-y-8 ${isVisible ? 'animate-fade-in-left' : 'opacity-0'}`}>
+          
+          {/* Right content */}
+          <div className={`space-y-8 ${isVisible ? 'animate-fade-in-right' : 'opacity-0'}`}>
+            {/* Introduction */}
             <div className="space-y-4">
-              <div className="text-darkgreen-800 font-semibold text-lg">
-                Sobre Mim
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                Olá, sou{' '}
-                <span className="text-darkgreen-800">Creusa Lima</span>
-              </h2>
-              
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Há mais de 15 anos dedico-me à medicina natural e terapias complementares, 
-                ajudando pessoas a encontrar o equilíbrio e bem-estar através de tratamentos 
-                naturais e personalizados.
-              </p>
-              
-              <p className="text-lg text-gray-600 leading-relaxed">
-                A minha missão é proporcionar cuidados de saúde holísticos que respeitam 
-                a individualidade de cada pessoa, promovendo a cura natural e o bem-estar 
-                duradouro sem dependência de medicamentos químicos.
-              </p>
-            </div>
-
-            {/* Achievements */}
-            <div className="space-y-3">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Formações e Certificações
+              <h3 className="text-3xl font-semibold text-gray-900">
+                A sua jornada para a beleza e bem-estar começa aqui.
               </h3>
+              <p className="text-gray-700 leading-relaxed">
+                Com anos de experiência, dedico-me a oferecer tratamentos personalizados que atendem às suas necessidades individuais. 
+                Cada serviço é projetado para realçar a sua beleza natural e promover o seu bem-estar geral.
+              </p>
+            </div>
+            
+            {/* Specialties */}
+            <div className="space-y-4">
+              <h4 className="text-xl font-semibold text-gray-900">Especialidades</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="text-pink-500 h-5 w-5" />
+                  <span>Tratamentos Faciais Personalizados</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="text-pink-500 h-5 w-5" />
+                  <span>Massagens Relaxantes e Terapêuticas</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="text-pink-500 h-5 w-5" />
+                  <span>Soluções Avançadas para a Pele</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="text-pink-500 h-5 w-5" />
+                  <span>Bem-estar Holístico</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Achievements */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {achievements.map((achievement, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-darkgreen-800 flex-shrink-0 mt-1" />
-                  <span className="text-gray-700">{achievement}</span>
+                <div key={index} className="text-center p-4 bg-white rounded-lg shadow-md border border-pink-100">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full mb-2">
+                    <achievement.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900">{achievement.count}</div>
+                  <div className="text-gray-600">{achievement.label}</div>
                 </div>
               ))}
             </div>
-
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {features.map((feature, index) => (
-                <div key={index} className="flex gap-4">
-                  <div className="w-12 h-12 bg-sage-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="h-6 w-6 text-darkgreen-800" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">
-                      {feature.title}
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      {feature.description}
-                    </p>
-                  </div>
+            
+            {/* Call to Action */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-pink-100">
+              <div className="text-center space-y-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full mb-4">
+                  <Calendar className="h-8 w-8 text-white" />
                 </div>
-              ))}
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Pronta para se Sentir Radiante?
+                </h3>
+                <p className="text-gray-600">
+                  Descubra os nossos tratamentos personalizados e agende a sua consulta hoje mesmo.
+                </p>
+                <button
+                  onClick={scrollToServices}
+                  className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-pink-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Ver os Nossos Serviços
+                </button>
+                <p className="text-sm text-gray-500">
+                  Clique para ver todos os tratamentos disponíveis
+                </p>
+              </div>
             </div>
-
-            {/* CTA Button */}
-            <Button
-              onClick={() => setIsBookingModalOpen(true)}
-              size="lg"
-              className="bg-darkgreen-800 hover:bg-darkgreen-900 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <Calendar className="h-5 w-5 mr-2" />
-              Agendar Consulta
-            </Button>
           </div>
         </div>
       </div>
@@ -143,16 +149,27 @@ const AboutSection: React.FC = () => {
       {isBookingModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Agendar Consulta</h3>
-            <p className="text-gray-600 mb-4">
-              Para agendar a sua consulta, por favor contacte-nos através do WhatsApp ou telefone.
+            <h3 className="text-xl font-bold mb-4">Agendar Consulta</h3>
+            <p className="text-gray-600 mb-6">
+              Para agendar a sua consulta, por favor contacte-nos através do WhatsApp.
             </p>
-            <Button
-              onClick={() => setIsBookingModalOpen(false)}
-              className="w-full"
-            >
-              Fechar
-            </Button>
+            <div className="flex space-x-4">
+              <button
+                onClick={() => setIsBookingModalOpen(false)}
+                className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  window.open('https://wa.me/351123456789?text=Olá! Gostaria de agendar uma consulta.', '_blank');
+                  setIsBookingModalOpen(false);
+                }}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                Contactar WhatsApp
+              </button>
+            </div>
           </div>
         </div>
       )}
