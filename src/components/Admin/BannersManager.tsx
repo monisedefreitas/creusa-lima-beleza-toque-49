@@ -26,6 +26,7 @@ import { pt } from 'date-fns/locale';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Banner = Tables<'banners'>;
+type Service = Tables<'services'>;
 
 const BannersManager: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -41,7 +42,8 @@ const BannersManager: React.FC = () => {
     is_active: true,
     start_date: '',
     end_date: '',
-    order_index: 0
+    order_index: 0,
+    service_id: ''
   });
 
   const { toast } = useToast();
@@ -57,6 +59,20 @@ const BannersManager: React.FC = () => {
       
       if (error) throw error;
       return data as Banner[];
+    }
+  });
+
+  const { data: services } = useQuery({
+    queryKey: ['services'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) throw error;
+      return data as Service[];
     }
   });
 
@@ -147,7 +163,8 @@ const BannersManager: React.FC = () => {
         is_active: banner.is_active || false,
         start_date: banner.start_date ? banner.start_date.split('T')[0] : '',
         end_date: banner.end_date ? banner.end_date.split('T')[0] : '',
-        order_index: banner.order_index || 0
+        order_index: banner.order_index || 0,
+        service_id: banner.service_id || ''
       });
     } else {
       setEditingBanner(null);
@@ -162,7 +179,8 @@ const BannersManager: React.FC = () => {
         is_active: true,
         start_date: '',
         end_date: '',
-        order_index: 0
+        order_index: 0,
+        service_id: ''
       });
     }
     setIsDialogOpen(true);
@@ -180,6 +198,7 @@ const BannersManager: React.FC = () => {
       ...formData,
       start_date: formData.start_date ? new Date(formData.start_date).toISOString() : null,
       end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
+      service_id: formData.service_id || null,
     };
 
     if (editingBanner) {
@@ -197,6 +216,12 @@ const BannersManager: React.FC = () => {
       'contact': 'Secção Contacto'
     };
     return positions[position as keyof typeof positions] || position;
+  };
+
+  const getServiceName = (serviceId: string | null) => {
+    if (!serviceId) return null;
+    const service = services?.find(s => s.id === serviceId);
+    return service?.name || 'Serviço não encontrado';
   };
 
   if (isLoading) {
@@ -288,7 +313,7 @@ const BannersManager: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="position">Posição</Label>
                   <Select value={formData.position} onValueChange={(value) => setFormData(prev => ({ ...prev, position: value }))}>
@@ -304,6 +329,25 @@ const BannersManager: React.FC = () => {
                   </Select>
                 </div>
                 
+                <div>
+                  <Label htmlFor="service_id">Serviço (Opcional)</Label>
+                  <Select value={formData.service_id} onValueChange={(value) => setFormData(prev => ({ ...prev, service_id: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecionar serviço" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Nenhum serviço específico</SelectItem>
+                      {services?.map((service) => (
+                        <SelectItem key={service.id} value={service.id}>
+                          {service.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="start_date">Data de Início</Label>
                   <Input
@@ -375,6 +419,11 @@ const BannersManager: React.FC = () => {
                     <Badge variant="outline">
                       {getPositionLabel(banner.position || '')}
                     </Badge>
+                    {banner.service_id && (
+                      <Badge variant="secondary">
+                        Serviço: {getServiceName(banner.service_id)}
+                      </Badge>
+                    )}
                   </div>
                   
                   {banner.subtitle && (

@@ -5,7 +5,7 @@ import HeroSection from '@/components/HeroSection';
 import AboutSection from '@/components/AboutSection';
 import { ServicesSection } from '@/components/ServicesSection';
 import FAQSection from '@/components/FAQSection';
-import { LocationSection } from '@/components/LocationSection';
+import LocationSection from '@/components/LocationSection';
 import { Footer } from '@/components/Footer';
 import GallerySection from '@/components/Gallery/GallerySection';
 import FloatingWhatsApp from '@/components/WhatsApp/FloatingWhatsApp';
