@@ -14,7 +14,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import BookingModal from '@/components/BookingSystem/BookingModal';
 
 const AboutSection: React.FC = () => {
-  const { ref, isVisible } = useScrollAnimation();
+  const { elementRef, isVisible } = useScrollAnimation();
   const [isBookingModalOpen, setIsBookingModalOpen] = React.useState(false);
 
   const features = [
@@ -48,7 +48,7 @@ const AboutSection: React.FC = () => {
   ];
 
   return (
-    <section ref={ref} className="py-20 bg-white">
+    <section ref={elementRef} className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Image Section */}
@@ -58,8 +58,6 @@ const AboutSection: React.FC = () => {
                 src="/lovable-uploads/73d8cd7b-d053-484a-b84e-0c423886228f.png"
                 alt="Creusa Lima no seu consultório"
                 className="w-full h-auto rounded-2xl shadow-xl"
-                width={600}
-                height={700}
               />
               
               {/* Experience Badge */}
@@ -143,10 +141,26 @@ const AboutSection: React.FC = () => {
       </div>
 
       {/* Booking Modal */}
-      <BookingModal
-        isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
-      />
+      <BookingModal>
+        <div style={{ display: 'none' }} />
+      </BookingModal>
+      
+      {isBookingModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Agendar Consulta</h3>
+            <p className="text-gray-600 mb-4">
+              Para agendar a sua consulta, por favor contacte-nos através do WhatsApp ou telefone.
+            </p>
+            <Button
+              onClick={() => setIsBookingModalOpen(false)}
+              className="w-full"
+            >
+              Fechar
+            </Button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

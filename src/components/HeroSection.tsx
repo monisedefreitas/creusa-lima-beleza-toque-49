@@ -8,7 +8,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const HeroSection: React.FC = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const { ref, isVisible } = useScrollAnimation();
+  const { elementRef, isVisible } = useScrollAnimation();
 
   const scrollToContact = () => {
     const contactSection = document.getElementById('contact');
@@ -22,7 +22,7 @@ const HeroSection: React.FC = () => {
 
   return (
     <section 
-      ref={ref}
+      ref={elementRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-sage-50 to-white"
     >
       {/* Background Pattern */}
@@ -99,8 +99,6 @@ const HeroSection: React.FC = () => {
                 src="/lovable-uploads/46b56184-9c80-42e2-9f4b-8fb2bf567b13.png"
                 alt="Creusa Lima - Especialista em Bem-Estar Natural"
                 className="w-full h-auto rounded-2xl shadow-2xl"
-                width={600}
-                height={800}
               />
               
               {/* Floating Card */}
@@ -121,10 +119,26 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Booking Modal */}
-      <BookingModal
-        isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
-      />
+      <BookingModal>
+        <div style={{ display: 'none' }} />
+      </BookingModal>
+      
+      {isBookingModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Marcar Consulta</h3>
+            <p className="text-gray-600 mb-4">
+              Para marcar a sua consulta, por favor contacte-nos através do WhatsApp ou telefone.
+            </p>
+            <Button
+              onClick={() => setIsBookingModalOpen(false)}
+              className="w-full"
+            >
+              Fechar
+            </Button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
