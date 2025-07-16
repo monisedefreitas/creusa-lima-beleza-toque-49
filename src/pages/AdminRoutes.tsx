@@ -14,6 +14,7 @@ import ContactsManager from '@/components/Admin/ContactsManager';
 import SocialMediaManager from '@/components/Admin/SocialMediaManager';
 import FAQsManager from '@/components/Admin/FAQsManager';
 import SettingsManager from '@/components/Admin/SettingsManager';
+import MessageTemplatesManager from '@/components/Admin/MessageTemplatesManager';
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const AdminRoutes: React.FC = () => {
         <Route path="contacts" element={<ContactsManager />} />
         <Route path="social" element={<SocialMediaManager />} />
         <Route path="faqs" element={<FAQsManager />} />
+        <Route path="message-templates" element={<MessageTemplatesManager />} />
         <Route path="settings" element={<SettingsManager />} />
       </Route>
     </Routes>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,13 +16,17 @@ import {
   MessageSquare,
   Search,
   Download,
-  MessageCircle,
-  ExternalLink
+  ExternalLink,
+  TrendingUp,
+  Users,
+  Euro
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useAppointments, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
+import { useCreateNotification } from '@/hooks/useNotifications';
 import { useToast } from '@/hooks/use-toast';
+import EnhancedWhatsAppManager from './EnhancedWhatsAppManager';
 
 const EnhancedAppointmentsManager: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -33,6 +36,7 @@ const EnhancedAppointmentsManager: React.FC = () => {
 
   const { data: appointments, isLoading } = useAppointments();
   const updateStatusMutation = useUpdateAppointmentStatus();
+  const createNotificationMutation = useCreateNotification();
   const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
@@ -55,40 +59,26 @@ const EnhancedAppointmentsManager: React.FC = () => {
     }
   };
 
-  const generateWhatsAppMessage = (appointment: any) => {
-    const message = `Olá ${appointment.client_name}! 
+  const handleStatusUpdate = async (appointmentId: string, newStatus: string, notificationTitle: string) => {
+    try {
+      await updateStatusMutation.mutateAsync({ 
+        id: appointmentId, 
+        status: newStatus 
+      });
 
-Confirmamos a sua marcação para ${format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })} às ${appointment.time_slots?.time}.
-
-Serviços agendados:
-${appointment.appointment_services?.map((service: any) => `• ${service.services?.name}`).join('\n')}
-
-Estamos ansiosos para recebê-la!
-
-Atenciosamente,
-Equipa da clínica`;
-
-    return encodeURIComponent(message);
-  };
-
-  const handleWhatsAppConfirmation = (appointment: any) => {
-    const message = generateWhatsAppMessage(appointment);
-    const phoneNumber = appointment.client_phone.replace(/\D/g, ''); // Remove non-digits
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-    
-    // Update appointment status to confirmed
-    updateStatusMutation.mutate({ 
-      id: appointment.id, 
-      status: 'confirmed' 
-    });
-
-    // Open WhatsApp
-    window.open(whatsappUrl, '_blank');
-    
-    toast({
-      title: "WhatsApp aberto",
-      description: "A marcação foi confirmada e o WhatsApp foi aberto com a mensagem pré-definida.",
-    });
+      const appointment = appointments?.find(apt => apt.id === appointmentId);
+      if (appointment) {
+        await createNotificationMutation.mutateAsync({
+          type: `appointment_${newStatus}`,
+          title: notificationTitle,
+          message: `Marcação de ${appointment.client_name} foi ${getStatusLabel(newStatus).toLowerCase()}`,
+          appointment_id: appointmentId,
+          client_name: appointment.client_name
+        });
+      }
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+    }
   };
 
   const filteredAppointments = appointments?.filter(appointment => {
@@ -97,7 +87,6 @@ Equipa da clínica`;
     const matchesStatus = selectedStatus === 'all' || appointment.status === selectedStatus;
     const matchesDate = !selectedDate || appointment.appointment_date === selectedDate;
     
-    // Date range filter
     let matchesDateRange = true;
     if (dateRange !== 'all') {
       const appointmentDate = new Date(appointment.appointment_date);
@@ -131,6 +120,7 @@ Equipa da clínica`;
   const pendingCount = appointments?.filter(apt => apt.status === 'pending').length || 0;
   const totalRevenue = appointments?.reduce((sum, apt) => sum + (apt.total_price || 0), 0) || 0;
   const confirmedToday = todayAppointments.filter(apt => apt.status === 'confirmed').length;
+  const completedCount = appointments?.filter(apt => apt.status === 'completed').length || 0;
 
   const exportToCSV = () => {
     if (!filteredAppointments.length) return;
@@ -198,8 +188,8 @@ Equipa da clínica`;
         </div>
       </div>
 
-      {/* Enhanced Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      {/* Enhanced Real-time Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -217,7 +207,7 @@ Equipa da clínica`;
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pendentes</p>
-                <p className="text-2xl font-bold">{pendingCount}</p>
+                <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
               </div>
               <Clock className="h-8 w-8 text-yellow-600" />
             </div>
@@ -229,9 +219,21 @@ Equipa da clínica`;
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Confirmadas</p>
-                <p className="text-2xl font-bold">{confirmedToday}</p>
+                <p className="text-2xl font-bold text-green-600">{confirmedToday}</p>
               </div>
               <Check className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Concluídas</p>
+                <p className="text-2xl font-bold text-blue-600">{completedCount}</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -243,7 +245,7 @@ Equipa da clínica`;
                 <p className="text-sm font-medium text-gray-600">Total</p>
                 <p className="text-2xl font-bold">{appointments?.length || 0}</p>
               </div>
-              <User className="h-8 w-8 text-purple-600" />
+              <Users className="h-8 w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -253,9 +255,9 @@ Equipa da clínica`;
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Receita</p>
-                <p className="text-2xl font-bold">€{totalRevenue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-600">€{totalRevenue.toFixed(2)}</p>
               </div>
-              <MessageSquare className="h-8 w-8 text-indigo-600" />
+              <Euro className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -321,7 +323,7 @@ Equipa da clínica`;
         </CardContent>
       </Card>
 
-      {/* Appointments List */}
+      {/* Appointments List with Enhanced WhatsApp */}
       <div className="space-y-4">
         {filteredAppointments.map((appointment) => (
           <Card key={appointment.id}>
@@ -390,25 +392,19 @@ Equipa da clínica`;
                   )}
                 </div>
 
-                {/* Enhanced Action Buttons */}
+                {/* Enhanced Action Buttons with new WhatsApp system */}
                 <div className="ml-4 flex flex-col space-y-2">
                   {appointment.status === 'pending' && (
                     <>
-                      <Button
-                        size="sm"
-                        onClick={() => handleWhatsAppConfirmation(appointment)}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        <MessageCircle className="h-4 w-4 mr-1" />
-                        Confirmar via WhatsApp
-                      </Button>
+                      <EnhancedWhatsAppManager appointment={appointment} />
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => updateStatusMutation.mutate({ 
-                          id: appointment.id, 
-                          status: 'cancelled' 
-                        })}
+                        onClick={() => handleStatusUpdate(
+                          appointment.id, 
+                          'cancelled',
+                          'Marcação cancelada'
+                        )}
                         className="text-red-600 hover:text-red-700"
                       >
                         <X className="h-4 w-4 mr-1" />
@@ -421,10 +417,11 @@ Equipa da clínica`;
                     <>
                       <Button
                         size="sm"
-                        onClick={() => updateStatusMutation.mutate({ 
-                          id: appointment.id, 
-                          status: 'completed' 
-                        })}
+                        onClick={() => handleStatusUpdate(
+                          appointment.id, 
+                          'completed',
+                          'Marcação concluída'
+                        )}
                         className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         <Check className="h-4 w-4 mr-1" />

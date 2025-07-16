@@ -19,7 +19,8 @@ import {
   Menu,
   Megaphone,
   Wrench,
-  List
+  List,
+  MessageSquare
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -63,6 +64,7 @@ const AdminLayout: React.FC = () => {
     { path: '/admin/contacts', icon: Phone, label: 'Contactos' },
     { path: '/admin/social', icon: Share2, label: 'Redes Sociais' },
     { path: '/admin/faqs', icon: HelpCircle, label: 'FAQs' },
+    { path: '/admin/message-templates', icon: MessageSquare, label: 'Templates' },
     { path: '/admin/settings', icon: Wrench, label: 'Configurações' }
   ];
 
