@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,17 +68,6 @@ const ServicesManager: React.FC = () => {
       return data as Banner[];
     }
   });
-
-  const handleCreateBanner = (serviceId: string, serviceName: string) => {
-    const bannerData = {
-      title: `Promoção Especial - ${serviceName}`,
-      subtitle: 'Oferta limitada com condições especiais',
-      description: `Descubra os benefícios exclusivos do nosso tratamento de ${serviceName} com preços promocionais por tempo limitado.`,
-      service_id: serviceId
-    };
-    
-    createBannerMutation.mutate(bannerData);
-  };
 
   const createServiceMutation = useMutation({
     mutationFn: async (service: Omit<Service, 'id'>) => {
@@ -171,6 +161,51 @@ const ServicesManager: React.FC = () => {
       toast.error('Erro ao criar banner');
     }
   });
+
+  const handleCreateBanner = (serviceId: string, serviceName: string) => {
+    const bannerData = {
+      title: `Promoção Especial - ${serviceName}`,
+      subtitle: 'Oferta limitada com condições especiais',
+      description: `Descubra os benefícios exclusivos do nosso tratamento de ${serviceName} com preços promocionais por tempo limitado.`,
+      service_id: serviceId
+    };
+    
+    createBannerMutation.mutate(bannerData);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const serviceData = {
+      name: formData.get('name') as string,
+      short_description: formData.get('short_description') as string || null,
+      description: formData.get('description') as string || null,
+      price_range: formData.get('price_range') as string || null,
+      duration_minutes: parseInt(formData.get('duration_minutes') as string) || null,
+      category: formData.get('category') as string || null,
+      image_url: formData.get('image_url') as string || null,
+      is_active: formData.get('is_active') === 'on',
+      is_featured: formData.get('is_featured') === 'on',
+      order_index: parseInt(formData.get('order_index') as string) || 0
+    };
+
+    if (editingService) {
+      updateServiceMutation.mutate({ ...serviceData, id: editingService.id });
+    } else {
+      createServiceMutation.mutate(serviceData);
+    }
+  };
+
+  const startEdit = (service: Service) => {
+    setEditingService(service);
+    setShowForm(true);
+  };
+
+  const startCreate = () => {
+    setEditingService(null);
+    setShowForm(true);
+  };
 
   const getServiceBanners = (serviceId: string) => {
     return banners?.filter(b => b.service_id === serviceId) || [];
@@ -413,40 +448,6 @@ const ServicesManager: React.FC = () => {
       </div>
     </div>
   );
-};
-
-const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  const formData = new FormData(e.currentTarget);
-  
-  const serviceData = {
-    name: formData.get('name') as string,
-    short_description: formData.get('short_description') as string || null,
-    description: formData.get('description') as string || null,
-    price_range: formData.get('price_range') as string || null,
-    duration_minutes: parseInt(formData.get('duration_minutes') as string) || null,
-    category: formData.get('category') as string || null,
-    image_url: formData.get('image_url') as string || null,
-    is_active: formData.get('is_active') === 'on',
-    is_featured: formData.get('is_featured') === 'on',
-    order_index: parseInt(formData.get('order_index') as string) || 0
-  };
-
-  if (editingService) {
-    updateServiceMutation.mutate({ ...serviceData, id: editingService.id });
-  } else {
-    createServiceMutation.mutate(serviceData);
-  }
-};
-
-const startEdit = (service: Service) => {
-  setEditingService(service);
-  setShowForm(true);
-};
-
-const startCreate = () => {
-  setEditingService(null);
-  setShowForm(true);
 };
 
 export default ServicesManager;

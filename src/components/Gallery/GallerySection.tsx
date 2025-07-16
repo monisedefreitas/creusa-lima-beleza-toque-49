@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,15 +13,15 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type MediaItem = Tables<'media_gallery'>;
 
-// Imagens locais de exemplo
-const sampleImages = [
+// Enhanced local sample images with better data
+const sampleImages: MediaItem[] = [
   {
     id: 'sample-1',
     file_url: '/lovable-uploads/46b56184-9c80-42e2-9f4b-8fb2bf567b13.png',
-    title: 'Tratamento Facial',
+    title: 'Tratamento Facial Premium',
     category: 'Facial',
-    description: 'Resultado de tratamento de rejuvenescimento facial',
-    alt_text: 'Antes e depois de tratamento facial',
+    description: 'Resultado extraordinário de tratamento de rejuvenescimento facial com técnicas avançadas',
+    alt_text: 'Antes e depois de tratamento facial rejuvenescedor',
     file_type: 'image' as const,
     is_active: true,
     is_featured: true,
@@ -31,10 +32,10 @@ const sampleImages = [
   {
     id: 'sample-2',
     file_url: '/lovable-uploads/73d8cd7b-d053-484a-b84e-0c423886228f.png',
-    title: 'Harmonização Facial',
+    title: 'Harmonização Facial Completa',
     category: 'Harmonização',
-    description: 'Tratamento de harmonização com preenchimento',
-    alt_text: 'Resultado de harmonização facial',
+    description: 'Transformação através de harmonização facial com preenchimento natural e botox',
+    alt_text: 'Resultado de harmonização facial profissional',
     file_type: 'image' as const,
     is_active: true,
     is_featured: false,
@@ -45,9 +46,9 @@ const sampleImages = [
   {
     id: 'sample-3',
     file_url: '/lovable-uploads/f82463a1-3344-4535-86dd-071e92421715.png',
-    title: 'Tratamento Corporal',
+    title: 'Modelagem Corporal',
     category: 'Corporal',
-    description: 'Resultado de tratamento de modelagem corporal',
+    description: 'Resultado impressionante de tratamento de modelagem corporal e redução de medidas',
     alt_text: 'Antes e depois de tratamento corporal',
     file_type: 'image' as const,
     is_active: true,
@@ -59,14 +60,28 @@ const sampleImages = [
   {
     id: 'sample-4',
     file_url: '/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png',
-    title: 'Rejuvenescimento',
+    title: 'Rejuvenescimento Completo',
     category: 'Anti-idade',
-    description: 'Tratamento completo de rejuvenescimento',
-    alt_text: 'Resultado de tratamento anti-idade',
+    description: 'Tratamento completo de rejuvenescimento com resultados naturais e duradouros',
+    alt_text: 'Resultado de tratamento anti-idade completo',
     file_type: 'image' as const,
     is_active: true,
     is_featured: false,
     order_index: 4,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: 'sample-5',
+    file_url: '/lovable-uploads/new-logo.png',
+    title: 'Centro de Estética',
+    category: 'Instalações',
+    description: 'Ambiente profissional e acolhedor do nosso centro de estética',
+    alt_text: 'Instalações do centro de estética',
+    file_type: 'image' as const,
+    is_active: true,
+    is_featured: false,
+    order_index: 5,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   }
@@ -94,11 +109,13 @@ const GallerySection: React.FC = () => {
     }
   });
 
-  // Combinar imagens do banco com imagens de exemplo
+  // Combine database images with local sample images
   const gallery = React.useMemo(() => {
     const combinedGallery = [...sampleImages];
     if (dbGallery && dbGallery.length > 0) {
-      combinedGallery.push(...dbGallery);
+      // Filter out any videos to ensure type safety
+      const imageGallery = dbGallery.filter(item => item.file_type === 'image');
+      combinedGallery.push(...imageGallery);
     }
     return combinedGallery;
   }, [dbGallery]);
@@ -340,28 +357,6 @@ const GallerySection: React.FC = () => {
       </Dialog>
     </section>
   );
-};
-
-const handleNext = () => {
-  if (filteredGallery && currentIndex < filteredGallery.length - 1) {
-    const newIndex = currentIndex + 1;
-    setCurrentIndex(newIndex);
-    setSelectedImage(filteredGallery[newIndex]);
-  }
-};
-
-const handlePrevious = () => {
-  if (currentIndex > 0) {
-    const newIndex = currentIndex - 1;
-    setCurrentIndex(newIndex);
-    setSelectedImage(filteredGallery[newIndex]);
-  }
-};
-
-const handleKeyDown = (e: React.KeyboardEvent) => {
-  if (e.key === 'ArrowRight') handleNext();
-  if (e.key === 'ArrowLeft') handlePrevious();
-  if (e.key === 'Escape') setSelectedImage(null);
 };
 
 export default GallerySection;
