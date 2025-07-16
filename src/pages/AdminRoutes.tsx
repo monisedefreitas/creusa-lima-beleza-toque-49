@@ -6,6 +6,9 @@ import AdminLayout from '@/components/Admin/AdminLayout';
 import Dashboard from '@/components/Admin/Dashboard';
 import ContactsManager from '@/components/Admin/ContactsManager';
 import AppointmentsManager from '@/components/Admin/AppointmentsManager';
+import ServicesManager from '@/components/Admin/ServicesManager';
+import FAQsManager from '@/components/Admin/FAQsManager';
+import TimeSlotManager from '@/components/Admin/TimeSlotManager';
 
 const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAdmin, loading } = useAuth();
@@ -33,6 +36,9 @@ const AdminRoutes: React.FC = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/contacts" element={<ContactsManager />} />
           <Route path="/appointments" element={<AppointmentsManager />} />
+          <Route path="/services" element={<ServicesManager />} />
+          <Route path="/faqs" element={<FAQsManager />} />
+          <Route path="/schedules" element={<TimeSlotManager />} />
           {/* Add more admin routes here */}
         </Routes>
       </AdminLayout>

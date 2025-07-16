@@ -18,7 +18,8 @@ import {
   Palette,
   Phone,
   Instagram,
-  Calendar
+  Calendar,
+  Clock
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -39,9 +40,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const menuItems = [
     { path: '/admin', icon: Home, label: 'Dashboard', exact: true },
     { path: '/admin/appointments', icon: Calendar, label: 'Marcações' },
-    { path: '/admin/contacts', icon: Phone, label: 'Contactos' },
     { path: '/admin/services', icon: Star, label: 'Serviços' },
+    { path: '/admin/schedules', icon: Clock, label: 'Horários' },
     { path: '/admin/faqs', icon: MessageSquare, label: 'FAQs' },
+    { path: '/admin/contacts', icon: Phone, label: 'Contactos' },
     { path: '/admin/media', icon: Image, label: 'Galeria' },
     { path: '/admin/social', icon: Instagram, label: 'Redes Sociais' },
     { path: '/admin/addresses', icon: MapPin, label: 'Moradas' },
