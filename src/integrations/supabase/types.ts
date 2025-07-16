@@ -749,6 +749,45 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_approved: boolean
+          is_featured: boolean
+          message: string
+          name: string
+          phone: string | null
+          rating: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_approved?: boolean
+          is_featured?: boolean
+          message: string
+          name: string
+          phone?: string | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_approved?: boolean
+          is_featured?: boolean
+          message?: string
+          name?: string
+          phone?: string | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       time_slots: {
         Row: {
           created_at: string
