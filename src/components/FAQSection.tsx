@@ -1,38 +1,74 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Flower2, HelpCircle } from 'lucide-react';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/types';
 
-type FAQ = Tables<'faqs'>;
+interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  category: string | null;
+  order_index: number | null;
+}
 
 const FAQSection: React.FC = () => {
-  const { elementRef, isVisible } = useScrollAnimation();
-
-  const { data: faqs, isLoading } = useQuery({
+  const { data: faqs, isLoading, error } = useQuery({
     queryKey: ['faqs'],
     queryFn: async () => {
+      console.log('Fetching FAQs...');
       const { data, error } = await supabase
         .from('faqs')
         .select('*')
         .eq('is_active', true)
-        .order('order_index');
+        .order('order_index', { ascending: true });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching FAQs:', error);
+        throw error;
+      }
+      
+      console.log('FAQs fetched:', data);
       return data as FAQ[];
     }
   });
 
   if (isLoading) {
     return (
-      <section className="py-20 px-4 bg-gradient-to-br from-sage-50/50 to-beige-50/30">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-darkgreen-800 mx-auto"></div>
+      <section id="faq" className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-darkgreen-900 mb-4">
+              Perguntas Frequentes
+            </h2>
+            <div className="animate-pulse space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-16 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    console.error('FAQ Error:', error);
+    return (
+      <section id="faq" className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-darkgreen-900 mb-4">
+              Perguntas Frequentes
+            </h2>
+            <p className="text-gray-600">
+              Erro ao carregar as perguntas frequentes. Tente novamente mais tarde.
+            </p>
           </div>
         </div>
       </section>
@@ -41,24 +77,14 @@ const FAQSection: React.FC = () => {
 
   if (!faqs || faqs.length === 0) {
     return (
-      <section className="py-20 px-4 bg-gradient-to-br from-sage-50/50 to-beige-50/30">
-        <div className="container mx-auto max-w-4xl">
-          <div 
-            ref={elementRef}
-            className={`text-center mb-16 transition-all duration-800 ${
-              isVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'
-            }`}
-          >
-            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full border border-sage-200 mb-6">
-              <HelpCircle className="w-4 h-4 text-sage-500" />
-              <span className="text-sm font-medium text-darkgreen-800 font-bauer-bodoni">Dúvidas Frequentes</span>
-            </div>
-            
-            <h2 className="font-tan-mon-cheri text-4xl md:text-5xl font-bold text-darkgreen-900 mb-6">
-              Perguntas & Respostas
+      <section id="faq" className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-darkgreen-900 mb-4">
+              Perguntas Frequentes
             </h2>
-            <p className="font-poppins text-xl text-forest-600 max-w-3xl mx-auto leading-relaxed">
-              As perguntas frequentes serão exibidas aqui quando forem adicionadas pelo administrador.
+            <p className="text-gray-600">
+              Nenhuma pergunta frequente disponível no momento.
             </p>
           </div>
         </div>
@@ -67,61 +93,35 @@ const FAQSection: React.FC = () => {
   }
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-sage-50/50 to-beige-50/30">
-      <div className="container mx-auto max-w-4xl">
-        <div 
-          ref={elementRef}
-          className={`text-center mb-16 transition-all duration-800 ${
-            isVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full border border-sage-200 mb-6">
-            <HelpCircle className="w-4 h-4 text-sage-500" />
-            <span className="text-sm font-medium text-darkgreen-800 font-bauer-bodoni">Dúvidas Frequentes</span>
-          </div>
-          
-          <h2 className="font-tan-mon-cheri text-4xl md:text-5xl font-bold text-darkgreen-900 mb-6">
-            Perguntas & Respostas
+    <section id="faq" className="py-20 bg-white">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-darkgreen-900 mb-4">
+            Perguntas Frequentes
           </h2>
-          <p className="font-poppins text-xl text-forest-600 max-w-3xl mx-auto leading-relaxed">
-            Esclareça suas dúvidas sobre nossos tratamentos e serviços
+          <p className="text-lg text-gray-600">
+            Encontre respostas para as dúvidas mais comuns sobre os nossos serviços
           </p>
         </div>
 
-        <Card className={`border-0 shadow-xl bg-white/90 backdrop-blur-sm transition-all duration-800 ${
-          isVisible ? 'animate-scale-in animate-delay-300' : 'opacity-0 scale-95'
-        }`}>
-          <CardContent className="p-8">
-            <Accordion type="single" collapsible className="space-y-4">
-              {faqs.map((faq, index) => (
-                <AccordionItem 
-                  key={faq.id} 
-                  value={`item-${index}`}
-                  className="border border-sage-100 rounded-lg px-6 py-2 hover:shadow-md transition-all duration-300"
-                >
-                  <AccordionTrigger className="text-left font-poppins font-medium text-darkgreen-900 hover:text-darkgreen-700 py-4">
-                    <div className="flex items-center gap-3">
-                      <Flower2 className="w-4 h-4 text-sage-500 flex-shrink-0" />
-                      <span>{faq.question}</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="text-forest-600 font-poppins leading-relaxed pt-2 pb-4 pl-7">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-
-            <div className="mt-8 p-6 bg-gradient-to-r from-sage-50 to-beige-50 rounded-lg text-center border border-sage-200">
-              <p className="text-forest-700 font-poppins mb-2">
-                Não encontrou a resposta que procurava?
-              </p>
-              <p className="text-sm text-forest-600 font-poppins">
-                Entre em contacto connosco pelo WhatsApp para esclarecimentos personalizados
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <Accordion type="single" collapsible className="space-y-4">
+          {faqs.map((faq) => (
+            <AccordionItem 
+              key={faq.id} 
+              value={faq.id}
+              className="border border-sage-200 rounded-lg px-6 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <AccordionTrigger className="text-left hover:no-underline py-6">
+                <span className="font-semibold text-darkgreen-900 pr-4">
+                  {faq.question}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-gray-700 leading-relaxed pb-6 pt-2">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
     </section>
   );

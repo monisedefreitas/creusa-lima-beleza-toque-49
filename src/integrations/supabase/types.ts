@@ -193,6 +193,7 @@ export type Database = {
           is_active: boolean | null
           order_index: number | null
           position: string | null
+          service_id: string | null
           start_date: string | null
           subtitle: string | null
           title: string
@@ -209,6 +210,7 @@ export type Database = {
           is_active?: boolean | null
           order_index?: number | null
           position?: string | null
+          service_id?: string | null
           start_date?: string | null
           subtitle?: string | null
           title: string
@@ -225,12 +227,21 @@ export type Database = {
           is_active?: boolean | null
           order_index?: number | null
           position?: string | null
+          service_id?: string | null
           start_date?: string | null
           subtitle?: string | null
           title?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "banners_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       business_hours: {
         Row: {

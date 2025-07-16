@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, Star, Image } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Service {
@@ -23,9 +23,20 @@ interface Service {
   order_index: number | null;
 }
 
+interface Banner {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  service_id: string | null;
+  is_active: boolean | null;
+}
+
 const ServicesManager: React.FC = () => {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showBannerForm, setShowBannerForm] = useState(false);
+  const [selectedServiceForBanner, setSelectedServiceForBanner] = useState<string>('');
   const queryClient = useQueryClient();
 
   const { data: services, isLoading } = useQuery({
@@ -38,6 +49,20 @@ const ServicesManager: React.FC = () => {
       
       if (error) throw error;
       return data as Service[];
+    }
+  });
+
+  const { data: banners } = useQuery({
+    queryKey: ['service-banners'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('banners')
+        .select('*')
+        .eq('position', 'services')
+        .order('order_index');
+      
+      if (error) throw error;
+      return data as Banner[];
     }
   });
 
@@ -103,6 +128,48 @@ const ServicesManager: React.FC = () => {
       toast.error('Erro ao eliminar serviço');
     }
   });
+
+  const createBannerMutation = useMutation({
+    mutationFn: async (bannerData: {
+      title: string;
+      subtitle: string;
+      description: string;
+      service_id: string;
+    }) => {
+      const { data, error } = await supabase
+        .from('banners')
+        .insert([{
+          ...bannerData,
+          position: 'services',
+          is_active: true,
+          order_index: 0
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['service-banners'] });
+      toast.success('Banner criado com sucesso!');
+      setShowBannerForm(false);
+    },
+    onError: () => {
+      toast.error('Erro ao criar banner');
+    }
+  });
+
+  const handleCreateBanner = (serviceId: string, serviceName: string) => {
+    const bannerData = {
+      title: `Promoção ${serviceName}`,
+      subtitle: 'Oferta especial limitada',
+      description: `Descubra os benefícios do nosso tratamento de ${serviceName} com condições especiais.`,
+      service_id: serviceId
+    };
+    
+    createBannerMutation.mutate(bannerData);
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -252,59 +319,79 @@ const ServicesManager: React.FC = () => {
       )}
 
       <div className="grid gap-4">
-        {services?.map((service) => (
-          <Card key={service.id}>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <h3 className="text-lg font-semibold">{service.name}</h3>
-                    {service.is_featured && (
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    )}
-                    {!service.is_active && (
-                      <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
-                        Inativo
-                      </span>
-                    )}
+        {services?.map((service) => {
+          const serviceBanner = banners?.find(b => b.service_id === service.id);
+          
+          return (
+            <Card key={service.id}>
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <h3 className="text-lg font-semibold">{service.name}</h3>
+                      {service.is_featured && (
+                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                      )}
+                      {!service.is_active && (
+                        <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
+                          Inativo
+                        </span>
+                      )}
+                      {serviceBanner && (
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded flex items-center">
+                          <Image className="h-3 w-3 mr-1" />
+                          Com Banner
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-gray-600 mb-2">{service.short_description}</p>
+                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                      {service.category && (
+                        <span>Categoria: {service.category}</span>
+                      )}
+                      {service.price_range && (
+                        <span>Preço: {service.price_range}</span>
+                      )}
+                      {service.duration_minutes && (
+                        <span>Duração: {service.duration_minutes}min</span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-gray-600 mb-2">{service.short_description}</p>
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    {service.category && (
-                      <span>Categoria: {service.category}</span>
+                  <div className="flex space-x-2">
+                    {!serviceBanner && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCreateBanner(service.id, service.name)}
+                      >
+                        <Image className="h-4 w-4 mr-1" />
+                        Criar Banner
+                      </Button>
                     )}
-                    {service.price_range && (
-                      <span>Preço: {service.price_range}</span>
-                    )}
-                    {service.duration_minutes && (
-                      <span>Duração: {service.duration_minutes}min</span>
-                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => startEdit(service)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm('Tem a certeza que deseja eliminar este serviço?')) {
+                          deleteServiceMutation.mutate(service.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => startEdit(service)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (confirm('Tem a certeza que deseja eliminar este serviço?')) {
-                        deleteServiceMutation.mutate(service.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

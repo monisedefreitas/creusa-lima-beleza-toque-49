@@ -1,116 +1,92 @@
+
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Clock, Phone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MapPin, Clock, Star } from 'lucide-react';
 import GoogleMap from './GoogleMap';
-export const LocationSection: React.FC = () => {
-  const locationFeatures = [{
-    icon: <Clock className="w-5 h-5 text-gold-600" />,
-    title: "Horários Flexíveis",
-    description: "Agendamento conforme sua disponibilidade"
-  }, {
-    icon: <Phone className="w-5 h-5 text-emerald-600" />,
-    title: "Atendimento Personalizado",
-    description: "Consulta prévia para melhor atendimento"
-  }];
-  return <section id="localizacao" className="py-20 px-4 bg-gradient-to-br from-emerald-50/50 to-gold-50/30">
-      <div className="container mx-auto">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="font-playfair text-4xl md:text-5xl font-bold text-emerald-900 mb-6">Nossa Localização</h2>
-          <p className="font-inter text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Encontre-nos no coração de Carcavelos, em um espaço pensado para o seu bem-estar
+
+const LocationSection: React.FC = () => {
+  const handleGoogleReview = () => {
+    // Replace with actual Google Maps review link
+    window.open('https://g.page/r/CdQjW8CjW8CjEBM/review', '_blank');
+  };
+
+  return (
+    <section id="location" className="py-20 bg-sage-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-darkgreen-900 mb-4">
+            Visite-nos
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Encontre-nos no coração da cidade, num espaço pensado para o seu bem-estar e relaxamento
           </p>
         </div>
-        
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* Location Details */}
-            <div className="space-y-8">
-              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300">
-                <CardContent className="p-8">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="p-3 bg-gradient-to-br from-emerald-100 to-gold-100 rounded-lg">
-                      <MapPin className="w-6 h-6 text-emerald-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-playfair text-2xl font-semibold text-emerald-900 mb-2">
-                        Espaço Sinergia
-                      </h3>
-                      <p className="font-inter text-lg text-slate-700 leading-relaxed">
-                        Rua Fernando Lopes Graça 379 B<br />
-                        Cascais 2775-571 Carcavelos<br />
-                        <span className="text-emerald-700 font-medium">Portugal</span>
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {locationFeatures.map((feature, index) => <div key={index} className="flex items-center gap-3 p-4 bg-gradient-to-r from-slate-50 to-emerald-50 rounded-lg">
-                        {feature.icon}
-                        <div>
-                          <h4 className="font-semibold text-emerald-900 text-sm">{feature.title}</h4>
-                          <p className="text-slate-600 text-sm">{feature.description}</p>
-                        </div>
-                      </div>)}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* Map Area */}
-            <div className="space-y-6">
-              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden hover-lift">
-                <CardContent className="p-0">
-                  <GoogleMap className="h-80" />
-                </CardContent>
-              </Card>
-              
-              {/* Transport Options */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-emerald-200 text-center">
-                  <div className="text-emerald-800 font-semibold text-sm mb-1">Metro</div>
-                  <div className="text-slate-600 text-xs">Linha de Cascais</div>
-                </div>
-                <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-gold-200 text-center">
-                  <div className="text-gold-700 font-semibold text-sm mb-1">Autocarro</div>
-                  <div className="text-slate-600 text-xs">Várias linhas</div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Location Info */}
+          <div className="space-y-8">
+            <div className="bg-white p-8 rounded-2xl shadow-lg">
+              <div className="flex items-start space-x-4">
+                <MapPin className="h-6 w-6 text-sage-600 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-xl font-semibold text-darkgreen-900 mb-2">
+                    Localização
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Rua das Flores, 123<br />
+                    1200-123 Lisboa<br />
+                    Portugal
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* Full-width Facilities Section */}
-          <div className="mt-16">
-            <Card className="border-0 shadow-lg bg-gradient-to-r from-emerald-800 to-emerald-900 text-white">
-              <CardContent className="p-12 text-center">
-                <h3 className="font-playfair text-3xl md:text-4xl font-semibold mb-6">
-                  Ambiente Acolhedor & Profissional
-                </h3>
-                <p className="font-inter text-emerald-100 leading-relaxed mb-8 text-lg max-w-4xl mx-auto">
-                  Um espaço pensado para proporcionar máximo conforto e tranquilidade durante seus tratamentos.
-                  Cada detalhe foi cuidadosamente planeado para criar uma experiência única e relaxante.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-                  <div className="bg-white/10 p-6 rounded-lg">
-                    <div className="font-semibold text-lg mb-2">Higiene Premium</div>
-                    <div className="text-emerald-200">Protocolos rigorosos de limpeza e segurança</div>
-                  </div>
-                  <div className="bg-white/10 p-6 rounded-lg">
-                    <div className="font-semibold text-lg mb-2">Equipamentos</div>
-                    <div className="text-emerald-200">Tecnologia avançada e certificada</div>
-                  </div>
-                  <div className="bg-white/10 p-6 rounded-lg">
-                    <div className="font-semibold text-lg mb-2">Conforto</div>
-                    <div className="text-emerald-200">Ambiente climatizado e acolhedor</div>
-                  </div>
-                  <div className="bg-white/10 p-6 rounded-lg">
-                    <div className="font-semibold text-lg mb-2">Privacidade</div>
-                    <div className="text-emerald-200">Espaços reservados e discretos</div>
+
+            <div className="bg-white p-8 rounded-2xl shadow-lg">
+              <div className="flex items-start space-x-4">
+                <Clock className="h-6 w-6 text-sage-600 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-xl font-semibold text-darkgreen-900 mb-2">
+                    Horário de Funcionamento
+                  </h3>
+                  <div className="space-y-1 text-gray-600">
+                    <p>Segunda a Sexta: 9h00 - 19h00</p>
+                    <p>Sábado: 9h00 - 17h00</p>
+                    <p>Domingo: Fechado</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+
+            {/* Full-width Professional Environment Section */}
+            <div className="bg-gradient-to-r from-sage-600 to-forest-700 p-8 rounded-2xl text-white shadow-lg">
+              <h3 className="text-2xl font-bold mb-4">
+                Ambiente Acolhedor & Profissional
+              </h3>
+              <p className="text-sage-100 leading-relaxed mb-6">
+                Criámos um espaço único onde pode relaxar completamente enquanto recebe 
+                tratamentos de excelência. Cada detalhe foi pensado para proporcionar 
+                uma experiência de bem-estar inesquecível.
+              </p>
+              
+              {/* Rating Button */}
+              <Button 
+                onClick={handleGoogleReview}
+                className="bg-white text-sage-700 hover:bg-sage-50 font-semibold"
+              >
+                <Star className="h-4 w-4 mr-2" />
+                Avaliar Atendimento
+              </Button>
+            </div>
+          </div>
+
+          {/* Map */}
+          <div className="bg-white p-4 rounded-2xl shadow-lg">
+            <GoogleMap />
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
+export default LocationSection;
