@@ -6,30 +6,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Calendar } from '@/components/ui/calendar';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Calendar as CalendarIcon, 
   Clock, 
   Phone, 
   Mail, 
   User, 
-  Check, 
-  X, 
   MessageSquare,
   Search,
   Plus,
-  Edit
+  Edit,
+  Filter,
+  TrendingUp
 } from 'lucide-react';
 import { format, isBefore, startOfDay } from 'date-fns';
 import { pt } from 'date-fns/locale';
-import { useAppointments, useUpdateAppointmentStatus, useCreateAppointment, useTimeSlots, useBusinessHours, useBookedSlotsForDate } from '@/hooks/useAppointments';
-import { useClients } from '@/hooks/useClients';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useAppointments, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
+import { useUpdateAppointment } from '@/hooks/useUpdateAppointment';
 import WhatsAppMessageSelector from './WhatsAppMessageSelector';
+import AppointmentEditModal from './AppointmentEditModal';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,46 +32,14 @@ const AppointmentsManager: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [whatsappModal, setWhatsappModal] = useState<any>(null);
+  const [editingAppointment, setEditingAppointment] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  
-  // Form states
-  const [formData, setFormData] = useState({
-    client_id: '',
-    client_name: '',
-    client_phone: '',
-    client_email: '',
-    appointment_date: '',
-    time_slot_id: '',
-    service_ids: [] as string[],
-    notes: '',
-    next_session_date: ''
-  });
-  const [selectedDateForForm, setSelectedDateForForm] = useState<Date>();
 
   const { data: appointments, isLoading } = useAppointments();
-  const { data: clients } = useClients();
-  const { data: timeSlots } = useTimeSlots();
-  const { data: businessHours } = useBusinessHours();
-  const { data: bookedSlots } = useBookedSlotsForDate(selectedDateForForm ? format(selectedDateForForm, 'yyyy-MM-dd') : '');
   const updateStatusMutation = useUpdateAppointmentStatus();
-  const createAppointmentMutation = useCreateAppointment();
-
-  const { data: services } = useQuery({
-    queryKey: ['services'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .eq('is_active', true)
-        .order('order_index');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
+  const updateAppointmentMutation = useUpdateAppointment();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -90,10 +53,10 @@ const AppointmentsManager: React.FC = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Confirmado';
+      case 'confirmed': return 'Confirmada';
       case 'pending': return 'Pendente';
-      case 'cancelled': return 'Cancelado';
-      case 'completed': return 'Concluído';
+      case 'cancelled': return 'Cancelada';
+      case 'completed': return 'Concluída';
       default: return status;
     }
   };
@@ -116,55 +79,8 @@ const AppointmentsManager: React.FC = () => {
   ) || [];
 
   const pendingCount = appointments?.filter(apt => apt.status === 'pending').length || 0;
+  const confirmedCount = appointments?.filter(apt => apt.status === 'confirmed').length || 0;
   const totalRevenue = appointments?.reduce((sum, apt) => sum + (apt.total_price || 0), 0) || 0;
-
-  const isDateAvailable = (date: Date) => {
-    const dayOfWeek = date.getDay();
-    const isBusinessDay = businessHours?.some(bh => bh.day_of_week === dayOfWeek);
-    const isNotPast = !isBefore(date, startOfDay(new Date()));
-    return isBusinessDay && isNotPast;
-  };
-
-  const getAvailableTimeSlots = () => {
-    if (!timeSlots || !bookedSlots) return [];
-    return timeSlots.filter(slot => !bookedSlots.includes(slot.id));
-  };
-
-  const handleServiceToggle = (serviceId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      service_ids: prev.service_ids.includes(serviceId) 
-        ? prev.service_ids.filter(id => id !== serviceId)
-        : [...prev.service_ids, serviceId]
-    }));
-  };
-
-  const handleCreateAppointment = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const appointmentData = {
-      ...formData,
-      appointment_date: selectedDateForForm ? format(selectedDateForForm, 'yyyy-MM-dd') : formData.appointment_date
-    };
-
-    createAppointmentMutation.mutate(appointmentData, {
-      onSuccess: () => {
-        setShowCreateForm(false);
-        setFormData({
-          client_id: '',
-          client_name: '',
-          client_phone: '',
-          client_email: '',
-          appointment_date: '',
-          time_slot_id: '',
-          service_ids: [],
-          notes: '',
-          next_session_date: ''
-        });
-        setSelectedDateForForm(undefined);
-      }
-    });
-  };
 
   const handleStatusChange = (appointmentId: string, newStatus: string, nextSession?: string) => {
     updateStatusMutation.mutate({
@@ -174,14 +90,27 @@ const AppointmentsManager: React.FC = () => {
     });
   };
 
+  const handleEditAppointment = (appointment: any) => {
+    setEditingAppointment(appointment);
+  };
+
+  const handleUpdateAppointment = (data: any) => {
+    updateAppointmentMutation.mutate(
+      { id: editingAppointment.id, ...data },
+      {
+        onSuccess: () => {
+          setEditingAppointment(null);
+        }
+      }
+    );
+  };
+
   const handleWhatsApp = (appointment: any) => {
     setWhatsappModal(appointment);
   };
 
   const handleWhatsAppSend = (message: string, type: string) => {
-    // Here you would typically integrate with a WhatsApp API
-    // For now, we'll just show a success message
-    console.log('Sending WhatsApp message:', { message, type, appointment: whatsappModal });
+    console.log('Enviando mensagem WhatsApp:', { message, type, appointment: whatsappModal });
     
     toast({
       title: "Mensagem enviada",
@@ -224,8 +153,8 @@ const AppointmentsManager: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Estatísticas Melhoradas */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -243,9 +172,21 @@ const AppointmentsManager: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pendentes</p>
-                <p className="text-2xl font-bold">{pendingCount}</p>
+                <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
               </div>
               <Clock className="h-8 w-8 text-yellow-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Confirmadas</p>
+                <p className="text-2xl font-bold text-green-600">{confirmedCount}</p>
+              </div>
+              <User className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -257,7 +198,7 @@ const AppointmentsManager: React.FC = () => {
                 <p className="text-sm font-medium text-gray-600">Total</p>
                 <p className="text-2xl font-bold">{appointments?.length || 0}</p>
               </div>
-              <User className="h-8 w-8 text-green-600" />
+              <MessageSquare className="h-8 w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -267,19 +208,19 @@ const AppointmentsManager: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Receita</p>
-                <p className="text-2xl font-bold">€{totalRevenue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-600">€{totalRevenue.toFixed(2)}</p>
               </div>
-              <MessageSquare className="h-8 w-8 text-purple-600" />
+              <TrendingUp className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Filtros Melhorados */}
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-wrap gap-4">
-            <div>
+            <div className="flex-1 min-w-[250px]">
               <Label>Pesquisar</Label>
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
@@ -295,15 +236,16 @@ const AppointmentsManager: React.FC = () => {
             <div>
               <Label>Estado</Label>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-40">
+                  <Filter className="h-4 w-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="pending">Pendente</SelectItem>
-                  <SelectItem value="confirmed">Confirmado</SelectItem>
-                  <SelectItem value="completed">Concluído</SelectItem>
-                  <SelectItem value="cancelled">Cancelado</SelectItem>
+                  <SelectItem value="confirmed">Confirmada</SelectItem>
+                  <SelectItem value="completed">Concluída</SelectItem>
+                  <SelectItem value="cancelled">Cancelada</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -314,16 +256,17 @@ const AppointmentsManager: React.FC = () => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-40"
               />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Appointments List */}
+      {/* Lista de Marcações */}
       <div className="space-y-4">
         {filteredAppointments.map((appointment) => (
-          <Card key={appointment.id}>
+          <Card key={appointment.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1 space-y-3">
@@ -336,7 +279,7 @@ const AppointmentsManager: React.FC = () => {
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <span className="flex items-center">
                             <CalendarIcon className="h-4 w-4 mr-1" />
-                            {format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })}
+                            {format(new Date(appointment.appointment_date), 'PPP', { locale: pt })}
                           </span>
                           <span className="flex items-center">
                             <Clock className="h-4 w-4 mr-1" />
@@ -346,22 +289,9 @@ const AppointmentsManager: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
-                      <Select 
-                        value={appointment.status} 
-                        onValueChange={(value) => handleStatusChange(appointment.id, value)}
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">Pendente</SelectItem>
-                          <SelectItem value="confirmed">Confirmado</SelectItem>
-                          <SelectItem value="completed">Concluído</SelectItem>
-                          <SelectItem value="cancelled">Cancelado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <Badge className={getStatusColor(appointment.status)}>
+                      {getStatusLabel(appointment.status)}
+                    </Badge>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -377,7 +307,7 @@ const AppointmentsManager: React.FC = () => {
                         </div>
                       )}
                       {appointment.total_price && (
-                        <div className="text-sm font-medium">
+                        <div className="text-sm font-medium text-green-600">
                           Total: €{appointment.total_price}
                         </div>
                       )}
@@ -406,23 +336,47 @@ const AppointmentsManager: React.FC = () => {
                   {appointment.next_session_date && (
                     <div className="p-3 bg-blue-50 rounded-lg">
                       <p className="text-sm">
-                        <strong>Próxima Sessão:</strong> {format(new Date(appointment.next_session_date), 'dd/MM/yyyy', { locale: pt })}
+                        <strong>Próxima Sessão:</strong> {format(new Date(appointment.next_session_date), 'PPP', { locale: pt })}
                       </p>
                     </div>
                   )}
-                </div>
 
-                {/* Action Buttons */}
-                <div className="ml-4 flex flex-col space-y-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleWhatsApp(appointment)}
-                    className="text-green-600 hover:text-green-700"
-                  >
-                    <MessageSquare className="h-4 w-4 mr-1" />
-                    WhatsApp
-                  </Button>
+                  {/* Ações */}
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Select 
+                      value={appointment.status} 
+                      onValueChange={(value) => handleStatusChange(appointment.id, value)}
+                    >
+                      <SelectTrigger className="w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pendente</SelectItem>
+                        <SelectItem value="confirmed">Confirmada</SelectItem>
+                        <SelectItem value="completed">Concluída</SelectItem>
+                        <SelectItem value="cancelled">Cancelada</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditAppointment(appointment)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleWhatsApp(appointment)}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      <MessageSquare className="h-4 w-4 mr-1" />
+                      WhatsApp
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -439,6 +393,16 @@ const AppointmentsManager: React.FC = () => {
           </Card>
         )}
       </div>
+
+      {/* Modal de Edição */}
+      {editingAppointment && (
+        <AppointmentEditModal
+          appointment={editingAppointment}
+          isOpen={!!editingAppointment}
+          onClose={() => setEditingAppointment(null)}
+          onUpdate={handleUpdateAppointment}
+        />
+      )}
 
       {/* WhatsApp Message Selector */}
       {whatsappModal && (

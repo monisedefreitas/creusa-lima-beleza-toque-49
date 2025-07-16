@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -55,14 +54,38 @@ export const useBookedSlotsForDate = (date: string) => {
   return useQuery({
     queryKey: ['booked-slots', date],
     queryFn: async () => {
+      if (!date) return [];
+      
       const { data, error } = await supabase
         .from('appointments')
-        .select('time_slot_id')
+        .select(`
+          time_slot_id,
+          time_slots!inner(max_concurrent)
+        `)
         .eq('appointment_date', date)
         .in('status', ['pending', 'confirmed']);
       
       if (error) throw error;
-      return data.map(item => item.time_slot_id);
+
+      // Contar quantas marcações cada slot tem
+      const slotCounts = data.reduce((acc: Record<string, number>, item) => {
+        acc[item.time_slot_id] = (acc[item.time_slot_id] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Retornar slots que atingiram o limite máximo
+      const unavailableSlots: string[] = [];
+      
+      for (const [slotId, count] of Object.entries(slotCounts)) {
+        const appointment = data.find(d => d.time_slot_id === slotId);
+        const maxConcurrent = appointment?.time_slots?.max_concurrent || 1;
+        
+        if (count >= maxConcurrent) {
+          unavailableSlots.push(slotId);
+        }
+      }
+
+      return unavailableSlots;
     },
     enabled: !!date
   });
@@ -111,6 +134,23 @@ export const useCreateAppointment = () => {
       next_session_date?: string;
       status?: string;
     }) => {
+      // Verificar disponibilidade do slot antes de criar
+      const { data: existingAppointments } = await supabase
+        .from('appointments')
+        .select(`
+          id,
+          time_slots!inner(max_concurrent)
+        `)
+        .eq('appointment_date', appointmentData.appointment_date)
+        .eq('time_slot_id', appointmentData.time_slot_id)
+        .in('status', ['pending', 'confirmed']);
+
+      const maxConcurrent = existingAppointments?.[0]?.time_slots?.max_concurrent || 1;
+      
+      if (existingAppointments && existingAppointments.length >= maxConcurrent) {
+        throw new Error('Este horário já não está disponível. Por favor, escolha outro horário.');
+      }
+
       let clientId = appointmentData.client_id;
 
       // Se não foi fornecido client_id, criar ou encontrar cliente
@@ -210,7 +250,7 @@ export const useCreateAppointment = () => {
       console.error('Error creating appointment:', error);
       toast({
         title: "Erro",
-        description: "Erro ao criar a marcação. Tente novamente.",
+        description: error.message || "Erro ao criar a marcação. Tente novamente.",
         variant: "destructive",
       });
     }
@@ -276,6 +316,7 @@ export const useUpdateAppointmentStatus = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['booked-slots'] });
       toast({
         title: "Estado atualizado",
         description: "O estado da marcação foi atualizado com sucesso.",
