@@ -1,59 +1,38 @@
 
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { Routes, Route } from 'react-router-dom';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import Dashboard from '@/components/Admin/Dashboard';
-import ContactsManager from '@/components/Admin/ContactsManager';
-import AppointmentsManager from '@/components/Admin/AppointmentsManager';
+import EnhancedAppointmentsManager from '@/components/Admin/EnhancedAppointmentsManager';
 import ServicesManager from '@/components/Admin/ServicesManager';
-import FAQsManager from '@/components/Admin/FAQsManager';
-import TimeSlotManager from '@/components/Admin/TimeSlotManager';
-import MediaManager from '@/components/Admin/MediaManager';
-import SocialMediaManager from '@/components/Admin/SocialMediaManager';
-import AddressesManager from '@/components/Admin/AddressesManager';
 import UsersManager from '@/components/Admin/UsersManager';
+import TimeSlotManager from '@/components/Admin/TimeSlotManager';
 import BannersManager from '@/components/Admin/BannersManager';
+import MediaManager from '@/components/Admin/MediaManager';
+import AddressesManager from '@/components/Admin/AddressesManager';
+import ContactsManager from '@/components/Admin/ContactsManager';
+import SocialMediaManager from '@/components/Admin/SocialMediaManager';
+import FAQsManager from '@/components/Admin/FAQsManager';
 import SettingsManager from '@/components/Admin/SettingsManager';
-
-const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAdmin, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-darkgreen-800"></div>
-      </div>
-    );
-  }
-
-  if (!user || !isAdmin) {
-    return <Navigate to="/auth" state={{ from: { pathname: '/admin' } }} replace />;
-  }
-
-  return <>{children}</>;
-};
 
 const AdminRoutes: React.FC = () => {
   return (
-    <AdminGuard>
-      <AdminLayout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/contacts" element={<ContactsManager />} />
-          <Route path="/appointments" element={<AppointmentsManager />} />
-          <Route path="/services" element={<ServicesManager />} />
-          <Route path="/faqs" element={<FAQsManager />} />
-          <Route path="/schedules" element={<TimeSlotManager />} />
-          <Route path="/media" element={<MediaManager />} />
-          <Route path="/social" element={<SocialMediaManager />} />
-          <Route path="/addresses" element={<AddressesManager />} />
-          <Route path="/banners" element={<BannersManager />} />
-          <Route path="/settings" element={<SettingsManager />} />
-          <Route path="/users" element={<UsersManager />} />
-        </Routes>
-      </AdminLayout>
-    </AdminGuard>
+    <Routes>
+      <Route path="/" element={<AdminLayout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="appointments" element={<EnhancedAppointmentsManager />} />
+        <Route path="services" element={<ServicesManager />} />
+        <Route path="users" element={<UsersManager />} />
+        <Route path="time-slots" element={<TimeSlotManager />} />
+        <Route path="banners" element={<BannersManager />} />
+        <Route path="media" element={<MediaManager />} />
+        <Route path="addresses" element={<AddressesManager />} />
+        <Route path="contacts" element={<ContactsManager />} />
+        <Route path="social" element={<SocialMediaManager />} />
+        <Route path="faqs" element={<FAQsManager />} />
+        <Route path="settings" element={<SettingsManager />} />
+      </Route>
+    </Routes>
   );
 };
 

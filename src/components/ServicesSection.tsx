@@ -14,9 +14,10 @@ interface ServicesSectionProps {
 }
 
 type Service = Tables<'services'>;
+type Banner = Tables<'banners'>;
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick }) => {
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading: servicesLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -30,7 +31,22 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
     }
   });
 
-  if (isLoading) {
+  const { data: banners } = useQuery({
+    queryKey: ['services-banners'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('banners')
+        .select('*')
+        .eq('is_active', true)
+        .eq('position', 'services')
+        .order('order_index');
+      
+      if (error) throw error;
+      return data as Banner[];
+    }
+  });
+
+  if (servicesLoading) {
     return (
       <section id="services" className="py-20 bg-sage-50">
         <div className="container mx-auto px-4 text-center">
@@ -54,6 +70,49 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
               sempre com foco na segurança, naturalidade e satisfação do paciente.
             </p>
           </div>
+
+          {/* Services Banners */}
+          {banners && banners.length > 0 && (
+            <div className="mb-12">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {banners.map((banner) => (
+                  <Card key={banner.id} className="overflow-hidden border-darkgreen-200 hover:shadow-lg transition-shadow">
+                    {banner.image_url && (
+                      <div className="aspect-video relative">
+                        <img 
+                          src={banner.image_url} 
+                          alt={banner.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <div className="text-center text-white p-4">
+                            <h3 className="text-xl font-bold mb-2">{banner.title}</h3>
+                            {banner.subtitle && (
+                              <p className="text-sm opacity-90">{banner.subtitle}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {banner.description && (
+                      <CardContent className="p-4">
+                        <p className="text-forest-600 text-sm">{banner.description}</p>
+                        {banner.button_text && banner.button_link && (
+                          <Button 
+                            className="mt-3 w-full bg-darkgreen-800 hover:bg-darkgreen-900"
+                            size="sm"
+                            onClick={() => window.open(banner.button_link, '_blank')}
+                          >
+                            {banner.button_text}
+                          </Button>
+                        )}
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
           
           {/* Services Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">

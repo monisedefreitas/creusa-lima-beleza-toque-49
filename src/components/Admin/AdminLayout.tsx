@@ -1,55 +1,69 @@
 
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { Badge } from '@/components/ui/badge';
 import { 
+  Calendar, 
+  Users, 
   Settings, 
-  Users,
-  FileText,
-  MessageSquare,
-  Image,
-  MapPin,
-  Star,
+  BarChart3, 
+  FileImage, 
+  MapPin, 
+  HelpCircle, 
+  Phone, 
+  Share2, 
+  Clock,
+  Home,
   LogOut,
   Menu,
-  X,
-  Home,
-  Palette,
-  Phone,
-  Instagram,
-  Calendar,
-  Clock
+  Megaphone,
+  Wrench,
+  List
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import NotificationSystem from './NotificationSystem';
 
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
-
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { signOut, user } = useAuth();
-  const navigate = useNavigate();
+const AdminLayout: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    try {
+      await supabase.auth.signOut();
+      navigate('/auth');
+      toast({
+        title: "Sessão encerrada",
+        description: "Até breve!",
+      });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao encerrar sessão",
+        variant: "destructive",
+      });
+    }
   };
 
   const menuItems = [
-    { path: '/admin', icon: Home, label: 'Dashboard', exact: true },
+    { path: '/admin', icon: BarChart3, label: 'Dashboard', exact: true },
     { path: '/admin/appointments', icon: Calendar, label: 'Marcações' },
-    { path: '/admin/services', icon: Star, label: 'Serviços' },
-    { path: '/admin/schedules', icon: Clock, label: 'Horários' },
-    { path: '/admin/faqs', icon: MessageSquare, label: 'FAQs' },
-    { path: '/admin/contacts', icon: Phone, label: 'Contactos' },
-    { path: '/admin/media', icon: Image, label: 'Galeria' },
-    { path: '/admin/social', icon: Instagram, label: 'Redes Sociais' },
-    { path: '/admin/addresses', icon: MapPin, label: 'Moradas' },
-    { path: '/admin/banners', icon: Palette, label: 'Banners' },
-    { path: '/admin/settings', icon: Settings, label: 'Configurações' },
+    { path: '/admin/services', icon: List, label: 'Serviços' },
     { path: '/admin/users', icon: Users, label: 'Utilizadores' },
+    { path: '/admin/time-slots', icon: Clock, label: 'Horários' },
+    { path: '/admin/banners', icon: Megaphone, label: 'Banners' },
+    { path: '/admin/media', icon: FileImage, label: 'Galeria' },
+    { path: '/admin/addresses', icon: MapPin, label: 'Endereços' },
+    { path: '/admin/contacts', icon: Phone, label: 'Contactos' },
+    { path: '/admin/social', icon: Share2, label: 'Redes Sociais' },
+    { path: '/admin/faqs', icon: HelpCircle, label: 'FAQs' },
+    { path: '/admin/settings', icon: Wrench, label: 'Configurações' }
   ];
 
   const isActive = (path: string, exact = false) => {
@@ -62,88 +76,95 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:inset-0
-      `}>
-        <div className="flex items-center justify-between h-16 px-6 border-b">
-          <h1 className="text-xl font-bold text-darkgreen-900">Admin Panel</h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <nav className="mt-6">
-          {menuItems.map((item) => (
-            <Button
-              key={item.path}
-              variant={isActive(item.path, item.exact) ? "secondary" : "ghost"}
-              className="w-full justify-start px-6 py-3 text-left"
-              onClick={() => {
-                navigate(item.path);
-                setSidebarOpen(false);
-              }}
-            >
-              <item.icon className="h-4 w-4 mr-3" />
-              {item.label}
-            </Button>
-          ))}
-        </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t">
-          <div className="text-sm text-gray-600 mb-2">
-            Logado como: {user?.email}
+      <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out`}>
+        <div className="flex flex-col h-full">
+          <div className="p-6 border-b">
+            <h1 className="text-xl font-bold text-gray-900">Painel Admin</h1>
           </div>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleSignOut}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sair
-          </Button>
+          
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive(item.path, item.exact)
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
+                  onClick={() => setIsSidebarOpen(false)}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+          
+          <div className="p-4 border-t space-y-2">
+            <Link
+              to="/"
+              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <Home className="h-5 w-5" />
+              <span>Ver Site</span>
+            </Link>
+            <Button
+              variant="ghost"
+              onClick={handleSignOut}
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <LogOut className="h-5 w-5 mr-3" />
+              Sair
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
       <div className="flex-1 lg:ml-0">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b h-16 flex items-center px-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden mr-4"
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
-          
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Painel de Administração
-            </h2>
+        <header className="bg-white shadow-sm border-b px-4 lg:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="lg:hidden"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Gestão de Conteúdo
+              </h2>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <NotificationSystem />
+              <Badge variant="secondary" className="hidden sm:inline-flex">
+                Admin
+              </Badge>
+            </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="p-6">
-          {children}
+        {/* Content */}
+        <main className="p-4 lg:p-6">
+          <Outlet />
         </main>
       </div>
-
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 };
