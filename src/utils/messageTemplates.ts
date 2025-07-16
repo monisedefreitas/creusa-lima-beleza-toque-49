@@ -1,102 +1,91 @@
 
-export const getAvailableVariables = () => {
-  return [
-    'client_name',
-    'appointment_date',
-    'appointment_time',
-    'services_list',
-    'total_price',
-    'clinic_name',
-    'clinic_phone',
-    'clinic_address'
-  ];
-};
+export const defaultMessageTemplates = [
+  {
+    id: 'whatsapp_confirmation',
+    name: 'Confirmação de Marcação WhatsApp',
+    type: 'whatsapp_confirmation',
+    content: `Olá {{client_name}}! 😊
 
-export const getVariableDescriptions = () => {
-  return {
-    client_name: 'Nome do cliente',
-    appointment_date: 'Data da marcação',
-    appointment_time: 'Hora da marcação',
-    services_list: 'Lista de serviços agendados',
-    total_price: 'Preço total da consulta',
-    clinic_name: 'Nome da clínica',
-    clinic_phone: 'Telefone da clínica',
-    clinic_address: 'Endereço da clínica'
-  };
-};
+✅ A sua marcação foi confirmada com sucesso!
 
-export const processMessageTemplate = (template: string, variables: Record<string, string>) => {
-  let processed = template;
-  
-  Object.entries(variables).forEach(([key, value]) => {
-    const regex = new RegExp(`{{${key}}}`, 'g');
-    processed = processed.replace(regex, value || `[${key}]`);
-  });
-  
-  return processed;
-};
+📅 **Detalhes da sua consulta:**
+• **Data:** {{appointment_date}}
+• **Hora:** {{appointment_time}}
+• **Serviço:** {{service_name}}
+• **Local:** {{clinic_address}}
 
-export const generateWhatsAppVariables = (appointment: any) => {
-  const servicesList = appointment.appointment_services?.map((service: any) => 
-    `• ${service.services?.name} (€${service.price})`
-  ).join('\n') || '';
+📍 **Como chegar:**
+Pode usar o nosso link de navegação para facilitar: {{maps_link}}
 
-  return {
-    client_name: appointment.client_name || '',
-    appointment_date: appointment.appointment_date || '',
-    appointment_time: appointment.time_slots?.time || '',
-    services_list: servicesList,
-    total_price: appointment.total_price ? `€${appointment.total_price}` : '',
-    clinic_name: 'Creusa Lima',
-    clinic_phone: '+351 964 481 966',
-    clinic_address: 'Rua das Flores, 123, 1200-123 Lisboa'
-  };
-};
+💡 **Lembretes importantes:**
+• Chegue 10 minutos antes da hora marcada
+• Traga um documento de identificação
+• Em caso de impossibilidade, avise com 24h de antecedência
 
-export const getMessageTemplates = () => {
-  return {
-    whatsapp_confirmation: {
-      name: 'Confirmação de Marcação',
-      content: `Olá {{client_name}}! 😊
+Estamos ansiosos por recebê-la e proporcionar uma experiência única de bem-estar! 
 
-A sua marcação foi confirmada para o dia {{appointment_date}} às {{appointment_time}}.
+Se tiver alguma dúvida, não hesite em contactar-nos.
 
-Serviços agendados:
-{{services_list}}
+Com os melhores cumprimentos,
+Equipa {{clinic_name}} 💚`,
+    variables: ['client_name', 'appointment_date', 'appointment_time', 'service_name', 'clinic_address', 'maps_link', 'clinic_name'],
+    is_default: true
+  },
+  {
+    id: 'review_request',
+    name: 'Pedido de Avaliação',
+    type: 'review_request',
+    content: `Olá {{client_name}}! 😊
 
-Total: {{total_price}}
+Esperamos que tenha ficado satisfeita com o seu tratamento de {{service_name}} connosco! ✨
 
-Aguardamos por si! 🌿
+A sua opinião é muito importante para nós e ajuda outras pessoas a conhecerem o nosso trabalho. 
 
-Obrigada! ✨`
-    },
-    whatsapp_arrival_confirmation: {
-      name: 'Confirmação de Vinda da Cliente',
-      content: `Olá {{client_name}}! 😊
+💝 **Poderia partilhar a sua experiência?**
 
-Esperamos por si amanhã, dia {{appointment_date}} às {{appointment_time}}, para o seu tratamento de:
-{{services_list}}
+Deixe-nos uma avaliação no Google Maps:
+{{review_link}}
 
-Por favor confirme a sua presença respondendo a esta mensagem.
+⭐ A sua avaliação demora apenas 1 minuto e significa muito para a nossa pequena clínica!
 
-Obrigada! 🌿✨`
-    },
-    whatsapp_review_request: {
-      name: 'Pedido de Avaliação no Google Maps',
-      content: `Olá {{client_name}}! 😊
+Como agradecimento pela sua confiança, na sua próxima visita oferecemos 10% de desconto! 🎁
 
-Esperamos que tenha ficado satisfeita com o seu tratamento! ✨
-
-A sua opinião é muito importante para nós e ajuda outras pessoas a conhecerem o nosso trabalho. 💝
-
-Poderia deixar uma avaliação no nosso Google Maps? Será muito rápido e significa muito para nós! ⭐
-
-🔗 Link direto: https://g.page/r/[SEU_LINK_GOOGLE_MAPS]/review
-
-Muito obrigada pelo seu tempo e confiança! 🙏💚
+Muito obrigada pelo seu tempo e confiança! 
 
 Com carinho,
-Creusa Lima 🌿`
-    }
-  };
-};
+Equipa {{clinic_name}} 💚
+
+P.S.: Estamos sempre aqui para qualquer esclarecimento! 😘`,
+    variables: ['client_name', 'service_name', 'review_link', 'clinic_name'],
+    is_default: false
+  },
+  {
+    id: 'appointment_reminder',
+    name: 'Lembrete de Consulta',
+    type: 'appointment_reminder',
+    content: `Olá {{client_name}}! 😊
+
+🔔 **Lembrete da sua consulta**
+
+Lembramos que tem uma consulta marcada connosco:
+
+📅 **Amanhã, {{appointment_date}}**
+🕐 **Às {{appointment_time}}**
+💆‍♀️ **Serviço:** {{service_name}}
+
+📍 **Localização:** {{clinic_address}}
+
+💡 **Preparação para a consulta:**
+• Chegue 10 minutos mais cedo
+• Vista roupa confortável
+• Traga documento de identificação
+
+Se por algum motivo não puder comparecer, avise-nos com antecedência para reagendarmos.
+
+Estamos ansiosos por recebê-la! ✨
+
+Equipa {{clinic_name}} 💚`,
+    variables: ['client_name', 'appointment_date', 'appointment_time', 'service_name', 'clinic_address', 'clinic_name'],
+    is_default: false
+  }
+];

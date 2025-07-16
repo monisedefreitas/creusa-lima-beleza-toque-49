@@ -17,7 +17,8 @@ import {
   Phone,
   HelpCircle,
   FileText,
-  Share2
+  Share2,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,10 @@ const AdminLayout: React.FC = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     window.location.href = '/';
+  };
+
+  const handleBackToSite = () => {
+    window.open('/', '_blank');
   };
 
   const menuItems = [
@@ -71,11 +76,6 @@ const AdminLayout: React.FC = () => {
       icon: Image, 
       label: 'Galeria', 
       path: '/admin/media' 
-    },
-    { 
-      icon: FileText, 
-      label: 'Banners', 
-      path: '/admin/banners' 
     },
     { 
       icon: MessageSquare, 
@@ -149,7 +149,15 @@ const AdminLayout: React.FC = () => {
           })}
         </nav>
         
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-2">
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={handleBackToSite}
+          >
+            <ExternalLink className="h-4 w-4 mr-2" />
+            Ver Site
+          </Button>
           <Button 
             variant="outline" 
             className="w-full" 

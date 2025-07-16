@@ -9,7 +9,6 @@ import ServicesManager from '@/components/Admin/ServicesManager';
 import TimeSlotManager from '@/components/Admin/TimeSlotManager';
 import UsersManager from '@/components/Admin/UsersManager';
 import MediaManager from '@/components/Admin/MediaManager';
-import BannersManager from '@/components/Admin/BannersManager';
 import FAQsManager from '@/components/Admin/FAQsManager';
 import AddressesManager from '@/components/Admin/AddressesManager';
 import ContactsManager from '@/components/Admin/ContactsManager';
@@ -29,7 +28,6 @@ const AdminRoutes: React.FC = () => {
         <Route path="timeslots" element={<TimeSlotManager />} />
         <Route path="users" element={<UsersManager />} />
         <Route path="media" element={<MediaManager />} />
-        <Route path="banners" element={<BannersManager />} />
         <Route path="faqs" element={<FAQsManager />} />
         <Route path="addresses" element={<AddressesManager />} />
         <Route path="contacts" element={<ContactsManager />} />

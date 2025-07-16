@@ -13,71 +13,58 @@ import {
   X,
   Send
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { trackWhatsAppClick, trackBookingIntent } from '@/components/Analytics/GoogleAnalytics';
-
-interface WhatsAppService {
-  id: string;
-  name: string;
-  template: string;
-  icon: React.ReactNode;
-  category: string;
-}
 
 const FloatingWhatsApp: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
 
-  const services: WhatsAppService[] = [
-    {
-      id: 'linfoterapia',
-      name: 'Linfoterapia',
-      template: 'Olá! Gostaria de agendar uma sessão de linfoterapia. Poderia indicar-me a disponibilidade?',
-      icon: <CheckCircle className="w-4 h-4" />,
-      category: 'Especialidade'
-    },
-    {
-      id: 'pos-operatorio',
-      name: 'Pós-Operatório',
-      template: 'Olá! Preciso de drenagem linfática pós-operatória. Quando seria possível agendar?',
-      icon: <CheckCircle className="w-4 h-4" />,
-      category: 'Especialidade'
-    },
-    {
-      id: 'radiofrequencia',
-      name: 'Radiofrequência',
-      template: 'Olá! Tenho interesse em tratamentos de radiofrequência. Gostaria de saber mais informações.',
-      icon: <CheckCircle className="w-4 h-4" />,
-      category: 'Tecnologia'
-    },
-    {
-      id: 'hifu',
-      name: 'HIFU',
-      template: 'Olá! Gostaria de informações sobre o tratamento HIFU. Qual seria o investimento?',
-      icon: <CheckCircle className="w-4 h-4" />,
-      category: 'Tecnologia'
-    },
-    {
-      id: 'massagem-gestante',
-      name: 'Massagem Gestante',
-      template: 'Olá! Estou grávida e gostaria de agendar uma massagem especializada para gestantes.',
-      icon: <CheckCircle className="w-4 h-4" />,
-      category: 'Cuidados Especiais'
-    },
-    {
-      id: 'geral',
-      name: 'Consulta Geral',
-      template: 'Olá! Gostaria de agendar uma consulta para avaliação personalizada dos meus tratamentos.',
-      icon: <MessageSquare className="w-4 h-4" />,
-      category: 'Geral'
+  const { data: services } = useQuery({
+    queryKey: ['services-whatsapp'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_index');
+      
+      if (error) throw error;
+      return data;
     }
-  ];
+  });
 
-  const handleWhatsAppClick = (service?: WhatsAppService) => {
+  const { data: contactInfo } = useQuery({
+    queryKey: ['contact-whatsapp'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('contact_info')
+        .select('*')
+        .eq('type', 'phone')
+        .eq('is_active', true)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const phoneNumber = contactInfo?.value?.replace(/\s+/g, '') || '351964481966';
+
+  const handleWhatsAppClick = (serviceId?: string, customMessage?: string) => {
     trackWhatsAppClick();
     trackBookingIntent();
     
-    const phoneNumber = '351964481966';
-    const message = service ? service.template : 'Olá! Gostaria de mais informações sobre os vossos serviços.';
+    let message = customMessage || 'Olá! Gostaria de mais informações sobre os vossos serviços.';
+    
+    if (serviceId && services) {
+      const service = services.find(s => s.id === serviceId);
+      if (service) {
+        message = `Olá! Gostaria de agendar uma consulta para ${service.name}. Poderia indicar-me a disponibilidade e os valores?`;
+      }
+    }
+    
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
     
@@ -86,22 +73,18 @@ const FloatingWhatsApp: React.FC = () => {
   };
 
   const handleCallbackRequest = () => {
-    const phoneNumber = '351964481966';
     const message = 'Olá! Gostaria de solicitar uma chamada de retorno. Qual seria o melhor horário para me contactarem?';
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-    
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-    setIsOpen(false);
+    handleWhatsAppClick(undefined, message);
   };
 
-  const groupedServices = services.reduce((acc, service) => {
-    if (!acc[service.category]) {
-      acc[service.category] = [];
+  const groupedServices = services?.reduce((acc, service) => {
+    const category = service.category || 'Outros';
+    if (!acc[category]) {
+      acc[category] = [];
     }
-    acc[service.category].push(service);
+    acc[category].push(service);
     return acc;
-  }, {} as Record<string, WhatsAppService[]>);
+  }, {} as Record<string, typeof services>) || {};
 
   const categories = Object.keys(groupedServices);
 
@@ -111,7 +94,7 @@ const FloatingWhatsApp: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
-          className="bg-green-600 hover:bg-green-700 text-white rounded-full w-16 h-16 shadow-2xl hover:scale-110 transition-all duration-300 animate-pulse"
+          className="bg-green-600 hover:bg-green-700 text-white rounded-full w-16 h-16 shadow-2xl hover:scale-110 transition-all duration-300"
           size="icon"
         >
           <MessageSquare className="h-8 w-8" />
@@ -168,7 +151,7 @@ const FloatingWhatsApp: React.FC = () => {
             </div>
 
             {/* Category Navigation */}
-            {!selectedCategory && (
+            {!selectedCategory && categories.length > 0 && (
               <div className="space-y-3">
                 <h3 className="font-semibold text-gray-900 text-sm">Agendar Serviço Específico:</h3>
                 <div className="space-y-2">
@@ -182,7 +165,7 @@ const FloatingWhatsApp: React.FC = () => {
                       <Calendar className="w-4 h-4 mr-3 flex-shrink-0" />
                       <span className="truncate">{category}</span>
                       <Badge variant="secondary" className="ml-auto">
-                        {groupedServices[category].length}
+                        {groupedServices[category]?.length || 0}
                       </Badge>
                     </Button>
                   ))}
@@ -191,7 +174,7 @@ const FloatingWhatsApp: React.FC = () => {
             )}
 
             {/* Services List */}
-            {selectedCategory && (
+            {selectedCategory && groupedServices[selectedCategory] && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-gray-900 text-sm">{selectedCategory}</h3>
@@ -208,16 +191,19 @@ const FloatingWhatsApp: React.FC = () => {
                   {groupedServices[selectedCategory].map((service) => (
                     <Button
                       key={service.id}
-                      onClick={() => handleWhatsAppClick(service)}
+                      onClick={() => handleWhatsAppClick(service.id)}
                       className="w-full justify-start text-left p-3 h-auto"
                       variant="outline"
                     >
                       <div className="flex items-center space-x-3 w-full">
                         <div className="p-1.5 bg-green-100 rounded-lg flex-shrink-0">
-                          {service.icon}
+                          <CheckCircle className="w-4 h-4 text-green-600" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm truncate">{service.name}</div>
+                          {service.price_range && (
+                            <div className="text-xs text-gray-500">{service.price_range}</div>
+                          )}
                         </div>
                         <Send className="w-3 h-3 text-green-600 flex-shrink-0" />
                       </div>

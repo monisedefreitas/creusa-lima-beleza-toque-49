@@ -2,8 +2,28 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, ArrowRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const HeroSection: React.FC = () => {
+  const { data: settings } = useQuery({
+    queryKey: ['site-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const getSettingValue = (key: string) => {
+    return settings?.find(s => s.key === key)?.value || '';
+  };
+
+  const heroBackgroundImage = getSettingValue('hero_background_image') || '/lovable-uploads/new-logo.png';
+
   const scrollToServices = () => {
     const servicesSection = document.getElementById('services');
     if (servicesSection) {
@@ -19,7 +39,7 @@ const HeroSection: React.FC = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/lovable-uploads/new-logo.png')"
+          backgroundImage: `url('${heroBackgroundImage}')`
         }}
       />
       
