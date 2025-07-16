@@ -7,8 +7,10 @@ import type { Tables } from '@/integrations/supabase/types';
 type TimeSlot = Tables<'time_slots'>;
 type BusinessHours = Tables<'business_hours'>;
 type Appointment = Tables<'appointments'>;
+type Client = Tables<'clients'>;
 type AppointmentWithDetails = Appointment & {
   time_slots: TimeSlot;
+  clients?: Client;
   appointment_services: Array<{
     id: string;
     service_id: string;
@@ -75,6 +77,7 @@ export const useAppointments = () => {
         .select(`
           *,
           time_slots (*),
+          clients (*),
           appointment_services (
             id,
             service_id,
@@ -97,15 +100,48 @@ export const useCreateAppointment = () => {
 
   return useMutation({
     mutationFn: async (appointmentData: {
-      client_name: string;
-      client_phone: string;
+      client_name?: string;
+      client_phone?: string;
       client_email?: string;
+      client_id?: string;
       appointment_date: string;
       time_slot_id: string;
       notes?: string;
       service_ids: string[];
+      next_session_date?: string;
+      status?: string;
     }) => {
-      // Calculate total price
+      let clientId = appointmentData.client_id;
+
+      // Se não foi fornecido client_id, criar ou encontrar cliente
+      if (!clientId && appointmentData.client_name && appointmentData.client_phone) {
+        // Verificar se cliente já existe
+        const { data: existingClient } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('phone', appointmentData.client_phone)
+          .single();
+
+        if (existingClient) {
+          clientId = existingClient.id;
+        } else {
+          // Criar novo cliente
+          const { data: newClient, error: clientError } = await supabase
+            .from('clients')
+            .insert({
+              name: appointmentData.client_name,
+              phone: appointmentData.client_phone,
+              email: appointmentData.client_email,
+            })
+            .select()
+            .single();
+
+          if (clientError) throw clientError;
+          clientId = newClient.id;
+        }
+      }
+
+      // Calcular preço total
       const { data: services } = await supabase
         .from('services')
         .select('id, price_range')
@@ -116,25 +152,32 @@ export const useCreateAppointment = () => {
         return sum + price;
       }, 0) || 0;
 
-      // Create appointment
+      // Criar marcação
       const { data: appointment, error: appointmentError } = await supabase
         .from('appointments')
         .insert({
-          client_name: appointmentData.client_name,
-          client_phone: appointmentData.client_phone,
+          client_id: clientId,
+          client_name: appointmentData.client_name || '',
+          client_phone: appointmentData.client_phone || '',
           client_email: appointmentData.client_email,
           appointment_date: appointmentData.appointment_date,
           time_slot_id: appointmentData.time_slot_id,
           notes: appointmentData.notes,
           total_price: totalPrice,
-          status: 'pending'
+          status: appointmentData.status || 'pending',
+          next_session_date: appointmentData.next_session_date,
+          status_history: JSON.stringify([{
+            status: appointmentData.status || 'pending',
+            timestamp: new Date().toISOString(),
+            changed_by: 'system'
+          }])
         })
         .select()
         .single();
 
       if (appointmentError) throw appointmentError;
 
-      // Create appointment services
+      // Criar serviços da marcação
       const appointmentServices = appointmentData.service_ids.map(serviceId => {
         const service = services?.find(s => s.id === serviceId);
         const price = parseFloat(service?.price_range?.split('-')[0]?.replace('€', '') || '0');
@@ -156,10 +199,11 @@ export const useCreateAppointment = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       queryClient.invalidateQueries({ queryKey: ['booked-slots'] });
       toast({
         title: "Marcação criada",
-        description: "A sua marcação foi criada com sucesso!",
+        description: "A marcação foi criada com sucesso!",
       });
     },
     onError: (error) => {
@@ -178,16 +222,55 @@ export const useUpdateAppointmentStatus = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ 
+      id, 
+      status, 
+      next_session_date 
+    }: { 
+      id: string; 
+      status: string;
+      next_session_date?: string;
+    }) => {
+      // Buscar histórico atual
+      const { data: currentAppointment } = await supabase
+        .from('appointments')
+        .select('status_history')
+        .eq('id', id)
+        .single();
+
+      let statusHistory = [];
+      try {
+        statusHistory = JSON.parse(currentAppointment?.status_history || '[]');
+      } catch (e) {
+        statusHistory = [];
+      }
+
+      // Adicionar nova entrada ao histórico
+      statusHistory.push({
+        status,
+        timestamp: new Date().toISOString(),
+        changed_by: 'admin'
+      });
+
+      const updateData: any = { 
+        status, 
+        status_history: JSON.stringify(statusHistory)
+      };
+
+      if (next_session_date !== undefined) {
+        updateData.next_session_date = next_session_date;
+      }
+
       const { error } = await supabase
         .from('appointments')
-        .update({ status })
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       toast({
         title: "Estado atualizado",
         description: "O estado da marcação foi atualizado com sucesso.",

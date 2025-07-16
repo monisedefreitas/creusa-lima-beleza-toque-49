@@ -1,23 +1,15 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Clock, Star, ArrowRight, Sparkles } from "lucide-react";
-import BookingModal from "@/components/BookingSystem/BookingModal";
-import type { Tables } from "@/integrations/supabase/types";
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import BookingModal from './BookingSystem/BookingModal';
+import { Button } from '@/components/ui/button';
+import { Clock, Euro } from 'lucide-react';
 
-interface ServicesSectionProps {
-  onBookingClick: () => void;
-}
-
-type Service = Tables<'services'>;
-type Banner = Tables<'banners'>;
-
-export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick }) => {
-  const { data: services, isLoading: servicesLoading } = useQuery({
+const ServicesSection: React.FC = () => {
+  const { data: services, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,217 +19,125 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onBookingClick
         .order('order_index');
       
       if (error) throw error;
-      return data as Service[];
+      return data;
     }
   });
 
-  const { data: banners, isLoading: bannersLoading } = useQuery({
-    queryKey: ['services-banners'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('banners')
-        .select('*')
-        .eq('is_active', true)
-        .eq('position', 'services')
-        .order('order_index');
-      
-      if (error) throw error;
-      return data as Banner[];
-    }
-  });
-
-  if (servicesLoading) {
+  if (isLoading) {
     return (
-      <section id="services" className="py-20 bg-sage-50">
-        <div className="container mx-auto px-4 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-darkgreen-800 mx-auto"></div>
+      <section id="services" className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Os Nossos Serviços</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Descubra os nossos tratamentos especializados
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <div className="aspect-video bg-gray-200 rounded-t-lg"></div>
+                <CardContent className="p-6">
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded mb-4"></div>
+                  <div className="h-8 bg-gray-200 rounded"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
     );
   }
 
   return (
-    <section id="services" className="py-20 bg-sage-50">
+    <section id="services" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-darkgreen-900 mb-6">
-              <span className="font-tan-mon-cheri">Nossos Serviços</span>
-            </h2>
-            <p className="text-xl text-forest-600 max-w-3xl mx-auto leading-relaxed">
-              Oferecemos uma gama completa de tratamentos de medicina estética, 
-              sempre com foco na segurança, naturalidade e satisfação do paciente.
-            </p>
-          </div>
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Os Nossos Serviços</h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Descubra os nossos tratamentos especializados, cada um pensado para realçar a sua beleza natural
+          </p>
+        </div>
 
-          {/* Services Banners */}
-          {!bannersLoading && banners && banners.length > 0 && (
-            <div className="mb-16">
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {banners.map((banner) => (
-                  <Card key={banner.id} className="overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-white to-sage-50">
-                    {banner.image_url ? (
-                      <div className="aspect-video relative overflow-hidden">
-                        <img 
-                          src={banner.image_url} 
-                          alt={banner.title}
-                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end">
-                          <div className="p-6 text-white w-full">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <Sparkles className="h-5 w-5 text-yellow-400" />
-                              <h3 className="text-xl font-bold">{banner.title}</h3>
-                            </div>
-                            {banner.subtitle && (
-                              <p className="text-sm opacity-90 mb-3">{banner.subtitle}</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="aspect-video relative bg-gradient-to-br from-darkgreen-600 to-forest-700 flex items-center justify-center">
-                        <div className="text-center text-white p-6">
-                          <Sparkles className="h-12 w-12 mx-auto mb-4 text-yellow-400" />
-                          <h3 className="text-2xl font-bold mb-2">{banner.title}</h3>
-                          {banner.subtitle && (
-                            <p className="text-sm opacity-90">{banner.subtitle}</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {banner.description && (
-                      <CardContent className="p-6">
-                        <p className="text-forest-600 text-sm leading-relaxed mb-4">{banner.description}</p>
-                        {banner.button_text && banner.button_link ? (
-                          <Button 
-                            className="w-full bg-darkgreen-800 hover:bg-darkgreen-900 text-white font-semibold group"
-                            onClick={() => window.open(banner.button_link, '_blank')}
-                          >
-                            {banner.button_text}
-                            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                          </Button>
-                        ) : (
-                          <BookingModal>
-                            <Button className="w-full bg-darkgreen-800 hover:bg-darkgreen-900 text-white font-semibold group">
-                              Agendar Consulta
-                              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                            </Button>
-                          </BookingModal>
-                        )}
-                      </CardContent>
-                    )}
-                  </Card>
-                ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services?.map((service) => (
+            <Card key={service.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+              {/* Service Image */}
+              <div className="aspect-video overflow-hidden bg-gray-100">
+                {service.image_url ? (
+                  <img
+                    src={service.image_url}
+                    alt={service.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+                    <div className="text-center text-gray-500">
+                      <div className="text-4xl mb-2">✨</div>
+                      <p className="text-sm">Imagem do procedimento</p>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
 
-          {/* Message when no banners exist */}
-          {!bannersLoading && (!banners || banners.length === 0) && (
-            <div className="mb-12 text-center">
-              <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border border-sage-200 max-w-2xl mx-auto">
-                <Sparkles className="h-8 w-8 text-darkgreen-800 mx-auto mb-3" />
-                <p className="text-forest-600 text-sm">
-                  Os banners de promoções e destaques aparecerão aqui quando forem adicionados pelo administrador.
-                </p>
-              </div>
-            </div>
-          )}
-          
-          {/* Services Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {services?.map((service) => (
-              <Card key={service.id} className="group hover:shadow-xl transition-all duration-300 border-sage-200 hover:border-darkgreen-300 bg-white">
-                <CardHeader className="pb-4">
-                  {service.image_url && (
-                    <div className="aspect-video rounded-lg overflow-hidden mb-4">
-                      <img 
-                        src={service.image_url} 
-                        alt={service.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                    {service.name}
+                  </h3>
+                  {service.is_featured && (
+                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                      Destaque
+                    </Badge>
+                  )}
+                </div>
+
+                {service.short_description && (
+                  <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                    {service.short_description}
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between mb-4">
+                  {service.price_range && (
+                    <div className="flex items-center text-primary font-semibold">
+                      <Euro className="h-4 w-4 mr-1" />
+                      {service.price_range}
                     </div>
                   )}
-                  
-                  <div className="flex items-center justify-between mb-2">
-                    <CardTitle className="text-xl text-darkgreen-900 group-hover:text-darkgreen-800 transition-colors">
-                      {service.name}
-                    </CardTitle>
-                    {service.is_featured && (
-                      <Badge className="bg-darkgreen-800 text-white">
-                        <Star className="h-3 w-3 mr-1" />
-                        Popular
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  {service.short_description && (
-                    <p className="text-forest-600 text-sm mb-3">
-                      {service.short_description}
-                    </p>
+                  {service.duration_minutes && (
+                    <div className="flex items-center text-gray-500 text-sm">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {service.duration_minutes}min
+                    </div>
                   )}
-                  
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-semibold text-darkgreen-800 text-lg">
-                      {service.price_range}
-                    </span>
-                    {service.duration_minutes && (
-                      <span className="flex items-center text-forest-600">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {service.duration_minutes}min
-                      </span>
-                    )}
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  {service.description && (
-                    <p className="text-forest-600 text-sm leading-relaxed mb-4">
-                      {service.description}
-                    </p>
-                  )}
-                  
-                  <BookingModal>
-                    <Button 
-                      className="w-full bg-darkgreen-800 hover:bg-darkgreen-900 text-white transition-colors group"
-                      size="sm"
-                    >
-                      Agendar Consulta
-                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </BookingModal>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          {/* CTA Section */}
-          <div className="text-center">
-            <div className="bg-white rounded-2xl p-8 shadow-lg max-w-2xl mx-auto border border-sage-200">
-              <h3 className="text-2xl font-semibold text-darkgreen-900 mb-4">
-                Não encontrou o que procura?
-              </h3>
-              <p className="text-forest-600 mb-6">
-                Entre em contacto connosco para uma consulta personalizada e descubra 
-                o tratamento ideal para as suas necessidades.
-              </p>
-              
-              <BookingModal>
-                <Button 
-                  size="lg" 
-                  className="bg-darkgreen-800 hover:bg-darkgreen-900 text-white px-8 py-3 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 group"
-                >
-                  Consulta Personalizada
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </BookingModal>
-            </div>
-          </div>
+                </div>
+
+                {service.description && (
+                  <p className="text-gray-700 text-sm mb-6 leading-relaxed">
+                    {service.description}
+                  </p>
+                )}
+
+                <BookingModal>
+                  <Button className="w-full group-hover:bg-primary/90 transition-colors">
+                    Marcar Consulta
+                  </Button>
+                </BookingModal>
+              </CardContent>
+            </Card>
+          ))}
         </div>
+
+        {(!services || services.length === 0) && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">Nenhum serviço disponível no momento.</p>
+          </div>
+        )}
       </div>
     </section>
   );
 };
+
+export default ServicesSection;

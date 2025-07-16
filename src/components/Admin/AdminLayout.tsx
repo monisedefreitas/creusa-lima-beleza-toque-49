@@ -1,171 +1,173 @@
 
 import React from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
+  LayoutDashboard, 
   Calendar, 
   Users, 
+  UserCheck,
+  Scissors, 
   Settings, 
-  BarChart3, 
-  FileImage, 
-  MapPin, 
-  HelpCircle, 
-  Phone, 
-  Share2, 
+  LogOut, 
+  Image,
+  MessageSquare,
+  Globe,
   Clock,
-  Home,
-  LogOut,
-  Menu,
-  Megaphone,
-  Wrench,
-  List,
-  MessageSquare
+  MapPin,
+  Phone,
+  HelpCircle,
+  FileText,
+  Share2
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
-import NotificationSystem from './NotificationSystem';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { data: notifications } = useNotifications();
+  
+  const unreadCount = notifications?.filter(n => !n.read).length || 0;
 
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      navigate('/auth');
-      toast({
-        title: "Sessão encerrada",
-        description: "Até breve!",
-      });
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao encerrar sessão",
-        variant: "destructive",
-      });
-    }
+    await supabase.auth.signOut();
+    window.location.href = '/';
   };
 
   const menuItems = [
-    { path: '/admin', icon: BarChart3, label: 'Dashboard', exact: true },
-    { path: '/admin/appointments', icon: Calendar, label: 'Marcações' },
-    { path: '/admin/services', icon: List, label: 'Serviços' },
-    { path: '/admin/users', icon: Users, label: 'Utilizadores' },
-    { path: '/admin/time-slots', icon: Clock, label: 'Horários' },
-    { path: '/admin/banners', icon: Megaphone, label: 'Banners' },
-    { path: '/admin/media', icon: FileImage, label: 'Galeria' },
-    { path: '/admin/addresses', icon: MapPin, label: 'Endereços' },
-    { path: '/admin/contacts', icon: Phone, label: 'Contactos' },
-    { path: '/admin/social', icon: Share2, label: 'Redes Sociais' },
-    { path: '/admin/faqs', icon: HelpCircle, label: 'FAQs' },
-    { path: '/admin/message-templates', icon: MessageSquare, label: 'Templates' },
-    { path: '/admin/settings', icon: Wrench, label: 'Configurações' }
+    { 
+      icon: LayoutDashboard, 
+      label: 'Dashboard', 
+      path: '/admin',
+      badge: unreadCount > 0 ? unreadCount : undefined
+    },
+    { 
+      icon: Calendar, 
+      label: 'Marcações', 
+      path: '/admin/appointments' 
+    },
+    { 
+      icon: UserCheck, 
+      label: 'Clientes', 
+      path: '/admin/clients' 
+    },
+    { 
+      icon: Scissors, 
+      label: 'Serviços', 
+      path: '/admin/services' 
+    },
+    { 
+      icon: Clock, 
+      label: 'Horários', 
+      path: '/admin/timeslots' 
+    },
+    { 
+      icon: Users, 
+      label: 'Utilizadores', 
+      path: '/admin/users' 
+    },
+    { 
+      icon: Image, 
+      label: 'Galeria', 
+      path: '/admin/media' 
+    },
+    { 
+      icon: FileText, 
+      label: 'Banners', 
+      path: '/admin/banners' 
+    },
+    { 
+      icon: MessageSquare, 
+      label: 'WhatsApp', 
+      path: '/admin/whatsapp' 
+    },
+    { 
+      icon: HelpCircle, 
+      label: 'FAQs', 
+      path: '/admin/faqs' 
+    },
+    { 
+      icon: MapPin, 
+      label: 'Endereços', 
+      path: '/admin/addresses' 
+    },
+    { 
+      icon: Phone, 
+      label: 'Contactos', 
+      path: '/admin/contacts' 
+    },
+    { 
+      icon: Share2, 
+      label: 'Redes Sociais', 
+      path: '/admin/social' 
+    },
+    { 
+      icon: Globe, 
+      label: 'Site', 
+      path: '/admin/site-config' 
+    },
+    { 
+      icon: Settings, 
+      label: 'Configurações', 
+      path: '/admin/settings' 
+    }
   ];
 
-  const isActive = (path: string, exact = false) => {
-    if (exact) {
-      return location.pathname === path;
-    }
-    return location.pathname.startsWith(path);
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar */}
-      <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out`}>
-        <div className="flex flex-col h-full">
-          <div className="p-6 border-b">
-            <h1 className="text-xl font-bold text-gray-900">Painel Admin</h1>
-          </div>
-          
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive(item.path, item.exact)
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <Icon className="h-5 w-5" />
+      <div className="w-64 bg-white shadow-lg flex flex-col">
+        <div className="p-6 border-b">
+          <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+        </div>
+        
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                  isActive 
+                    ? 'bg-primary text-white' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center">
+                  <item.icon className="h-5 w-5 mr-3" />
                   <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-          
-          <div className="p-4 border-t space-y-2">
-            <Link
-              to="/"
-              className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <Home className="h-5 w-5" />
-              <span>Ver Site</span>
-            </Link>
-            <Button
-              variant="ghost"
-              onClick={handleSignOut}
-              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <LogOut className="h-5 w-5 mr-3" />
-              Sair
-            </Button>
-          </div>
+                </div>
+                {item.badge && (
+                  <Badge variant="destructive" className="text-xs">
+                    {item.badge}
+                  </Badge>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+        
+        <div className="p-4 border-t">
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sair
+          </Button>
         </div>
       </div>
 
-      {/* Overlay for mobile */}
-      {isSidebarOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
       {/* Main Content */}
-      <div className="flex-1 lg:ml-0">
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b px-4 lg:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="lg:hidden"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-              <h2 className="text-lg font-semibold text-gray-900">
-                Gestão de Conteúdo
-              </h2>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <NotificationSystem />
-              <Badge variant="secondary" className="hidden sm:inline-flex">
-                Admin
-              </Badge>
-            </div>
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto">
+          <div className="p-8">
+            <Outlet />
           </div>
-        </header>
-
-        {/* Content */}
-        <main className="p-4 lg:p-6">
-          <Outlet />
-        </main>
+        </div>
       </div>
     </div>
   );

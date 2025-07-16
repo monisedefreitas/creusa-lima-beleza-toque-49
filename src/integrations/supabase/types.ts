@@ -135,12 +135,15 @@ export type Database = {
         Row: {
           appointment_date: string
           client_email: string | null
+          client_id: string | null
           client_name: string
           client_phone: string
           created_at: string
           id: string
+          next_session_date: string | null
           notes: string | null
           status: string
+          status_history: Json | null
           time_slot_id: string
           total_price: number | null
           updated_at: string
@@ -148,12 +151,15 @@ export type Database = {
         Insert: {
           appointment_date: string
           client_email?: string | null
+          client_id?: string | null
           client_name: string
           client_phone: string
           created_at?: string
           id?: string
+          next_session_date?: string | null
           notes?: string | null
           status?: string
+          status_history?: Json | null
           time_slot_id: string
           total_price?: number | null
           updated_at?: string
@@ -161,17 +167,27 @@ export type Database = {
         Update: {
           appointment_date?: string
           client_email?: string | null
+          client_id?: string | null
           client_name?: string
           client_phone?: string
           created_at?: string
           id?: string
+          next_session_date?: string | null
           notes?: string | null
           status?: string
+          status_history?: Json | null
           time_slot_id?: string
           total_price?: number | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appointments_time_slot_id_fkey"
             columns: ["time_slot_id"]
@@ -269,6 +285,39 @@ export type Database = {
           id?: string
           is_active?: boolean
           open_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string
+          preferences: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone: string
+          preferences?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string
+          preferences?: Json | null
           updated_at?: string
         }
         Relationships: []

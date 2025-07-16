@@ -1,174 +1,171 @@
 
 import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
-} from '@/components/ui/dialog';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { MessageCircle, Send, Eye } from 'lucide-react';
-import { useMessageTemplates } from '@/hooks/useMessageTemplates';
-import { 
-  processMessageTemplate, 
-  generateWhatsAppVariables 
-} from '@/utils/messageTemplates';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { MessageSquare, Copy, ExternalLink } from 'lucide-react';
+import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
 
 interface WhatsAppMessageSelectorProps {
-  appointment: any;
-  onSend: (message: string, type: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  appointment: {
+    id: string;
+    client_name: string;
+    client_phone: string;
+    appointment_date: string;
+    time_slots?: { time: string };
+    appointment_services?: Array<{
+      services?: { name: string };
+    }>;
+    total_price?: number;
+  };
 }
 
-const WhatsAppMessageSelector: React.FC<WhatsAppMessageSelectorProps> = ({ 
-  appointment, 
-  onSend 
+const WhatsAppMessageSelector: React.FC<WhatsAppMessageSelectorProps> = ({
+  isOpen,
+  onClose,
+  appointment
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedType, setSelectedType] = useState<string>('whatsapp_confirmation');
-  const [customMessage, setCustomMessage] = useState('');
-  const [previewMessage, setPreviewMessage] = useState('');
-  
-  const { data: templates } = useMessageTemplates();
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
 
-  const messageTypes = [
-    { value: 'whatsapp_confirmation', label: 'Confirmação de Marcação' },
-    { value: 'whatsapp_arrival_confirmation', label: 'Confirmação de Vinda da Cliente' },
-    { value: 'whatsapp_review_request', label: 'Pedido de Avaliação no Google Maps' },
-    { value: 'custom', label: 'Mensagem Personalizada' }
-  ];
+  const messageTemplates = {
+    confirmation: {
+      title: 'Confirmação de Marcação',
+      description: 'Confirmar que a marcação foi aceite',
+      template: `Olá ${appointment.client_name}! ✅
 
-  React.useEffect(() => {
-    if (selectedType !== 'custom') {
-      const template = templates?.find(t => t.type === selectedType && t.is_default);
-      if (template) {
-        const variables = generateWhatsAppVariables(appointment);
-        const processed = processMessageTemplate(template.content, variables);
-        setPreviewMessage(processed);
-        setCustomMessage(processed);
-      }
-    } else {
-      setPreviewMessage('');
-      setCustomMessage('');
+A sua marcação foi CONFIRMADA:
+
+📅 Data: ${format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })}
+🕒 Hora: ${appointment.time_slots?.time || 'N/A'}
+💆‍♀️ Serviços: ${appointment.appointment_services?.map(s => s.services?.name).join(', ') || 'N/A'}
+💰 Valor: €${appointment.total_price || 'A definir'}
+
+Estamos ansiosos por recebê-la!
+Se tiver alguma dúvida, não hesite em contactar.
+
+Obrigado! 🙏`
+    },
+    reminder: {
+      title: 'Lembrete de Marcação',
+      description: 'Lembrar o cliente da marcação próxima',
+      template: `Olá ${appointment.client_name}! 👋
+
+Este é um lembrete da sua marcação:
+
+📅 Data: ${format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })}
+🕒 Hora: ${appointment.time_slots?.time || 'N/A'}
+💆‍♀️ Serviços: ${appointment.appointment_services?.map(s => s.services?.name).join(', ') || 'N/A'}
+
+Por favor confirme a sua presença.
+Aguardamos por si! ✨`
+    },
+    cancellation: {
+      title: 'Cancelamento de Marcação',
+      description: 'Informar sobre o cancelamento',
+      template: `Olá ${appointment.client_name},
+
+Informamos que a sua marcação do dia ${format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })} às ${appointment.time_slots?.time || 'N/A'} foi cancelada.
+
+Se desejar reagendar, por favor entre em contacto connosco.
+
+Obrigado pela compreensão.`
+    },
+    reschedule: {
+      title: 'Reagendamento',
+      description: 'Propor novo agendamento',
+      template: `Olá ${appointment.client_name},
+
+Precisamos de reagendar a sua marcação do dia ${format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })}.
+
+Por favor entre em contacto para escolhermos uma nova data que seja conveniente para si.
+
+Obrigado! 🙏`
     }
-  }, [selectedType, templates, appointment]);
-
-  const handleSend = () => {
-    onSend(customMessage, selectedType);
-    setIsOpen(false);
   };
 
-  const getDefaultMessage = (type: string) => {
-    const messages = {
-      whatsapp_confirmation: `Olá ${appointment.client_name}!\n\nA sua marcação foi confirmada para o dia ${appointment.appointment_date} às ${appointment.time_slots?.time}.\n\nServiços agendados:\n${appointment.appointment_services?.map((s: any) => `• ${s.services?.name}`).join('\n')}\n\nAguardamos por si!\n\nObrigada! 🌿`,
-      whatsapp_arrival_confirmation: `Olá ${appointment.client_name}!\n\nEsperamos por si amanhã, dia ${appointment.appointment_date} às ${appointment.time_slots?.time}, para o seu tratamento.\n\nPor favor confirme a sua presença respondendo a esta mensagem.\n\nObrigada! 🌿`,
-      whatsapp_review_request: `Olá ${appointment.client_name}!\n\nEsperamos que tenha ficado satisfeita com o seu tratamento.\n\nA sua opinião é muito importante para nós! Poderia deixar uma avaliação no nosso Google Maps?\n\nMuito obrigada! ⭐`,
-      custom: ''
-    };
-    return messages[type as keyof typeof messages] || '';
+  const handleSendMessage = (templateKey: string) => {
+    const template = messageTemplates[templateKey as keyof typeof messageTemplates];
+    const message = encodeURIComponent(template.template);
+    const phoneNumber = appointment.client_phone.replace(/[^0-9]/g, '');
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    
+    window.open(whatsappUrl, '_blank');
+    onClose();
+  };
+
+  const copyToClipboard = (templateKey: string) => {
+    const template = messageTemplates[templateKey as keyof typeof messageTemplates];
+    navigator.clipboard.writeText(template.template);
   };
 
   return (
-    <>
-      <Button
-        size="sm"
-        onClick={() => setIsOpen(true)}
-        className="bg-green-600 hover:bg-green-700 text-white"
-      >
-        <MessageCircle className="h-4 w-4 mr-1" />
-        WhatsApp
-      </Button>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center">
+            <MessageSquare className="h-5 w-5 mr-2" />
+            Enviar Mensagem WhatsApp
+          </DialogTitle>
+        </DialogHeader>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Enviar Mensagem WhatsApp - {appointment.client_name}</DialogTitle>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label>Tipo de Mensagem</Label>
-                <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {messageTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Mensagem</Label>
-                <Textarea
-                  value={customMessage}
-                  onChange={(e) => setCustomMessage(e.target.value)}
-                  rows={12}
-                  placeholder={selectedType === 'custom' ? 'Digite sua mensagem personalizada...' : 'Edite a mensagem conforme necessário...'}
-                />
-              </div>
-
-              <div className="flex space-x-2">
-                <Button onClick={handleSend} className="flex-1">
-                  <Send className="h-4 w-4 mr-2" />
-                  Enviar WhatsApp
-                </Button>
-                <Button variant="outline" onClick={() => setIsOpen(false)}>
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label>Informações da Marcação</Label>
-                <div className="p-4 bg-gray-50 rounded-lg space-y-2">
-                  <p><strong>Cliente:</strong> {appointment.client_name}</p>
-                  <p><strong>Telefone:</strong> {appointment.client_phone}</p>
-                  <p><strong>Data:</strong> {appointment.appointment_date}</p>
-                  <p><strong>Hora:</strong> {appointment.time_slots?.time}</p>
-                  <p><strong>Serviços:</strong></p>
-                  <ul className="ml-4">
-                    {appointment.appointment_services?.map((service: any) => (
-                      <li key={service.id}>
-                        • {service.services?.name} (€{service.price})
-                      </li>
-                    ))}
-                  </ul>
-                  {appointment.total_price && (
-                    <p><strong>Total:</strong> €{appointment.total_price}</p>
-                  )}
-                </div>
-              </div>
-
-              {previewMessage && (
-                <div>
-                  <Label>Preview da Mensagem</Label>
-                  <div className="p-4 border rounded-lg bg-white max-h-60 overflow-y-auto">
-                    <div className="whitespace-pre-wrap text-sm">
-                      {previewMessage}
-                    </div>
-                  </div>
-                </div>
-              )}
+        <div className="space-y-4">
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h3 className="font-medium text-gray-900 mb-2">Detalhes da Marcação:</h3>
+            <div className="text-sm text-gray-600 space-y-1">
+              <p><strong>Cliente:</strong> {appointment.client_name}</p>
+              <p><strong>Telefone:</strong> {appointment.client_phone}</p>
+              <p><strong>Data:</strong> {format(new Date(appointment.appointment_date), 'dd/MM/yyyy', { locale: pt })}</p>
+              <p><strong>Hora:</strong> {appointment.time_slots?.time || 'N/A'}</p>
+              <p><strong>Serviços:</strong> {appointment.appointment_services?.map(s => s.services?.name).join(', ') || 'N/A'}</p>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+
+          <div className="grid gap-4">
+            <h3 className="font-medium text-gray-900">Selecione o tipo de mensagem:</h3>
+            
+            {Object.entries(messageTemplates).map(([key, template]) => (
+              <Card key={key} className="cursor-pointer hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900 mb-1">{template.title}</h4>
+                      <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                      
+                      <div className="bg-gray-50 p-3 rounded text-xs font-mono text-gray-700 max-h-32 overflow-y-auto">
+                        {template.template}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => copyToClipboard(key)}
+                    >
+                      <Copy className="h-4 w-4 mr-1" />
+                      Copiar
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleSendMessage(key)}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Enviar WhatsApp
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
