@@ -48,21 +48,30 @@ export const useTestimonials = () => {
 
   const createTestimonial = async (testimonial: Omit<Testimonial, 'id' | 'is_approved' | 'is_featured' | 'created_at' | 'updated_at'>) => {
     try {
-      const { error } = await supabase.from('testimonials').insert([testimonial]);
+      // Admin-created testimonials are automatically approved
+      const testimonialData = {
+        ...testimonial,
+        is_approved: true,
+        is_featured: false
+      };
+
+      const { error } = await supabase.from('testimonials').insert([testimonialData]);
       
       if (error) throw error;
       
       toast({
         title: "Sucesso",
-        description: "Depoimento enviado com sucesso! Será analisado antes da publicação.",
+        description: "Depoimento criado com sucesso!",
       });
       
+      // Refresh the testimonials list
+      fetchTestimonials(true);
       return true;
     } catch (error) {
       console.error('Error creating testimonial:', error);
       toast({
         title: "Erro",
-        description: "Erro ao enviar depoimento",
+        description: "Erro ao criar depoimento",
         variant: "destructive",
       });
       return false;

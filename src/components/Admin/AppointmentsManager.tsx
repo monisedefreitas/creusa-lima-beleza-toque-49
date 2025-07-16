@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import WhatsAppMessageSelector from './WhatsAppMessageSelector';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const AppointmentsManager: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -38,6 +40,7 @@ const AppointmentsManager: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [whatsappModal, setWhatsappModal] = useState<any>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Form states
   const [formData, setFormData] = useState({
@@ -188,6 +191,10 @@ const AppointmentsManager: React.FC = () => {
     setWhatsappModal(null);
   };
 
+  const handleCreateNewAppointment = () => {
+    navigate('/admin/create-appointment');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -201,169 +208,10 @@ const AppointmentsManager: React.FC = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Gestão de Marcações</h1>
         <div className="flex items-center space-x-2">
-          <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Marcação
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Criar Nova Marcação</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleCreateAppointment} className="space-y-6">
-                {/* Cliente */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Cliente</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Cliente Existente</Label>
-                      <Select value={formData.client_id} onValueChange={(value) => {
-                        const client = clients?.find(c => c.id === value);
-                        setFormData(prev => ({
-                          ...prev,
-                          client_id: value,
-                          client_name: client?.name || '',
-                          client_phone: client?.phone || '',
-                          client_email: client?.email || ''
-                        }));
-                      }}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecionar cliente..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {clients?.map(client => (
-                            <SelectItem key={client.id} value={client.id}>
-                              {client.name} - {client.phone}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label>Nome *</Label>
-                      <Input
-                        value={formData.client_name}
-                        onChange={(e) => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label>Telefone *</Label>
-                      <Input
-                        value={formData.client_phone}
-                        onChange={(e) => setFormData(prev => ({ ...prev, client_phone: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label>Email</Label>
-                      <Input
-                        type="email"
-                        value={formData.client_email}
-                        onChange={(e) => setFormData(prev => ({ ...prev, client_email: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Serviços */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Serviços</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {services?.map((service) => (
-                      <Card key={service.id} className={`cursor-pointer transition-all ${
-                        formData.service_ids.includes(service.id) ? 'ring-2 ring-primary' : ''
-                      }`}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center space-x-3">
-                            <Checkbox
-                              checked={formData.service_ids.includes(service.id)}
-                              onCheckedChange={() => handleServiceToggle(service.id)}
-                            />
-                            <div className="flex-1">
-                              <h4 className="font-medium">{service.name}</h4>
-                              <p className="text-primary font-semibold">{service.price_range}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Data e Hora */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Data e Hora</h3>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                      <Label>Data</Label>
-                      <Calendar
-                        mode="single"
-                        selected={selectedDateForForm}
-                        onSelect={setSelectedDateForForm}
-                        disabled={(date) => !isDateAvailable(date)}
-                        locale={pt}
-                        className="rounded-md border"
-                      />
-                    </div>
-                    
-                    {selectedDateForForm && (
-                      <div>
-                        <Label>Horário</Label>
-                        <div className="grid grid-cols-2 gap-2 mt-2">
-                          {getAvailableTimeSlots().map((slot) => (
-                            <Button
-                              key={slot.id}
-                              type="button"
-                              variant={formData.time_slot_id === slot.id ? "default" : "outline"}
-                              onClick={() => setFormData(prev => ({ ...prev, time_slot_id: slot.id }))}
-                              className="text-sm"
-                            >
-                              {slot.time}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Observações e Próxima Sessão */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Observações</Label>
-                    <Textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <Label>Próxima Sessão (opcional)</Label>
-                    <Input
-                      type="date"
-                      value={formData.next_session_date}
-                      onChange={(e) => setFormData(prev => ({ ...prev, next_session_date: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={!formData.client_name || !formData.client_phone || !selectedDateForForm || !formData.time_slot_id || formData.service_ids.length === 0}>
-                    Criar Marcação
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={handleCreateNewAppointment}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Marcação
+          </Button>
           
           <Badge variant="secondary">
             Hoje: {todayAppointments.length} marcações

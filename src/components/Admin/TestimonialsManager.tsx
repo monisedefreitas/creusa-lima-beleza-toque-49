@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star, Check, X, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { useTestimonials, Testimonial } from '@/hooks/useTestimonials';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import TestimonialFormModal from './TestimonialFormModal';
 
 const TestimonialsManager: React.FC = () => {
   const { testimonials, isLoading, fetchTestimonials, updateTestimonial, deleteTestimonial } = useTestimonials();
@@ -31,6 +32,10 @@ const TestimonialsManager: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     await deleteTestimonial(id);
+  };
+
+  const handleTestimonialCreated = () => {
+    fetchTestimonials(true);
   };
 
   const renderStars = (rating?: number) => {
@@ -66,6 +71,7 @@ const TestimonialsManager: React.FC = () => {
             Gerir depoimentos de clientes e aprovar para exibição no site
           </p>
         </div>
+        <TestimonialFormModal onSuccess={handleTestimonialCreated} />
       </div>
 
       <div className="flex gap-2">
