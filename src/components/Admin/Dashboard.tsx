@@ -1,98 +1,15 @@
-
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { 
-  Users, 
-  Star, 
-  MessageSquare, 
-  Image,
-  TrendingUp,
-  Calendar,
-  CheckCircle,
-  Clock
-} from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileDashboard from './MobileDashboard';
 
 const Dashboard: React.FC = () => {
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['admin-stats'],
-    queryFn: async () => {
-      const [
-        { count: servicesCount },
-        { count: faqsCount },
-        { count: mediaCount },
-        { count: adminsCount },
-        { count: appointmentsCount },
-        { count: pendingAppointmentsCount }
-      ] = await Promise.all([
-        supabase.from('services').select('*', { count: 'exact', head: true }),
-        supabase.from('faqs').select('*', { count: 'exact', head: true }),
-        supabase.from('media_gallery').select('*', { count: 'exact', head: true }),
-        supabase.from('admin_users').select('*', { count: 'exact', head: true }),
-        supabase.from('appointments').select('*', { count: 'exact', head: true }),
-        supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('status', 'pending')
-      ]);
+  const isMobile = useIsMobile();
 
-      return {
-        services: servicesCount || 0,
-        faqs: faqsCount || 0,
-        media: mediaCount || 0,
-        admins: adminsCount || 0,
-        appointments: appointmentsCount || 0,
-        pendingAppointments: pendingAppointmentsCount || 0
-      };
-    }
-  });
-
-  const statCards = [
-    {
-      title: 'Marcações',
-      value: stats?.appointments || 0,
-      icon: Calendar,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
-    },
-    {
-      title: 'Pendentes',
-      value: stats?.pendingAppointments || 0,
-      icon: Clock,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50'
-    },
-    {
-      title: 'Serviços',
-      value: stats?.services || 0,
-      icon: Star,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50'
-    },
-    {
-      title: 'FAQs',
-      value: stats?.faqs || 0,
-      icon: MessageSquare,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
-    }
-  ];
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-20 bg-gray-200 rounded"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
+  if (isMobile) {
+    return <MobileDashboard />;
   }
 
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

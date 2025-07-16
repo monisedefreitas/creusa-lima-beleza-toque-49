@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
@@ -24,8 +23,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileAdminLayout from './MobileAdminLayout';
 
 const AdminLayout: React.FC = () => {
+  const isMobile = useIsMobile();
   const location = useLocation();
   const { data: notifications } = useNotifications();
   
@@ -39,6 +41,10 @@ const AdminLayout: React.FC = () => {
   const handleBackToSite = () => {
     window.open('/', '_blank');
   };
+
+  if (isMobile) {
+    return <MobileAdminLayout />;
+  }
 
   const menuItems = [
     { 
