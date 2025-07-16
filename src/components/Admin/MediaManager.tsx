@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -249,6 +250,10 @@ const MediaManager: React.FC = () => {
         fileUrl = await uploadImageToStorage(imageFile);
       }
       
+      // Get service_id and convert 'none' to null
+      const serviceIdValue = formData.get('service_id') as string;
+      const serviceId = serviceIdValue === 'none' ? null : serviceIdValue || null;
+      
       const mediaData = {
         title: formData.get('title') as string || null,
         description: formData.get('description') as string || null,
@@ -259,7 +264,7 @@ const MediaManager: React.FC = () => {
         is_active: formData.get('is_active') === 'on',
         is_featured: formData.get('is_featured') === 'on',
         order_index: parseInt(formData.get('order_index') as string) || 0,
-        service_id: formData.get('service_id') as string || null,
+        service_id: serviceId,
         file_size: parseInt(formData.get('file_size') as string) || null,
         dimensions: formData.get('dimensions') as string || null
       };
@@ -363,12 +368,12 @@ const MediaManager: React.FC = () => {
                   placeholder="Categoria personalizada"
                   defaultValue={editingMedia?.category || ''}
                 />
-                <Select name="service_id" defaultValue={editingMedia?.service_id || ''}>
+                <Select name="service_id" defaultValue={editingMedia?.service_id || 'none'}>
                   <SelectTrigger>
                     <SelectValue placeholder="Associar a serviço" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum serviço</SelectItem>
+                    <SelectItem value="none">Nenhum serviço</SelectItem>
                     {services?.map((service) => (
                       <SelectItem key={service.id} value={service.id}>
                         {service.name}
@@ -589,3 +594,4 @@ const MediaManager: React.FC = () => {
 };
 
 export default MediaManager;
+
