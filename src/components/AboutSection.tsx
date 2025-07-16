@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import LazyImage from '@/components/Performance/LazyImage';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import BookingModal from '@/components/BookingSystem/BookingModal';
 
 const AboutSection: React.FC = () => {
   const { elementRef, isVisible } = useScrollAnimation();
@@ -140,11 +139,7 @@ const AboutSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Booking Modal */}
-      <BookingModal>
-        <div style={{ display: 'none' }} />
-      </BookingModal>
-      
+      {/* Custom Booking Modal */}
       {isBookingModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
