@@ -6,6 +6,23 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 const HeroSection: React.FC = () => {
+  const { data: contentSettings } = useQuery({
+    queryKey: ['hero-content'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('content_sections')
+        .select('*')
+        .eq('section_type', 'hero_banner')
+        .eq('is_active', true)
+        .order('order_index')
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const { data: settings } = useQuery({
     queryKey: ['site-settings'],
     queryFn: async () => {
@@ -23,11 +40,29 @@ const HeroSection: React.FC = () => {
   };
 
   const heroBackgroundImage = getSettingValue('hero_background_image') || '/lovable-uploads/new-logo.png';
+  
+  // Use content from database or fallback to default
+  const heroTitle = contentSettings?.title || 'Transforme-se com os nossos';
+  const heroSubtitle = contentSettings?.subtitle || 'tratamentos exclusivos';
+  const heroContent = contentSettings?.content || 'Descubra a harmonia perfeita entre beleza natural e bem-estar numa experiência única e personalizada';
+  const heroButtonText = contentSettings?.button_text || 'Marcar Consulta';
+  const heroButtonLink = contentSettings?.button_link || '#services';
 
   const scrollToServices = () => {
     const servicesSection = document.getElementById('services');
     if (servicesSection) {
       servicesSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleMainAction = () => {
+    if (heroButtonLink.startsWith('#')) {
+      const element = document.getElementById(heroButtonLink.slice(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      window.open(heroButtonLink, '_blank');
     }
   };
 
@@ -45,22 +80,22 @@ const HeroSection: React.FC = () => {
       
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-          Transforme-se com os nossos
-          <span className="block text-sage-200">tratamentos exclusivos</span>
+          {heroTitle}
+          <span className="block text-sage-200">{heroSubtitle}</span>
         </h1>
         
         <p className="text-xl md:text-2xl text-sage-100 mb-8 max-w-2xl mx-auto">
-          Descubra a harmonia perfeita entre beleza natural e bem-estar numa experiência única e personalizada
+          {heroContent}
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
             size="lg" 
             className="bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 text-lg shadow-lg"
-            onClick={scrollToServices}
+            onClick={handleMainAction}
           >
             <Calendar className="mr-2 h-5 w-5" />
-            Marcar Consulta
+            {heroButtonText}
           </Button>
           
           <Button 

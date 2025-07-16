@@ -16,6 +16,7 @@ import SocialMediaManager from '@/components/Admin/SocialMediaManager';
 import SiteConfigManager from '@/components/Admin/SiteConfigManager';
 import SettingsManager from '@/components/Admin/SettingsManager';
 import WhatsAppManager from '@/components/Admin/WhatsAppManager';
+import SiteContentManager from '@/components/Admin/SiteContentManager';
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -33,6 +34,7 @@ const AdminRoutes: React.FC = () => {
         <Route path="contacts" element={<ContactsManager />} />
         <Route path="social" element={<SocialMediaManager />} />
         <Route path="site-config" element={<SiteConfigManager />} />
+        <Route path="content" element={<SiteContentManager />} />
         <Route path="settings" element={<SettingsManager />} />
         <Route path="whatsapp" element={<WhatsAppManager />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />

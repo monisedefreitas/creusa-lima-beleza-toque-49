@@ -78,6 +78,11 @@ const AdminLayout: React.FC = () => {
       path: '/admin/media' 
     },
     { 
+      icon: FileText, 
+      label: 'Conteúdo', 
+      path: '/admin/content' 
+    },
+    { 
       icon: MessageSquare, 
       label: 'WhatsApp', 
       path: '/admin/whatsapp' 

@@ -1,20 +1,48 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Upload, Image } from 'lucide-react';
+import { Save, Upload, Image, Type, Layout } from 'lucide-react';
 
 const SiteContentManager: React.FC = () => {
   const [heroImage, setHeroImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [heroContent, setHeroContent] = useState({
+    title: '',
+    subtitle: '',
+    content: '',
+    button_text: '',
+    button_link: '',
+    is_active: true
+  });
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: settings, isLoading } = useQuery({
+  // Fetch hero content from content_sections table
+  const { data: heroData, isLoading: heroLoading } = useQuery({
+    queryKey: ['hero-content-admin'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('content_sections')
+        .select('*')
+        .eq('section_type', 'hero_banner')
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Fetch site settings for background image
+  const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ['site-settings-content'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -25,6 +53,19 @@ const SiteContentManager: React.FC = () => {
       return data;
     }
   });
+
+  React.useEffect(() => {
+    if (heroData) {
+      setHeroContent({
+        title: heroData.title || '',
+        subtitle: heroData.subtitle || '',
+        content: heroData.content || '',
+        button_text: heroData.button_text || '',
+        button_link: heroData.button_link || '',
+        is_active: heroData.is_active || true
+      });
+    }
+  }, [heroData]);
 
   const updateSettingMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
@@ -52,6 +93,60 @@ const SiteContentManager: React.FC = () => {
     }
   });
 
+  const updateHeroContentMutation = useMutation({
+    mutationFn: async (content: typeof heroContent) => {
+      if (heroData?.id) {
+        // Update existing
+        const { error } = await supabase
+          .from('content_sections')
+          .update({
+            title: content.title,
+            subtitle: content.subtitle,
+            content: content.content,
+            button_text: content.button_text,
+            button_link: content.button_link,
+            is_active: content.is_active,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', heroData.id);
+
+        if (error) throw error;
+      } else {
+        // Create new
+        const { error } = await supabase
+          .from('content_sections')
+          .insert([{
+            section_type: 'hero_banner',
+            title: content.title,
+            subtitle: content.subtitle,
+            content: content.content,
+            button_text: content.button_text,
+            button_link: content.button_link,
+            is_active: content.is_active,
+            order_index: 0
+          }]);
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['hero-content-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['hero-content'] });
+      toast({
+        title: "Sucesso",
+        description: "Conteúdo do hero atualizado com sucesso!",
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating hero content:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar conteúdo do hero.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -68,16 +163,6 @@ const SiteContentManager: React.FC = () => {
     if (!heroImage) return;
 
     try {
-      // Upload image to a public folder (you might want to implement proper file upload)
-      // For now, we'll use a placeholder path
-      const imagePath = `/uploads/hero-${Date.now()}.jpg`;
-      
-      // In a real implementation, you would upload to storage here
-      // const { data: uploadData, error: uploadError } = await supabase.storage
-      //   .from('images')
-      //   .upload(imagePath, heroImage);
-
-      // For demo purposes, we'll use the preview URL
       await updateSettingMutation.mutateAsync({
         key: 'hero_background_image',
         value: imagePreview
@@ -95,13 +180,17 @@ const SiteContentManager: React.FC = () => {
     }
   };
 
+  const handleSaveHeroContent = () => {
+    updateHeroContentMutation.mutate(heroContent);
+  };
+
   const getSettingValue = (key: string) => {
     return settings?.find(s => s.key === key)?.value || '';
   };
 
   const currentHeroImage = getSettingValue('hero_background_image') || '/lovable-uploads/new-logo.png';
 
-  if (isLoading) {
+  if (heroLoading || settingsLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -115,7 +204,93 @@ const SiteContentManager: React.FC = () => {
         <h1 className="text-3xl font-bold">Gestão de Conteúdo do Site</h1>
       </div>
 
-      {/* Hero Section Management */}
+      {/* Hero Content Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Type className="h-5 w-5" />
+            Conteúdo da Secção Hero
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="hero-title">Título Principal</Label>
+              <Input
+                id="hero-title"
+                value={heroContent.title}
+                onChange={(e) => setHeroContent(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Transforme-se com os nossos"
+              />
+            </div>
+            <div>
+              <Label htmlFor="hero-subtitle">Subtítulo</Label>
+              <Input
+                id="hero-subtitle"
+                value={heroContent.subtitle}
+                onChange={(e) => setHeroContent(prev => ({ ...prev, subtitle: e.target.value }))}
+                placeholder="tratamentos exclusivos"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="hero-content">Descrição</Label>
+            <Textarea
+              id="hero-content"
+              value={heroContent.content}
+              onChange={(e) => setHeroContent(prev => ({ ...prev, content: e.target.value }))}
+              placeholder="Descubra a harmonia perfeita entre beleza natural e bem-estar..."
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="hero-button-text">Texto do Botão</Label>
+              <Input
+                id="hero-button-text"
+                value={heroContent.button_text}
+                onChange={(e) => setHeroContent(prev => ({ ...prev, button_text: e.target.value }))}
+                placeholder="Marcar Consulta"
+              />
+            </div>
+            <div>
+              <Label htmlFor="hero-button-link">Link do Botão</Label>
+              <Input
+                id="hero-button-link"
+                value={heroContent.button_link}
+                onChange={(e) => setHeroContent(prev => ({ ...prev, button_link: e.target.value }))}
+                placeholder="#services ou https://..."
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="hero-active"
+              checked={heroContent.is_active}
+              onCheckedChange={(checked) => setHeroContent(prev => ({ ...prev, is_active: checked }))}
+            />
+            <Label htmlFor="hero-active">Ativo</Label>
+          </div>
+
+          <Button 
+            onClick={handleSaveHeroContent}
+            disabled={updateHeroContentMutation.isPending}
+            className="w-full"
+          >
+            {updateHeroContentMutation.isPending ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Guardar Conteúdo do Hero
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Hero Background Image Management */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -124,7 +299,6 @@ const SiteContentManager: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Current Image Preview */}
           <div>
             <Label>Imagem Atual</Label>
             <div className="mt-2 border rounded-lg overflow-hidden">
@@ -136,7 +310,6 @@ const SiteContentManager: React.FC = () => {
             </div>
           </div>
 
-          {/* New Image Upload */}
           <div>
             <Label htmlFor="hero-image">Nova Imagem</Label>
             <Input
@@ -148,7 +321,6 @@ const SiteContentManager: React.FC = () => {
             />
           </div>
 
-          {/* Preview New Image */}
           {imagePreview && (
             <div>
               <Label>Pré-visualização</Label>
@@ -162,7 +334,6 @@ const SiteContentManager: React.FC = () => {
             </div>
           )}
 
-          {/* Save Button */}
           <Button 
             onClick={handleSaveHeroImage}
             disabled={!heroImage || updateSettingMutation.isPending}
@@ -171,34 +342,10 @@ const SiteContentManager: React.FC = () => {
             {updateSettingMutation.isPending ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
             ) : (
-              <Save className="h-4 w-4 mr-2" />
+              <Upload className="h-4 w-4 mr-2" />
             )}
             Guardar Nova Imagem
           </Button>
-        </CardContent>
-      </Card>
-
-      {/* Other Site Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Outras Configurações</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Link para Avaliações Google Maps</Label>
-              <Input
-                value={getSettingValue('google_maps_review_link')}
-                onChange={(e) => {
-                  updateSettingMutation.mutate({
-                    key: 'google_maps_review_link',
-                    value: e.target.value
-                  });
-                }}
-                placeholder="https://www.google.com/..."
-              />
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
