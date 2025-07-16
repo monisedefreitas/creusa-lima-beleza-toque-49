@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,6 +42,9 @@ const MediaManager: React.FC = () => {
   const [editingMedia, setEditingMedia] = useState<MediaItem | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploading, setUploading] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: mediaItems, isLoading } = useQuery({
@@ -99,6 +101,26 @@ const MediaManager: React.FC = () => {
       return data;
     }
   });
+
+  const uploadImageToStorage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `gallery_${Date.now()}.${fileExt}`;
+    const filePath = `images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('site-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('site-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
 
   const createMediaMutation = useMutation({
     mutationFn: async (media: Omit<MediaItem, 'id' | 'media_gallery_tags' | 'services'>) => {
@@ -196,31 +218,60 @@ const MediaManager: React.FC = () => {
     setShowForm(false);
     setEditingMedia(null);
     setSelectedTags([]);
+    setImageFile(null);
+    setImagePreview('');
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    const mediaData = {
-      title: formData.get('title') as string || null,
-      description: formData.get('description') as string || null,
-      file_url: formData.get('file_url') as string,
-      file_type: formData.get('file_type') as 'image' | 'video',
-      category: formData.get('category') as string || null,
-      alt_text: formData.get('alt_text') as string || null,
-      is_active: formData.get('is_active') === 'on',
-      is_featured: formData.get('is_featured') === 'on',
-      order_index: parseInt(formData.get('order_index') as string) || 0,
-      service_id: formData.get('service_id') as string || null,
-      file_size: parseInt(formData.get('file_size') as string) || null,
-      dimensions: formData.get('dimensions') as string || null
-    };
+    setUploading(true);
+    try {
+      let fileUrl = formData.get('file_url') as string;
+      
+      // If we have a new image file, upload it first
+      if (imageFile) {
+        fileUrl = await uploadImageToStorage(imageFile);
+      }
+      
+      const mediaData = {
+        title: formData.get('title') as string || null,
+        description: formData.get('description') as string || null,
+        file_url: fileUrl,
+        file_type: 'image' as const,
+        category: formData.get('category') as string || null,
+        alt_text: formData.get('alt_text') as string || null,
+        is_active: formData.get('is_active') === 'on',
+        is_featured: formData.get('is_featured') === 'on',
+        order_index: parseInt(formData.get('order_index') as string) || 0,
+        service_id: formData.get('service_id') as string || null,
+        file_size: parseInt(formData.get('file_size') as string) || null,
+        dimensions: formData.get('dimensions') as string || null
+      };
 
-    if (editingMedia) {
-      updateMediaMutation.mutate({ ...mediaData, id: editingMedia.id });
-    } else {
-      createMediaMutation.mutate(mediaData);
+      if (editingMedia) {
+        updateMediaMutation.mutate({ ...mediaData, id: editingMedia.id });
+      } else {
+        createMediaMutation.mutate(mediaData);
+      }
+    } catch (error) {
+      console.error('Error processing form:', error);
+      toast.error('Erro ao processar o formulário');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -292,12 +343,14 @@ const MediaManager: React.FC = () => {
                   placeholder="Título da imagem"
                   defaultValue={editingMedia?.title || ''}
                 />
-                <Input
-                  name="file_url"
-                  placeholder="URL da imagem *"
-                  defaultValue={editingMedia?.file_url || ''}
-                  required
-                />
+                {!imageFile && (
+                  <Input
+                    name="file_url"
+                    placeholder="URL da imagem (ou selecione um ficheiro)"
+                    defaultValue={editingMedia?.file_url || ''}
+                    required={!imageFile}
+                  />
+                )}
                 <Input
                   name="alt_text"
                   placeholder="Texto alternativo (SEO)"
@@ -327,18 +380,31 @@ const MediaManager: React.FC = () => {
                   placeholder="Ordem de exibição"
                   defaultValue={editingMedia?.order_index || 0}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="image-upload">Upload de Imagem</Label>
                 <Input
-                  name="file_size"
-                  type="number"
-                  placeholder="Tamanho do ficheiro (KB)"
-                  defaultValue={editingMedia?.file_size || ''}
-                />
-                <Input
-                  name="dimensions"
-                  placeholder="Dimensões (ex: 1920x1080)"
-                  defaultValue={editingMedia?.dimensions || ''}
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="mt-1"
                 />
               </div>
+
+              {imagePreview && (
+                <div>
+                  <Label>Pré-visualização</Label>
+                  <div className="mt-2 border rounded-lg overflow-hidden">
+                    <img 
+                      src={imagePreview} 
+                      alt="Pré-visualização" 
+                      className="w-full h-48 object-cover"
+                    />
+                  </div>
+                </div>
+              )}
               
               <Textarea
                 name="description"
@@ -387,12 +453,18 @@ const MediaManager: React.FC = () => {
                   />
                   <label>Destacado</label>
                 </div>
-                <input type="hidden" name="file_type" value="image" />
               </div>
 
               <div className="flex space-x-2">
-                <Button type="submit" className="bg-darkgreen-800 hover:bg-darkgreen-900">
-                  {editingMedia ? 'Atualizar' : 'Criar'}
+                <Button 
+                  type="submit" 
+                  className="bg-darkgreen-800 hover:bg-darkgreen-900"
+                  disabled={uploading}
+                >
+                  {uploading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : null}
+                  {uploading ? 'A processar...' : (editingMedia ? 'Atualizar' : 'Criar')}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancelar

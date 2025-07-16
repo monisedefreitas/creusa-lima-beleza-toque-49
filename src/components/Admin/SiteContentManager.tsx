@@ -9,11 +9,12 @@ import { Switch } from '@/components/ui/switch';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Upload, Image, Type, Layout } from 'lucide-react';
+import { Save, Upload, Image, Type } from 'lucide-react';
 
 const SiteContentManager: React.FC = () => {
   const [heroImage, setHeroImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploading, setUploading] = useState(false);
   const [heroContent, setHeroContent] = useState({
     title: '',
     subtitle: '',
@@ -159,13 +160,36 @@ const SiteContentManager: React.FC = () => {
     }
   };
 
+  const uploadImageToStorage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `hero_${Date.now()}.${fileExt}`;
+    const filePath = `images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('site-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('site-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
   const handleSaveHeroImage = async () => {
     if (!heroImage) return;
 
+    setUploading(true);
     try {
+      const imageUrl = await uploadImageToStorage(heroImage);
+      
       await updateSettingMutation.mutateAsync({
         key: 'hero_background_image',
-        value: imagePreview
+        value: imageUrl
       });
 
       setHeroImage(null);
@@ -177,6 +201,8 @@ const SiteContentManager: React.FC = () => {
         description: "Erro ao fazer upload da imagem.",
         variant: "destructive",
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -188,7 +214,7 @@ const SiteContentManager: React.FC = () => {
     return settings?.find(s => s.key === key)?.value || '';
   };
 
-  const currentHeroImage = getSettingValue('hero_background_image') || '/lovable-uploads/new-logo.png';
+  const currentHeroImage = getSettingValue('hero_background_image');
 
   if (heroLoading || settingsLoading) {
     return (
@@ -299,16 +325,18 @@ const SiteContentManager: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label>Imagem Atual</Label>
-            <div className="mt-2 border rounded-lg overflow-hidden">
-              <img 
-                src={currentHeroImage} 
-                alt="Imagem atual do hero" 
-                className="w-full h-48 object-cover"
-              />
+          {currentHeroImage && (
+            <div>
+              <Label>Imagem Atual</Label>
+              <div className="mt-2 border rounded-lg overflow-hidden">
+                <img 
+                  src={currentHeroImage} 
+                  alt="Imagem atual do hero" 
+                  className="w-full h-48 object-cover"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <Label htmlFor="hero-image">Nova Imagem</Label>
@@ -336,15 +364,15 @@ const SiteContentManager: React.FC = () => {
 
           <Button 
             onClick={handleSaveHeroImage}
-            disabled={!heroImage || updateSettingMutation.isPending}
+            disabled={!heroImage || uploading || updateSettingMutation.isPending}
             className="w-full"
           >
-            {updateSettingMutation.isPending ? (
+            {(uploading || updateSettingMutation.isPending) ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
             ) : (
               <Upload className="h-4 w-4 mr-2" />
             )}
-            Guardar Nova Imagem
+            {uploading ? 'A fazer upload...' : 'Guardar Nova Imagem'}
           </Button>
         </CardContent>
       </Card>

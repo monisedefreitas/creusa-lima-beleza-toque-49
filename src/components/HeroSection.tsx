@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+
 const HeroSection: React.FC = () => {
   const {
     data: contentSettings
@@ -17,6 +19,7 @@ const HeroSection: React.FC = () => {
       return data;
     }
   });
+  
   const {
     data: settings
   } = useQuery({
@@ -30,10 +33,12 @@ const HeroSection: React.FC = () => {
       return data;
     }
   });
+  
   const getSettingValue = (key: string) => {
     return settings?.find(s => s.key === key)?.value || '';
   };
-  const heroBackgroundImage = getSettingValue('hero_background_image') || '/lovable-uploads/new-logo.png';
+  
+  const heroBackgroundImage = getSettingValue('hero_background_image');
 
   // Use content from database or fallback to default
   const heroTitle = contentSettings?.title || 'Transforme-se com os nossos';
@@ -41,14 +46,7 @@ const HeroSection: React.FC = () => {
   const heroContent = contentSettings?.content || 'Descubra a harmonia perfeita entre beleza natural e bem-estar numa experiência única e personalizada';
   const heroButtonText = contentSettings?.button_text || 'Marcar Consulta';
   const heroButtonLink = contentSettings?.button_link || '#services';
-  const scrollToServices = () => {
-    const servicesSection = document.getElementById('services');
-    if (servicesSection) {
-      servicesSection.scrollIntoView({
-        behavior: 'smooth'
-      });
-    }
-  };
+  
   const handleMainAction = () => {
     if (heroButtonLink.startsWith('#')) {
       const element = document.getElementById(heroButtonLink.slice(1));
@@ -61,13 +59,21 @@ const HeroSection: React.FC = () => {
       window.open(heroButtonLink, '_blank');
     }
   };
-  return <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-sage-50 to-sage-100">
+
+  return (
+    <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-sage-50 to-sage-100">
+      {/* Overlay */}
       <div className="absolute inset-0 bg-black/20"></div>
       
-      {/* Background Image */}
-      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{
-      backgroundImage: `url('${heroBackgroundImage}')`
-    }} />
+      {/* Background Image - only show if defined in admin */}
+      {heroBackgroundImage && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat" 
+          style={{
+            backgroundImage: `url('${heroBackgroundImage}')`
+          }} 
+        />
+      )}
       
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-darkgreen-900">
@@ -93,6 +99,8 @@ const HeroSection: React.FC = () => {
           </Button>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default HeroSection;
