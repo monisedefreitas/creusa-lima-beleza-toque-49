@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,6 +29,7 @@ import { useClients } from '@/hooks/useClients';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import WhatsAppMessageSelector from './WhatsAppMessageSelector';
+import { useToast } from '@/hooks/use-toast';
 
 const AppointmentsManager: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -37,6 +37,7 @@ const AppointmentsManager: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [whatsappModal, setWhatsappModal] = useState<any>(null);
+  const { toast } = useToast();
   
   // Form states
   const [formData, setFormData] = useState({
@@ -172,6 +173,19 @@ const AppointmentsManager: React.FC = () => {
 
   const handleWhatsApp = (appointment: any) => {
     setWhatsappModal(appointment);
+  };
+
+  const handleWhatsAppSend = (message: string, type: string) => {
+    // Here you would typically integrate with a WhatsApp API
+    // For now, we'll just show a success message
+    console.log('Sending WhatsApp message:', { message, type, appointment: whatsappModal });
+    
+    toast({
+      title: "Mensagem enviada",
+      description: `Mensagem de ${type} enviada para ${whatsappModal?.client_name}`,
+    });
+    
+    setWhatsappModal(null);
   };
 
   if (isLoading) {
@@ -584,6 +598,7 @@ const AppointmentsManager: React.FC = () => {
           isOpen={!!whatsappModal}
           onClose={() => setWhatsappModal(null)}
           appointment={whatsappModal}
+          onSend={handleWhatsAppSend}
         />
       )}
     </div>
