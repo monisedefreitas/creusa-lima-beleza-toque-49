@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,14 +16,18 @@ import {
   Plus,
   Edit,
   Filter,
-  TrendingUp
+  TrendingUp,
+  CheckCircle,
+  Euro
 } from 'lucide-react';
 import { format, isBefore, startOfDay } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useAppointments, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
 import { useUpdateAppointment } from '@/hooks/useUpdateAppointment';
+import { usePriceConfirmation } from '@/hooks/usePriceConfirmation';
 import WhatsAppMessageSelector from './WhatsAppMessageSelector';
 import AppointmentEditModal from './AppointmentEditModal';
+import PriceConfirmationModal from './PriceConfirmationModal';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,12 +37,14 @@ const AppointmentsManager: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [whatsappModal, setWhatsappModal] = useState<any>(null);
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
+  const [priceConfirmationModal, setPriceConfirmationModal] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const { data: appointments, isLoading } = useAppointments();
   const updateStatusMutation = useUpdateAppointmentStatus();
   const updateAppointmentMutation = useUpdateAppointment();
+  const priceConfirmationMutation = usePriceConfirmation();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -80,7 +85,20 @@ const AppointmentsManager: React.FC = () => {
 
   const pendingCount = appointments?.filter(apt => apt.status === 'pending').length || 0;
   const confirmedCount = appointments?.filter(apt => apt.status === 'confirmed').length || 0;
-  const totalRevenue = appointments?.reduce((sum, apt) => sum + (apt.total_price || 0), 0) || 0;
+  
+  const confirmedRevenue = appointments?.reduce((sum, apt) => {
+    if (['confirmed', 'completed'].includes(apt.status) && apt.final_price) {
+      return sum + apt.final_price;
+    }
+    return sum;
+  }, 0) || 0;
+
+  const estimatedRevenue = appointments?.reduce((sum, apt) => {
+    if (apt.status === 'pending' && apt.total_price) {
+      return sum + apt.total_price;
+    }
+    return sum;
+  }, 0) || 0;
 
   const handleStatusChange = (appointmentId: string, newStatus: string, nextSession?: string) => {
     updateStatusMutation.mutate({
@@ -88,6 +106,21 @@ const AppointmentsManager: React.FC = () => {
       status: newStatus,
       next_session_date: nextSession
     });
+  };
+
+  const handleConfirmWithPrice = (appointment: any) => {
+    setPriceConfirmationModal(appointment);
+  };
+
+  const handlePriceConfirmation = (finalPrice: number, notes?: string) => {
+    if (priceConfirmationModal) {
+      priceConfirmationMutation.mutate({
+        appointmentId: priceConfirmationModal.id,
+        finalPrice,
+        notes
+      });
+      setPriceConfirmationModal(null);
+    }
   };
 
   const handleEditAppointment = (appointment: any) => {
@@ -137,7 +170,7 @@ const AppointmentsManager: React.FC = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Gestão de Marcações</h1>
         <div className="flex items-center space-x-2">
-          <Button onClick={handleCreateNewAppointment}>
+          <Button onClick={() => navigate('/admin/create-appointment')}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Marcação
           </Button>
@@ -153,8 +186,8 @@ const AppointmentsManager: React.FC = () => {
         </div>
       </div>
 
-      {/* Estatísticas Melhoradas */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      {/* Estatísticas Aprimoradas */}
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -186,7 +219,7 @@ const AppointmentsManager: React.FC = () => {
                 <p className="text-sm font-medium text-gray-600">Confirmadas</p>
                 <p className="text-2xl font-bold text-green-600">{confirmedCount}</p>
               </div>
-              <User className="h-8 w-8 text-green-600" />
+              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -198,7 +231,7 @@ const AppointmentsManager: React.FC = () => {
                 <p className="text-sm font-medium text-gray-600">Total</p>
                 <p className="text-2xl font-bold">{appointments?.length || 0}</p>
               </div>
-              <MessageSquare className="h-8 w-8 text-purple-600" />
+              <User className="h-8 w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -207,10 +240,22 @@ const AppointmentsManager: React.FC = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Receita</p>
-                <p className="text-2xl font-bold text-green-600">€{totalRevenue.toFixed(2)}</p>
+                <p className="text-sm font-medium text-gray-600">Receita Confirmada</p>
+                <p className="text-2xl font-bold text-green-600">€{confirmedRevenue.toFixed(2)}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <Euro className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Receita Estimada</p>
+                <p className="text-2xl font-bold text-orange-600">€{estimatedRevenue.toFixed(2)}</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-orange-600" />
             </div>
           </CardContent>
         </Card>
@@ -273,8 +318,14 @@ const AppointmentsManager: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div>
-                        <h3 className="text-lg font-semibold">
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
                           {appointment.clients?.name || appointment.client_name}
+                          {appointment.final_price && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                              <Euro className="h-3 w-3 mr-1" />
+                              Valor Confirmado
+                            </Badge>
+                          )}
                         </h3>
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <span className="flex items-center">
@@ -306,11 +357,23 @@ const AppointmentsManager: React.FC = () => {
                           {appointment.clients?.email || appointment.client_email}
                         </div>
                       )}
-                      {appointment.total_price && (
-                        <div className="text-sm font-medium text-green-600">
-                          Total: €{appointment.total_price}
-                        </div>
-                      )}
+                      
+                      <div className="space-y-1">
+                        {appointment.final_price ? (
+                          <div className="text-sm font-medium text-green-600">
+                            Valor Final: €{appointment.final_price}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-600">
+                            Valor Estimado: €{appointment.total_price || 0}
+                          </div>
+                        )}
+                        {appointment.price_confirmed_at && (
+                          <div className="text-xs text-gray-500">
+                            Confirmado em: {format(new Date(appointment.price_confirmed_at), 'PPp', { locale: pt })}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div>
@@ -343,6 +406,18 @@ const AppointmentsManager: React.FC = () => {
 
                   {/* Ações */}
                   <div className="flex items-center space-x-2 pt-2">
+                    {appointment.status === 'pending' && !appointment.final_price && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleConfirmWithPrice(appointment)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Confirmar com Valor
+                      </Button>
+                    )}
+
                     <Select 
                       value={appointment.status} 
                       onValueChange={(value) => handleStatusChange(appointment.id, value)}
@@ -393,6 +468,16 @@ const AppointmentsManager: React.FC = () => {
           </Card>
         )}
       </div>
+
+      {/* Modal de Confirmação de Preço */}
+      {priceConfirmationModal && (
+        <PriceConfirmationModal
+          appointment={priceConfirmationModal}
+          isOpen={!!priceConfirmationModal}
+          onClose={() => setPriceConfirmationModal(null)}
+          onConfirm={handlePriceConfirmation}
+        />
+      )}
 
       {/* Modal de Edição */}
       {editingAppointment && (

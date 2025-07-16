@@ -139,9 +139,12 @@ export type Database = {
           client_name: string
           client_phone: string
           created_at: string
+          final_price: number | null
           id: string
           next_session_date: string | null
           notes: string | null
+          price_confirmed_at: string | null
+          price_confirmed_by: string | null
           status: string
           status_history: Json | null
           time_slot_id: string
@@ -155,9 +158,12 @@ export type Database = {
           client_name: string
           client_phone: string
           created_at?: string
+          final_price?: number | null
           id?: string
           next_session_date?: string | null
           notes?: string | null
+          price_confirmed_at?: string | null
+          price_confirmed_by?: string | null
           status?: string
           status_history?: Json | null
           time_slot_id: string
@@ -171,9 +177,12 @@ export type Database = {
           client_name?: string
           client_phone?: string
           created_at?: string
+          final_price?: number | null
           id?: string
           next_session_date?: string | null
           notes?: string | null
+          price_confirmed_at?: string | null
+          price_confirmed_by?: string | null
           status?: string
           status_history?: Json | null
           time_slot_id?: string
