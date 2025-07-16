@@ -14,11 +14,6 @@ import SkipLinks from '@/components/Accessibility/SkipLinks';
 import { SectionDivider } from '@/components/SectionDivider';
 
 const Index: React.FC = () => {
-  const handleBookingClick = () => {
-    // This will be handled by the BookingModal component within ServicesSection
-    console.log('Booking clicked');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-sage-50 to-white">
       <SEOManager />
@@ -39,7 +34,7 @@ const Index: React.FC = () => {
         <SectionDivider />
         
         <section id="services">
-          <ServicesSection onBookingClick={handleBookingClick} />
+          <ServicesSection />
         </section>
         
         <SectionDivider />
