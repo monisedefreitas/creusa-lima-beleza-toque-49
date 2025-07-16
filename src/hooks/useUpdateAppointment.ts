@@ -11,7 +11,10 @@ interface UpdateAppointmentData {
   appointment_date?: string;
   time_slot_id?: string;
   notes?: string;
-  service_ids?: string[];
+  services?: Array<{
+    service_id: string;
+    price: number;
+  }>;
   status?: string;
   next_session_date?: string;
 }
@@ -22,20 +25,12 @@ export const useUpdateAppointment = () => {
 
   return useMutation({
     mutationFn: async (data: UpdateAppointmentData) => {
-      const { id, service_ids, ...appointmentData } = data;
+      const { id, services, ...appointmentData } = data;
 
       // Calcular novo preço total se os serviços mudaram
       let totalPrice = null;
-      if (service_ids && service_ids.length > 0) {
-        const { data: services } = await supabase
-          .from('services')
-          .select('id, price_range')
-          .in('id', service_ids);
-
-        totalPrice = services?.reduce((sum, service) => {
-          const price = parseFloat(service.price_range?.split('-')[0]?.replace('€', '') || '0');
-          return sum + price;
-        }, 0) || 0;
+      if (services && services.length > 0) {
+        totalPrice = services.reduce((sum, service) => sum + service.price, 0);
       }
 
       // Atualizar marcação
@@ -50,7 +45,7 @@ export const useUpdateAppointment = () => {
       if (appointmentError) throw appointmentError;
 
       // Atualizar serviços se fornecidos
-      if (service_ids) {
+      if (services) {
         // Remover serviços existentes
         const { error: deleteError } = await supabase
           .from('appointment_services')
@@ -60,22 +55,12 @@ export const useUpdateAppointment = () => {
         if (deleteError) throw deleteError;
 
         // Adicionar novos serviços
-        if (service_ids.length > 0) {
-          const { data: services } = await supabase
-            .from('services')
-            .select('id, price_range')
-            .in('id', service_ids);
-
-          const appointmentServices = service_ids.map(serviceId => {
-            const service = services?.find(s => s.id === serviceId);
-            const price = parseFloat(service?.price_range?.split('-')[0]?.replace('€', '') || '0');
-            
-            return {
-              appointment_id: id,
-              service_id: serviceId,
-              price: price
-            };
-          });
+        if (services.length > 0) {
+          const appointmentServices = services.map(service => ({
+            appointment_id: id,
+            service_id: service.service_id,
+            price: service.price
+          }));
 
           const { error: servicesError } = await supabase
             .from('appointment_services')

@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Euro, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useTimeSlots, useBookedSlotsForDate } from '@/hooks/useAppointments';
@@ -36,11 +36,15 @@ const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
     client_phone: '',
     client_email: '',
     time_slot_id: '',
-    service_ids: [] as string[],
     notes: '',
     status: 'pending',
     next_session_date: ''
   });
+  
+  const [selectedServices, setSelectedServices] = useState<Array<{
+    service_id: string;
+    price: number;
+  }>>([]);
 
   const { toast } = useToast();
   const { data: timeSlots } = useTimeSlots();
@@ -69,7 +73,6 @@ const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
         client_phone: appointment.client_phone || '',
         client_email: appointment.client_email || '',
         time_slot_id: appointment.time_slot_id || '',
-        service_ids: appointment.appointment_services?.map((s: any) => s.service_id) || [],
         notes: appointment.notes || '',
         status: appointment.status || 'pending',
         next_session_date: appointment.next_session_date || ''
@@ -77,6 +80,16 @@ const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
       
       if (appointment.appointment_date) {
         setSelectedDate(new Date(appointment.appointment_date));
+      }
+
+      // Carregar serviços da marcação
+      if (appointment.appointment_services) {
+        setSelectedServices(
+          appointment.appointment_services.map((s: any) => ({
+            service_id: s.service_id,
+            price: s.price
+          }))
+        );
       }
     }
   }, [appointment]);
@@ -101,19 +114,33 @@ const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
   const getAvailableTimeSlots = () => {
     if (!timeSlots || !bookedSlots) return timeSlots || [];
     
-    // Inclui o slot atual da marcação sendo editada
     return timeSlots.filter(slot => 
       !bookedSlots.includes(slot.id) || slot.id === appointment?.time_slot_id
     );
   };
 
   const handleServiceToggle = (serviceId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      service_ids: prev.service_ids.includes(serviceId)
-        ? prev.service_ids.filter(id => id !== serviceId)
-        : [...prev.service_ids, serviceId]
-    }));
+    const service = services?.find(s => s.id === serviceId);
+    if (!service) return;
+
+    const isSelected = selectedServices.some(s => s.service_id === serviceId);
+    
+    if (isSelected) {
+      setSelectedServices(prev => prev.filter(s => s.service_id !== serviceId));
+    } else {
+      const defaultPrice = parseFloat(service.price_range?.split('-')[0]?.replace('€', '') || '0');
+      setSelectedServices(prev => [...prev, { service_id: serviceId, price: defaultPrice }]);
+    }
+  };
+
+  const handleServicePriceChange = (serviceId: string, price: number) => {
+    setSelectedServices(prev => 
+      prev.map(s => s.service_id === serviceId ? { ...s, price } : s)
+    );
+  };
+
+  const getTotalPrice = () => {
+    return selectedServices.reduce((sum, service) => sum + service.price, 0);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -128,7 +155,7 @@ const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
       return;
     }
 
-    if (formData.service_ids.length === 0) {
+    if (selectedServices.length === 0) {
       toast({
         title: "Erro",
         description: "Selecione pelo menos um serviço.",
@@ -139,7 +166,8 @@ const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
 
     const updateData = {
       ...formData,
-      appointment_date: format(selectedDate, 'yyyy-MM-dd')
+      appointment_date: format(selectedDate, 'yyyy-MM-dd'),
+      services: selectedServices
     };
 
     onUpdate(updateData);
@@ -147,12 +175,12 @@ const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Marcação</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="client_name">Nome do Cliente *</Label>
@@ -248,20 +276,60 @@ const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
           </div>
 
           <div>
-            <Label>Serviços *</Label>
-            <div className="space-y-2 mt-2">
-              {services?.map((service) => (
-                <div key={service.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={service.id}
-                    checked={formData.service_ids.includes(service.id)}
-                    onCheckedChange={() => handleServiceToggle(service.id)}
-                  />
-                  <Label htmlFor={service.id} className="text-sm">
-                    {service.name} ({service.price_range})
-                  </Label>
+            <Label>Serviços e Preços *</Label>
+            <div className="space-y-4 mt-2">
+              <div className="text-sm text-gray-600">
+                Selecione os serviços e ajuste os preços individuais:
+              </div>
+              
+              {services?.map((service) => {
+                const isSelected = selectedServices.some(s => s.service_id === service.id);
+                const selectedService = selectedServices.find(s => s.service_id === service.id);
+                
+                return (
+                  <div key={service.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={service.id}
+                        checked={isSelected}
+                        onCheckedChange={() => handleServiceToggle(service.id)}
+                      />
+                      <Label htmlFor={service.id} className="text-sm font-medium">
+                        {service.name}
+                      </Label>
+                      <span className="text-xs text-gray-500">
+                        (Preço padrão: {service.price_range})
+                      </span>
+                    </div>
+                    
+                    {isSelected && (
+                      <div className="ml-6">
+                        <Label className="text-sm">Preço personalizado</Label>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Euro className="h-4 w-4 text-gray-500" />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={selectedService?.price || 0}
+                            onChange={(e) => handleServicePriceChange(service.id, parseFloat(e.target.value) || 0)}
+                            className="w-32"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              
+              {selectedServices.length > 0 && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-center font-medium">
+                    <span>Total:</span>
+                    <span className="text-lg">€{getTotalPrice().toFixed(2)}</span>
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 

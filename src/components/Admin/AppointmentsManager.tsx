@@ -28,11 +28,13 @@ import { usePriceConfirmation } from '@/hooks/usePriceConfirmation';
 import WhatsAppMessageSelector from './WhatsAppMessageSelector';
 import AppointmentEditModal from './AppointmentEditModal';
 import PriceConfirmationModal from './PriceConfirmationModal';
+import WhatsAppConfirmationModal from './WhatsAppConfirmationModal';
 import MobileAppointmentsTable from './MobileAppointmentsTable';
 import ResponsiveModal from './ResponsiveModal';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { createWhatsAppLink } from '@/utils/messageTemplates';
 
 const AppointmentsManager: React.FC = () => {
   const isMobile = useIsMobile();
@@ -42,6 +44,7 @@ const AppointmentsManager: React.FC = () => {
   const [whatsappModal, setWhatsappModal] = useState<any>(null);
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
   const [priceConfirmationModal, setPriceConfirmationModal] = useState<any>(null);
+  const [whatsappConfirmationModal, setWhatsappConfirmationModal] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -137,6 +140,8 @@ const AppointmentsManager: React.FC = () => {
       {
         onSuccess: () => {
           setEditingAppointment(null);
+          // Mostrar modal de confirmação de WhatsApp
+          setWhatsappConfirmationModal(editingAppointment);
         }
       }
     );
@@ -146,12 +151,29 @@ const AppointmentsManager: React.FC = () => {
     setWhatsappModal(appointment);
   };
 
-  const handleWhatsAppSend = (message: string, type: string) => {
-    console.log('Enviando mensagem WhatsApp:', { message, type, appointment: whatsappModal });
+  const handleWhatsAppSend = async (message: string, type: string) => {
+    if (!whatsappModal) return;
+    
+    const variables = {
+      clientName: whatsappModal.client_name,
+      appointmentDate: new Date(whatsappModal.appointment_date).toLocaleDateString('pt-PT'),
+      appointmentTime: whatsappModal.time_slots?.time || '',
+      serviceName: whatsappModal.appointment_services?.map((s: any) => s.services?.name).join(', ') || '',
+      totalPrice: whatsappModal.total_price?.toString() || '0'
+    };
+
+    const whatsappLink = await createWhatsAppLink(
+      whatsappModal.client_phone,
+      type,
+      variables
+    );
+
+    // Abrir o link do WhatsApp
+    window.open(whatsappLink, '_blank');
     
     toast({
-      title: "Mensagem enviada",
-      description: `Mensagem de ${type} enviada para ${whatsappModal?.client_name}`,
+      title: "WhatsApp aberto",
+      description: `WhatsApp aberto com mensagem de ${type} para ${whatsappModal.client_name}`,
     });
     
     setWhatsappModal(null);
@@ -532,6 +554,14 @@ const AppointmentsManager: React.FC = () => {
             onSend={handleWhatsAppSend}
           />
         </ResponsiveModal>
+      )}
+
+      {whatsappConfirmationModal && (
+        <WhatsAppConfirmationModal
+          isOpen={!!whatsappConfirmationModal}
+          onClose={() => setWhatsappConfirmationModal(null)}
+          appointment={whatsappConfirmationModal}
+        />
       )}
     </div>
   );
