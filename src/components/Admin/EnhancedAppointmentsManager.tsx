@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, User, Phone, Mail, MessageSquare, Edit, RotateCcw } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, MessageSquare, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useAppointments, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
@@ -65,6 +65,11 @@ const EnhancedAppointmentsManager: React.FC = () => {
       });
     } catch (error) {
       console.error('Error updating status:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar estado da marcação",
+        variant: "destructive",
+      });
     }
   };
 

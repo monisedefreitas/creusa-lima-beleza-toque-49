@@ -1,187 +1,229 @@
 
-export const defaultMessageTemplates = [
-  {
-    id: 'whatsapp_confirmation',
-    name: 'Confirmação de Marcação WhatsApp',
-    type: 'whatsapp_confirmation',
-    content: `Olá {{client_name}}! 😊
+import { supabase } from '@/integrations/supabase/client';
 
-✅ A sua marcação foi confirmada com sucesso!
+export const getWhatsAppMessage = async (templateType: string, variables: Record<string, string> = {}): Promise<string> => {
+  try {
+    // First try to get a specific template from the database
+    const { data: template } = await supabase
+      .from('message_templates')
+      .select('content, variables')
+      .eq('type', templateType)
+      .eq('is_active', true)
+      .eq('is_default', true)
+      .single();
 
-📅 **Detalhes da sua consulta:**
-• **Data:** {{appointment_date}}
-• **Hora:** {{appointment_time}}
-• **Serviço:** {{service_name}}
-• **Local:** {{clinic_address}}
+    if (template) {
+      let message = template.content;
+      
+      // Replace variables in the template
+      if (template.variables && Array.isArray(template.variables)) {
+        template.variables.forEach((variable: string) => {
+          const value = variables[variable] || `{${variable}}`;
+          message = message.replace(new RegExp(`\\{${variable}\\}`, 'g'), value);
+        });
+      }
 
-📍 **Como chegar:**
-Pode usar o nosso link de navegação para facilitar: {{maps_link}}
+      return message;
+    }
 
-💡 **Lembretes importantes:**
-• Chegue 10 minutos antes da hora marcada
-• Traga um documento de identificação
-• Em caso de impossibilidade, avise com 24h de antecedência
-
-Estamos ansiosos por recebê-la e proporcionar uma experiência única de bem-estar! 
-
-Se tiver alguma dúvida, não hesite em contactar-nos.
-
-Com os melhores cumprimentos,
-Equipa {{clinic_name}} 💚`,
-    variables: ['client_name', 'appointment_date', 'appointment_time', 'service_name', 'clinic_address', 'maps_link', 'clinic_name'],
-    is_default: true
-  },
-  {
-    id: 'review_request',
-    name: 'Pedido de Avaliação no Site',
-    type: 'review_request',
-    content: `Olá {{client_name}}! 😊
-
-Esperamos que tenha ficado satisfeita com o seu tratamento de {{service_name}} connosco! ✨
-
-A sua opinião é muito importante para nós e ajuda outras pessoas a conhecerem o nosso trabalho. 
-
-💝 **Poderia partilhar a sua experiência no nosso site?**
-
-Deixe-nos uma avaliação aqui:
-{{site_testimonial_link}}
-
-⭐ A sua avaliação demora apenas 1 minuto e significa muito para a nossa pequena clínica!
-
-Como agradecimento pela sua confiança, na sua próxima visita oferecemos 10% de desconto! 🎁
-
-Muito obrigada pelo seu tempo e confiança! 
-
-Com carinho,
-Equipa {{clinic_name}} 💚
-
-P.S.: Estamos sempre aqui para qualquer esclarecimento! 😘`,
-    variables: ['client_name', 'service_name', 'site_testimonial_link', 'clinic_name'],
-    is_default: false
-  },
-  {
-    id: 'appointment_reminder',
-    name: 'Lembrete de Consulta',
-    type: 'appointment_reminder',
-    content: `Olá {{client_name}}! 😊
-
-🔔 **Lembrete da sua consulta**
-
-Lembramos que tem uma consulta marcada connosco:
-
-📅 **Amanhã, {{appointment_date}}**
-🕐 **Às {{appointment_time}}**
-💆‍♀️ **Serviço:** {{service_name}}
-
-📍 **Localização:** {{clinic_address}}
-
-💡 **Preparação para a consulta:**
-• Chegue 10 minutos mais cedo
-• Vista roupa confortável
-• Traga documento de identificação
-
-Se por algum motivo não puder comparecer, avise-nos com antecedência para reagendarmos.
-
-Estamos ansiosos por recebê-la! ✨
-
-Equipa {{clinic_name}} 💚`,
-    variables: ['client_name', 'appointment_date', 'appointment_time', 'service_name', 'clinic_address', 'clinic_name'],
-    is_default: false
-  },
-  {
-    id: 'reschedule_notification',
-    name: 'Notificação de Reagendamento',
-    type: 'reschedule_notification',
-    content: `Olá {{client_name}}! 😊
-
-📅 **Consulta Reagendada com Sucesso!**
-
-A sua consulta foi reagendada para:
-
-🗓️ **Nova Data:** {{appointment_date}}
-🕐 **Horário:** {{appointment_time}}
-💆‍♀️ **Serviço:** {{service_name}}
-📍 **Local:** {{clinic_address}}
-
-💡 **Lembretes importantes:**
-• Chegue 10 minutos antes da hora marcada
-• Confirme a sua presença respondendo a esta mensagem
-• Em caso de nova impossibilidade, avise com 24h de antecedência
-
-Obrigada pela sua compreensão e estamos ansiosos por recebê-la na nova data! ✨
-
-Com os melhores cumprimentos,
-Equipa {{clinic_name}} 💚`,
-    variables: ['client_name', 'appointment_date', 'appointment_time', 'service_name', 'clinic_address', 'clinic_name'],
-    is_default: false
+    // Fallback to default templates if no database template found
+    return getDefaultTemplate(templateType, variables);
+  } catch (error) {
+    console.error('Error fetching message template:', error);
+    return getDefaultTemplate(templateType, variables);
   }
-];
-
-// Available variables for message templates
-export const getAvailableVariables = () => [
-  'client_name',
-  'appointment_date',
-  'appointment_time',
-  'service_name',
-  'services_list',
-  'total_price',
-  'clinic_name',
-  'clinic_address',
-  'clinic_phone',
-  'maps_link',
-  'site_testimonial_link'
-];
-
-// Variable descriptions for the admin interface
-export const getVariableDescriptions = () => ({
-  'client_name': 'Nome do cliente',
-  'appointment_date': 'Data da marcação',
-  'appointment_time': 'Hora da marcação',
-  'service_name': 'Nome do serviço',
-  'services_list': 'Lista de serviços (formatada)',
-  'total_price': 'Preço total da marcação',
-  'clinic_name': 'Nome da clínica',
-  'clinic_address': 'Endereço da clínica',
-  'clinic_phone': 'Telefone da clínica',
-  'maps_link': 'Link para navegação GPS',
-  'site_testimonial_link': 'Link para avaliação no site'
-});
-
-// Process message template by replacing variables
-export const processMessageTemplate = (template: string, variables: Record<string, string>) => {
-  let processedMessage = template;
-  
-  Object.entries(variables).forEach(([key, value]) => {
-    const placeholder = new RegExp(`{{${key}}}`, 'g');
-    processedMessage = processedMessage.replace(placeholder, value || `{{${key}}}`);
-  });
-  
-  return processedMessage;
 };
 
-// Generate WhatsApp message for services
-export const generateServiceWhatsAppMessage = (serviceName: string, clientName?: string) => {
-  const greeting = clientName ? `Olá ${clientName}!` : 'Olá!';
-  
-  return `${greeting} 😊
+const getDefaultTemplate = (templateType: string, variables: Record<string, string>): string => {
+  const { 
+    clientName = '{clientName}', 
+    appointmentDate = '{appointmentDate}', 
+    appointmentTime = '{appointmentTime}',
+    serviceName = '{serviceName}',
+    totalPrice = '{totalPrice}',
+    businessName = 'Nossa Empresa',
+    businessPhone = '+351 123 456 789',
+    businessAddress = 'Rua Principal, 123',
+    newDate = '{newDate}',
+    newTime = '{newTime}'
+  } = variables;
 
-Gostaria de saber mais informações sobre o serviço de ${serviceName}.
+  const templates: Record<string, string> = {
+    confirmation: `🌟 Olá ${clientName}!
 
-Poderia ajudar-me com:
-• Preços e duração
-• Disponibilidade de horários
-• Preparação necessária
+✅ A sua marcação foi confirmada:
+📅 Data: ${appointmentDate}
+🕐 Hora: ${appointmentTime}
+💅 Serviço: ${serviceName}
+💰 Valor: €${totalPrice}
 
-Obrigada! ✨`;
+📍 Localização: ${businessAddress}
+
+Em caso de dúvidas, contacte-nos através do ${businessPhone}.
+
+Até breve! 💖`,
+
+    reminder: `🔔 Lembrete da sua consulta
+
+Olá ${clientName}! 
+
+Lembramos que tem uma consulta marcada para amanhã:
+📅 ${appointmentDate} às ${appointmentTime}
+💅 Serviço: ${serviceName}
+
+📍 ${businessAddress}
+
+Caso necessite reagendar, contacte-nos pelo ${businessPhone}.
+
+Até amanhã! ✨`,
+
+    completion: `✨ Obrigada pela sua visita!
+
+Olá ${clientName}! 
+
+Esperamos que tenha ficado satisfeita com o nosso serviço de ${serviceName}! 
+
+🌟 A sua opinião é muito importante para nós! 
+📝 Pode deixar a sua avaliação em: https://meusite.com/avaliar
+
+Até à próxima! 💖
+
+${businessName}
+${businessPhone}`,
+
+    cancellation: `❌ Marcação Cancelada
+
+Olá ${clientName},
+
+A sua marcação do dia ${appointmentDate} às ${appointmentTime} foi cancelada.
+
+Se desejar reagendar, contacte-nos pelo ${businessPhone}.
+
+Obrigada pela compreensão! 
+
+${businessName}`,
+
+    rescheduling: `📅 Marcação Reagendada
+
+Olá ${clientName}!
+
+A sua consulta foi reagendada com sucesso:
+
+🔄 Nova data: ${newDate}
+🕐 Nova hora: ${newTime}
+💅 Serviço: ${serviceName}
+
+📍 Local: ${businessAddress}
+
+Obrigada pela compreensão!
+
+${businessName}
+${businessPhone}`,
+
+    welcome: `🌟 Bem-vinda ao ${businessName}!
+
+Olá ${clientName}!
+
+Obrigada por escolher os nossos serviços! 
+
+📱 Pode acompanhar as suas marcações através do nosso site
+📞 Para dúvidas: ${businessPhone}
+📍 Morada: ${businessAddress}
+
+Estamos ansiosas por recebê-la! 💖`,
+
+    follow_up: `💖 Como está a sentir-se?
+
+Olá ${clientName}!
+
+Já passaram alguns dias desde a sua última visita para ${serviceName}.
+
+Como está a sentir-se com o resultado? 
+
+🌟 Adoraríamos saber a sua opinião em: https://meusite.com/avaliar
+
+Para marcar a sua próxima consulta: ${businessPhone}
+
+${businessName}`,
+
+    promotion: `🎉 Oferta Especial para Si!
+
+Olá ${clientName}!
+
+Temos uma promoção especial que pode interessar-lhe! 
+
+💅 [Detalhes da promoção]
+📅 Válida até: [Data]
+
+Para marcar: ${businessPhone}
+Ou visite-nos em: ${businessAddress}
+
+${businessName}`,
+
+    birthday: `🎂 Feliz Aniversário!
+
+Olá ${clientName}!
+
+Hoje é um dia especial e queríamos desejar-lhe um Feliz Aniversário! 🎉
+
+🎁 Temos uma surpresa especial para si!
+📞 Contacte-nos: ${businessPhone}
+
+Que tenha um dia maravilhoso! ✨
+
+${businessName}`,
+
+    no_show: `❓ Sentimos a sua falta
+
+Olá ${clientName},
+
+Hoje esperávamos por si para a consulta das ${appointmentTime}, mas infelizmente não compareceu.
+
+Se aconteceu algum imprevisto, compreendemos! 
+
+📞 Para reagendar: ${businessPhone}
+
+${businessName}`,
+
+    whatsapp_confirmation: `🌟 Olá ${clientName}!
+
+✅ A sua marcação foi confirmada:
+📅 Data: ${appointmentDate}
+🕐 Hora: ${appointmentTime}
+💅 Serviço: ${serviceName}
+💰 Valor: €${totalPrice}
+
+📍 Localização: ${businessAddress}
+
+Em caso de dúvidas, contacte-nos através do ${businessPhone}.
+
+Até breve! 💖`,
+
+    review_request: `✨ Obrigada pela sua visita!
+
+Olá ${clientName}! 
+
+Esperamos que tenha ficado satisfeita com o nosso serviço de ${serviceName}! 
+
+🌟 A sua opinião é muito importante para nós! 
+📝 Pode deixar a sua avaliação em: https://meusite.com/avaliar
+
+Até à próxima! 💖
+
+${businessName}
+${businessPhone}`
+  };
+
+  return templates[templateType] || `Olá ${clientName}, obrigada por escolher os nossos serviços!`;
 };
 
-// Generate contact WhatsApp message
-export const generateContactWhatsAppMessage = () => {
-  return `Olá! 😊
+export const formatWhatsAppUrl = (phone: string, message: string): string => {
+  const cleanPhone = phone.replace(/\D/g, '');
+  const encodedMessage = encodeURIComponent(message);
+  return `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+};
 
-Gostaria de entrar em contacto para esclarecer algumas dúvidas sobre os vossos serviços.
-
-Estou disponível para conversar quando for conveniente.
-
-Obrigada! ✨`;
+export const createWhatsAppLink = async (phone: string, templateType: string, variables: Record<string, string> = {}): Promise<string> => {
+  const message = await getWhatsAppMessage(templateType, variables);
+  return formatWhatsAppUrl(phone, message);
 };

@@ -17,7 +17,8 @@ import {
   HelpCircle,
   FileText,
   Share2,
-  ExternalLink
+  ExternalLink,
+  Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -75,6 +76,11 @@ const AdminLayout: React.FC = () => {
       icon: FileText, 
       label: 'Conteúdo', 
       path: '/admin/content' 
+    },
+    { 
+      icon: Star, 
+      label: 'Depoimentos', 
+      path: '/admin/testimonials' 
     },
     { 
       icon: MessageSquare, 
