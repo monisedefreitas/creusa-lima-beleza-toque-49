@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -227,6 +228,32 @@ const SiteContentManager: React.FC = () => {
       .getPublicUrl(filePath);
 
     return data.publicUrl;
+  };
+
+  const handleSaveLogo = async () => {
+    if (!logoFile) return;
+
+    setUploading(true);
+    try {
+      const logoUrl = await uploadLogoToStorage(logoFile);
+      
+      await updateSettingMutation.mutateAsync({
+        key: 'site_logo',
+        value: logoUrl
+      });
+
+      setLogoFile(null);
+      setLogoPreview('');
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer upload da logo.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSaveDesktopImage = async () => {
