@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
+import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import AdminRoutes from "./pages/AdminRoutes";
 import NotFound from "./pages/NotFound";
@@ -26,19 +27,21 @@ const App = () => (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <BrowserRouter>
-            <SkipLinks />
-            <GoogleAnalytics trackingId="G-XXXXXXXXXX" />
-            <div className="min-h-screen bg-background font-sans antialiased">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/admin/*" element={<AdminRoutes />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <Toaster />
-              <Sonner />
-            </div>
-          </BrowserRouter>
+          <AuthProvider>
+            <BrowserRouter>
+              <SkipLinks />
+              <GoogleAnalytics trackingId="G-XXXXXXXXXX" />
+              <div className="min-h-screen bg-background font-sans antialiased">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/admin/*" element={<AdminRoutes />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Toaster />
+                <Sonner />
+              </div>
+            </BrowserRouter>
+          </AuthProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </HelmetProvider>
