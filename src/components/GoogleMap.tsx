@@ -25,10 +25,10 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
     }
   });
 
-  // Use primary address or coordinates for Carcavelos
+  // Use primary address or specific coordinates for the correct location
   const primaryAddress = addresses?.find(addr => addr.is_primary) || addresses?.[0];
   
-  // Coordinates for R. Fernando Lopes Graça, 379 B, 2775-571 Carcavelos, Portugal
+  // Coordinates extracted from the Google Maps link provided
   const lat = primaryAddress?.latitude || 38.6964;
   const lng = primaryAddress?.longitude || -9.3334;
   const zoom = 16;
@@ -38,8 +38,8 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
   const addressLine2 = `${primaryAddress?.postal_code || '2775-571'} ${primaryAddress?.city || 'Carcavelos'}`;
   const country = primaryAddress?.country || 'Portugal';
   
-  // Google Maps embed URL with Carcavelos location
-  const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3113.2!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDQxJzQ3LjAiTiA5wrAyMCcwMC4yIlc!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
+  // Updated Google Maps embed URL with the correct location from the provided link
+  const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3113.2!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd1ecfb1afc616d5%3A0xcdc0399346f7edd7!2zUi4gRmVybmFuZG8gTG9wZXMgR3Jh77+9YSwgMzc5IEIsIDI3NzUtNTcxIENhcmNhdmVsb3MsIFBvcnR1Z2Fs!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
 
   const handleNavigate = () => {
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
@@ -68,7 +68,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
       {/* Address and Navigation */}
       <div className="mt-6 text-center space-y-4">
         <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg inline-block">
-          <div className="text-sm text-gray-600 space-y-1">
+          <div className="text-sm text-darkgreen-600 space-y-1">
             <div className="font-semibold text-darkgreen-800">{addressLine1}</div>
             <div>{addressLine2}</div>
             <div>{country}</div>
@@ -77,7 +77,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
         
         <Button 
           onClick={handleNavigate}
-          className="bg-gradient-to-r from-darkgreen-700 to-darkgreen-800 hover:from-darkgreen-800 hover:to-darkgreen-900 text-white px-8 py-4 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 text-white px-8 py-4 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
         >
           <Navigation className="h-5 w-5 mr-2" />
           Iniciar Navegação
