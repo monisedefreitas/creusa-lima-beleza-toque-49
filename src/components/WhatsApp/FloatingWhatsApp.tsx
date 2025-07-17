@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
@@ -16,10 +15,13 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { trackWhatsAppClick, trackBookingIntent } from '@/components/Analytics/GoogleAnalytics';
+import { useWhatsAppTemplates } from '@/hooks/useWhatsAppTemplates';
 
 const FloatingWhatsApp: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  
+  const { getWhatsAppMessage } = useWhatsAppTemplates();
 
   const { data: services } = useQuery({
     queryKey: ['services-whatsapp'],
@@ -32,7 +34,8 @@ const FloatingWhatsApp: React.FC = () => {
       
       if (error) throw error;
       return data;
-    }
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes cache
   });
 
   const { data: contactInfo } = useQuery({
@@ -47,22 +50,30 @@ const FloatingWhatsApp: React.FC = () => {
       
       if (error) throw error;
       return data;
-    }
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes cache
   });
 
   const phoneNumber = contactInfo?.value?.replace(/\s+/g, '') || '351964481966';
 
-  const handleWhatsAppClick = (serviceId?: string, customMessage?: string) => {
+  const handleWhatsAppClick = (templateType: string = 'general_inquiry', serviceId?: string) => {
     trackWhatsAppClick();
     trackBookingIntent();
     
-    let message = customMessage || 'Olá! Gostaria de mais informações sobre os vossos serviços.';
+    let message: string;
     
     if (serviceId && services) {
       const service = services.find(s => s.id === serviceId);
-      if (service) {
-        message = `Olá! Gostaria de agendar uma consulta para ${service.name}. Poderia indicar-me a disponibilidade e os valores?`;
-      }
+      message = getWhatsAppMessage('service_booking', {
+        service_name: service?.name,
+        clinic_name: 'Clínica',
+        clinic_phone: contactInfo?.value
+      });
+    } else {
+      message = getWhatsAppMessage(templateType, {
+        clinic_name: 'Clínica',
+        clinic_phone: contactInfo?.value
+      });
     }
     
     const encodedMessage = encodeURIComponent(message);
@@ -73,8 +84,16 @@ const FloatingWhatsApp: React.FC = () => {
   };
 
   const handleCallbackRequest = () => {
-    const message = 'Olá! Gostaria de solicitar uma chamada de retorno. Qual seria o melhor horário para me contactarem?';
-    handleWhatsAppClick(undefined, message);
+    const message = getWhatsAppMessage('callback_request', {
+      clinic_name: 'Clínica',
+      clinic_phone: contactInfo?.value
+    });
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    setIsOpen(false);
   };
 
   const groupedServices = services?.reduce((acc, service) => {
@@ -96,6 +115,7 @@ const FloatingWhatsApp: React.FC = () => {
           onClick={() => setIsOpen(true)}
           className="bg-green-600 hover:bg-green-700 text-white rounded-full w-16 h-16 shadow-2xl hover:scale-110 transition-all duration-300"
           size="icon"
+          aria-label="Contactar via WhatsApp"
         >
           <MessageSquare className="h-8 w-8" />
         </Button>
@@ -132,7 +152,7 @@ const FloatingWhatsApp: React.FC = () => {
             {/* Quick Actions */}
             <div className="space-y-2">
               <Button
-                onClick={() => handleWhatsAppClick()}
+                onClick={() => handleWhatsAppClick('general_inquiry')}
                 className="w-full justify-start bg-green-50 hover:bg-green-100 text-green-800 border border-green-200"
                 variant="outline"
               >
@@ -191,7 +211,7 @@ const FloatingWhatsApp: React.FC = () => {
                   {groupedServices[selectedCategory].map((service) => (
                     <Button
                       key={service.id}
-                      onClick={() => handleWhatsAppClick(service.id)}
+                      onClick={() => handleWhatsAppClick('service_booking', service.id)}
                       className="w-full justify-start text-left p-3 h-auto"
                       variant="outline"
                     >

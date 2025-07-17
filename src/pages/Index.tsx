@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import AboutSection from '@/components/AboutSection';
@@ -9,11 +9,26 @@ import FAQSection from '@/components/FAQSection';
 import LocationSection from '@/components/LocationSection';
 import Footer from '@/components/Footer';
 import FloatingWhatsApp from '@/components/WhatsApp/FloatingWhatsApp';
+import ScrollToTop from '@/components/Performance/ScrollToTop';
 import SEOManager from '@/components/SEO/SEOManager';
 import SkipLinks from '@/components/Accessibility/SkipLinks';
 import { SectionDivider } from '@/components/SectionDivider';
 
 const Index: React.FC = () => {
+  useEffect(() => {
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          const registration = await navigator.serviceWorker.register('/sw.js');
+          console.log('SW registered: ', registration);
+        } catch (registrationError) {
+          console.log('SW registration failed: ', registrationError);
+        }
+      });
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-sage-50 to-white">
       <SEOManager />
@@ -58,6 +73,7 @@ const Index: React.FC = () => {
       
       <Footer />
       <FloatingWhatsApp />
+      <ScrollToTop />
     </div>
   );
 };
