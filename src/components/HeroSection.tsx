@@ -49,7 +49,7 @@ const HeroSection: React.FC = () => {
           <Button 
             size="lg" 
             variant="outline" 
-            className="border-white text-white hover:bg-white hover:text-sage-900 px-8 py-4 text-lg"
+            className="border-white text-sage-900 hover:bg-white hover:text-sage-900 px-8 py-4 text-lg"
             asChild
           >
             <a href="#contact">Marcar Consulta</a>
