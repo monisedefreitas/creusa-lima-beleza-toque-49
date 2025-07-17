@@ -25,16 +25,21 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
     }
   });
 
-  // Use primary address or first active address
+  // Use primary address or coordinates for Carcavelos
   const primaryAddress = addresses?.find(addr => addr.is_primary) || addresses?.[0];
   
-  // Default coordinates (Aveiro) if no address configured
-  const lat = primaryAddress?.latitude || 40.6405;
-  const lng = primaryAddress?.longitude || -8.6538;
+  // Coordinates for R. Fernando Lopes Graça, 379 B, 2775-571 Carcavelos, Portugal
+  const lat = primaryAddress?.latitude || 38.6964;
+  const lng = primaryAddress?.longitude || -9.3334;
   const zoom = 16;
   
-  // Google Maps embed URL with the location
-  const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3048.5!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDM4JzI1LjgiTiA4wrAzOScxMy43Ilc!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
+  // Address details
+  const addressLine1 = primaryAddress?.street_address || 'R. Fernando Lopes Graça, 379 B';
+  const addressLine2 = `${primaryAddress?.postal_code || '2775-571'} ${primaryAddress?.city || 'Carcavelos'}`;
+  const country = primaryAddress?.country || 'Portugal';
+  
+  // Google Maps embed URL with Carcavelos location
+  const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3113.2!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDQxJzQ3LjAiTiA5wrAyMCcwMC4yIlc!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
 
   const handleNavigate = () => {
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
@@ -43,7 +48,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
 
   return (
     <div className={`relative ${className}`}>
-      <div className="relative overflow-hidden rounded-xl shadow-2xl h-80 md:h-96">
+      <div className="relative overflow-hidden rounded-2xl shadow-2xl h-96 md:h-[450px] group">
         <iframe
           src={mapSrc}
           width="100%"
@@ -52,30 +57,32 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          title={`Localização - ${primaryAddress?.name || 'Espaço Sinergia'}`}
-          className="rounded-xl"
+          title={`Localização - ${addressLine1}, ${addressLine2}`}
+          className="rounded-2xl transition-transform duration-300 group-hover:scale-105"
         />
         
         {/* Overlay for premium effect */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/10 to-transparent rounded-xl"></div>
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/20 via-transparent to-transparent rounded-2xl"></div>
       </div>
       
-      {/* Navigation Button */}
-      <div className="mt-4 text-center">
+      {/* Address and Navigation */}
+      <div className="mt-6 text-center space-y-4">
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg inline-block">
+          <div className="text-sm text-gray-600 space-y-1">
+            <div className="font-semibold text-darkgreen-800">{addressLine1}</div>
+            <div>{addressLine2}</div>
+            <div>{country}</div>
+          </div>
+        </div>
+        
         <Button 
           onClick={handleNavigate}
-          className="bg-darkgreen-800 hover:bg-darkgreen-900 text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
+          className="bg-gradient-to-r from-darkgreen-700 to-darkgreen-800 hover:from-darkgreen-800 hover:to-darkgreen-900 text-white px-8 py-4 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
         >
           <Navigation className="h-5 w-5 mr-2" />
           Iniciar Navegação
         </Button>
       </div>
-      
-      {primaryAddress && (
-        <div className="mt-2 text-center text-sm text-gray-600">
-          {primaryAddress.street_address}, {primaryAddress.city}
-        </div>
-      )}
     </div>
   );
 };

@@ -63,14 +63,14 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section id="home" className={`relative min-h-screen flex items-center justify-center transition-all duration-500 ${
-      heroBackgroundImage && !imageLoaded ? 'bg-gradient-to-br from-sage-50 to-sage-100' : ''
+    <section id="home" className={`relative min-h-screen flex items-center justify-center transition-all duration-700 ${
+      heroBackgroundImage && !imageLoaded ? 'bg-gradient-to-br from-sage-50 via-white to-sage-100' : ''
     }`}>
       {/* Background Image - only show if defined in admin */}
       {heroBackgroundImage && (
         <>
           <div 
-            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-500 ${
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             style={{
@@ -85,7 +85,7 @@ const HeroSection: React.FC = () => {
             onError={() => setImageLoaded(false)}
           />
           {/* Overlay only when image is loaded */}
-          <div className={`absolute inset-0 bg-black/20 transition-opacity duration-500 ${
+          <div className={`absolute inset-0 bg-gradient-to-br from-black/20 via-black/10 to-black/30 transition-opacity duration-700 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}></div>
         </>
@@ -93,30 +93,51 @@ const HeroSection: React.FC = () => {
       
       {/* Fallback gradient when no image or image not loaded */}
       {(!heroBackgroundImage || !imageLoaded) && (
-        <div className="absolute inset-0 bg-gradient-to-br from-sage-50 to-sage-100"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-sage-50 via-white to-sage-100"></div>
       )}
       
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-darkgreen-900">
-          {heroTitle}
-          <span className="block text-darkgreen-700">{heroSubtitle}</span>
-        </h1>
+      {/* Decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-sage-200/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-32 right-16 w-48 h-48 bg-darkgreen-200/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+      
+      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
+        <div className="animate-fade-in-up">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
+            <span className="block text-darkgreen-900 mb-4 tracking-tight">
+              {heroTitle}
+            </span>
+            <span className="block text-transparent bg-gradient-to-r from-sage-600 via-darkgreen-700 to-sage-800 bg-clip-text font-light tracking-wide">
+              {heroSubtitle}
+            </span>
+          </h1>
+        </div>
         
-        <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto text-darkgreen-500">
-          {heroContent}
-        </p>
+        <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+          <p className="text-xl md:text-2xl lg:text-3xl mb-12 max-w-4xl mx-auto text-darkgreen-600 leading-relaxed font-light">
+            {heroContent}
+          </p>
+        </div>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button size="lg" className="bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 text-lg shadow-lg" onClick={handleMainAction}>
-            <Calendar className="mr-2 h-5 w-5" />
+        <div className="animate-fade-in-up flex flex-col sm:flex-row gap-6 justify-center items-center" style={{ animationDelay: '0.6s' }}>
+          <Button 
+            size="lg" 
+            className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 text-white px-10 py-6 text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 border-0 rounded-full"
+            onClick={handleMainAction}
+          >
+            <Calendar className="mr-3 h-6 w-6" />
             {heroButtonText}
           </Button>
           
-          <Button variant="outline" size="lg" onClick={() => document.getElementById('about')?.scrollIntoView({
-          behavior: 'smooth'
-        })} className="border-white px-8 py-4 text-lg text-darkgreen-900 bg-darkgreen-100">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })} 
+            className="border-2 border-darkgreen-300 hover:border-darkgreen-500 px-10 py-6 text-lg text-darkgreen-800 hover:text-darkgreen-900 bg-white/80 hover:bg-white backdrop-blur-sm transition-all duration-300 hover:scale-105 rounded-full"
+          >
             Saber Mais
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <ArrowRight className="ml-3 h-6 w-6" />
           </Button>
         </div>
       </div>

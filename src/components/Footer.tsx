@@ -32,28 +32,25 @@ const Footer: React.FC = () => {
     }
   });
 
+  const { data: settings } = useQuery({
+    queryKey: ['site-settings-footer'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('*')
+        .in('key', ['company_location', 'company_email']);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const getContactByType = (type: string) => {
     return contactInfo?.find(contact => contact.type === type);
   };
 
-  const formatBusinessHours = () => {
-    if (!businessHours) return [];
-    
-    const activeHours = businessHours.filter(hour => hour.is_active);
-    const inactiveHours = businessHours.filter(hour => !hour.is_active);
-    
-    return [
-      ...activeHours.map(hour => ({
-        day: hour.day_of_week === 1 ? 'Segunda - Sexta' : hour.day_of_week === 6 ? 'Sábado' : '',
-        time: `${hour.open_time.slice(0,5)} - ${hour.close_time.slice(0,5)}`,
-        isActive: true
-      })).filter(h => h.day),
-      ...inactiveHours.map(hour => ({
-        day: 'Domingo',
-        time: 'Fechado',
-        isActive: false
-      }))
-    ];
+  const getSettingValue = (key: string, fallback: string) => {
+    return settings?.find(s => s.key === key)?.value || fallback;
   };
 
   return (
@@ -92,29 +89,18 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-sage-100">Horários</h3>
             <ul className="space-y-2 text-sm text-gray-300">
-              {formatBusinessHours().length > 0 ? (
-                formatBusinessHours().map((schedule, index) => (
-                  <li key={index} className="flex justify-between">
-                    <span>{schedule.day}:</span>
-                    <span className={schedule.isActive ? '' : 'text-red-400'}>{schedule.time}</span>
-                  </li>
-                ))
-              ) : (
-                <>
-                  <li className="flex justify-between">
-                    <span>Segunda - Sexta:</span>
-                    <span>9:00 - 18:00</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Sábado:</span>
-                    <span>9:00 - 13:00</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Domingo:</span>
-                    <span className="text-red-400">Fechado</span>
-                  </li>
-                </>
-              )}
+              <li className="flex justify-between">
+                <span>Segunda à Sexta:</span>
+                <span>09:00 - 18:00</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Sábado:</span>
+                <span>09:00 - 18:00</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Domingo:</span>
+                <span className="text-red-400">Fechado</span>
+              </li>
             </ul>
           </div>
         </div>
@@ -162,13 +148,13 @@ const Footer: React.FC = () => {
                 </a>
                 <span>•</span>
                 <a 
-                  href="mailto:info@casacriativami.pt" 
+                  href="mailto:contato@casacriativami.com" 
                   className="hover:text-sage-300 transition-colors"
                 >
                   Contacto
                 </a>
                 <span>•</span>
-                <span>Madeira, Portugal</span>
+                <span>{getSettingValue('company_location', 'Sintra, Portugal')}</span>
               </div>
             </div>
           </div>

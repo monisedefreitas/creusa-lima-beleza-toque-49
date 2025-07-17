@@ -1,26 +1,13 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { MapPin, Clock, MessageSquare, Phone, Mail } from 'lucide-react';
-import GoogleMap from './GoogleMap';
+import { MapPin, Clock, Phone, Mail } from 'lucide-react';
+import GoogleMap from '@/components/GoogleMap';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 const LocationSection: React.FC = () => {
-  const { data: settings } = useQuery({
-    queryKey: ['site-settings'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('site_settings')
-        .select('*');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
   const { data: contactInfo } = useQuery({
-    queryKey: ['contact-info'],
+    queryKey: ['contact-info-location'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('contact_info')
@@ -34,202 +21,139 @@ const LocationSection: React.FC = () => {
   });
 
   const { data: addresses } = useQuery({
-    queryKey: ['addresses'],
+    queryKey: ['addresses-location'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('addresses')
         .select('*')
         .eq('is_active', true)
-        .order('order_index');
+        .order('is_primary', { ascending: false });
       
       if (error) throw error;
       return data;
     }
   });
-
-  const { data: businessHours } = useQuery({
-    queryKey: ['business-hours'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('business_hours')
-        .select('*')
-        .order('day_of_week');
-      
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const primaryAddress = addresses?.find(addr => addr.is_primary) || addresses?.[0];
-
-  const handleTestimonialClick = () => {
-    const element = document.querySelector('#testimonials');
-    if (element) {
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-  };
 
   const getContactByType = (type: string) => {
     return contactInfo?.find(contact => contact.type === type);
   };
 
-  const formatBusinessHours = () => {
-    if (!businessHours) return [];
-    
-    const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-    
-    return businessHours.map(hour => ({
-      day: dayNames[hour.day_of_week],
-      time: hour.is_active ? `${hour.open_time.slice(0,5)} - ${hour.close_time.slice(0,5)}` : 'Fechado',
-      isActive: hour.is_active
-    }));
-  };
+  const primaryAddress = addresses?.find(addr => addr.is_primary) || addresses?.[0];
 
   return (
-    <section id="location" className="py-16 bg-sage-50">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-darkgreen-900 mb-4">
-            <span className="font-tan-mon-cheri">Visite-nos</span>
+    <section id="contact" className="py-16 bg-gradient-to-br from-white to-sage-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16 animate-fade-in-up">
+          <h2 className="text-4xl md:text-5xl font-bold text-darkgreen-800 mb-6">
+            Onde Nos Encontrar
           </h2>
-          <p className="text-lg text-forest-600 max-w-2xl mx-auto">
-            Encontre-nos no coração da cidade, num espaço pensado para o seu bem-estar e relaxamento
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Visite-nos no nosso espaço em Carcavelos para uma consulta personalizada
           </p>
         </div>
-        
-        {/* Professional Environment Banner */}
-        <div className="bg-gradient-to-r from-darkgreen-800 to-forest-700 p-8 rounded-2xl text-white shadow-xl mb-12">
-          <div className="max-w-4xl mx-auto text-center">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4 font-tan-mon-cheri">
-              Ambiente Acolhedor & Profissional
-            </h3>
-            <p className="text-sage-100 leading-relaxed mb-6 text-lg">
-              Criámos um espaço único onde pode relaxar completamente enquanto recebe 
-              tratamentos de excelência. Cada detalhe foi pensado para proporcionar 
-              uma experiência de bem-estar inesquecível.
-            </p>
-            
-            <Button 
-              onClick={handleTestimonialClick}
-              className="bg-gold-500 hover:bg-gold-600 text-darkgreen-900 font-semibold px-6 py-3 transition-all duration-300 hover:scale-105 shadow-lg"
-            >
-              <MessageSquare className="h-5 w-5 mr-2" />
-              Enviar Depoimento
-            </Button>
-          </div>
-        </div>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          {/* Information Cards */}
-          <div className="space-y-6">
-            {/* Location Card */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-sage-200">
-              <div className="flex items-start space-x-4">
-                <div className="p-2 bg-darkgreen-100 rounded-lg">
-                  <MapPin className="h-5 w-5 text-darkgreen-800" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-darkgreen-900 mb-2">
-                    Localização
-                  </h3>
-                  {primaryAddress ? (
-                    <div className="text-forest-600 space-y-1">
-                      <p className="font-medium">{primaryAddress.street_address}</p>
-                      <p>{primaryAddress.postal_code} {primaryAddress.city}</p>
-                      <p>{primaryAddress.country}</p>
-                    </div>
-                  ) : (
-                    <div className="text-forest-600 space-y-1">
-                      <p className="font-medium">R. Fernando Lopes Graça 379 B</p>
-                      <p>2775-571 Carcavelos</p>
-                      <p>Portugal</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Business Hours Card */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-sage-200">
-              <div className="flex items-start space-x-4">
-                <div className="p-2 bg-darkgreen-100 rounded-lg">
-                  <Clock className="h-5 w-5 text-darkgreen-800" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-darkgreen-900 mb-2">
-                    Horário de Funcionamento
-                  </h3>
-                  <div className="space-y-1 text-forest-600 text-sm">
-                    {formatBusinessHours().length > 0 ? (
-                      formatBusinessHours().map((schedule, index) => (
-                        <div key={index} className="flex justify-between">
-                          <span>{schedule.day}:</span>
-                          <span className={`font-medium ${!schedule.isActive ? 'text-red-600' : ''}`}>
-                            {schedule.time}
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <>
-                        <div className="flex justify-between">
-                          <span>Segunda a Sexta:</span>
-                          <span className="font-medium">9h00 - 18h00</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Sábado:</span>
-                          <span className="font-medium">9h00 - 13h00</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Domingo:</span>
-                          <span className="font-medium text-red-600">Fechado</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Information Card */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-sage-200">
-              <h3 className="text-lg font-semibold text-darkgreen-900 mb-4">
-                Contacto
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
+          {/* Contact Information */}
+          <div className="space-y-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-sage-100">
+              <h3 className="text-2xl font-bold text-darkgreen-800 mb-6 flex items-center gap-3">
+                <MapPin className="w-8 h-8 text-sage-600" />
+                Informações de Contacto
               </h3>
-              <div className="space-y-3">
-                {getContactByType('phone') && (
-                  <div className="flex items-center space-x-3">
-                    <div className="p-1.5 bg-darkgreen-100 rounded-lg">
-                      <Phone className="h-4 w-4 text-darkgreen-800" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-forest-500">Telefone</p>
-                      <p className="text-forest-700 font-medium">{getContactByType('phone')?.value}</p>
+              
+              <div className="space-y-6">
+                {/* Address */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-6 h-6 text-sage-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-darkgreen-800 mb-2">Endereço</h4>
+                    <p className="text-gray-600 leading-relaxed">
+                      {primaryAddress?.street_address || 'R. Fernando Lopes Graça, 379 B'}<br />
+                      {primaryAddress?.postal_code || '2775-571'} {primaryAddress?.city || 'Carcavelos'}<br />
+                      {primaryAddress?.country || 'Portugal'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-6 h-6 text-sage-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-darkgreen-800 mb-2">Telefone</h4>
+                    <p className="text-gray-600">
+                      {getContactByType('phone')?.value || '+351 964 481 966'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-6 h-6 text-sage-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-darkgreen-800 mb-2">Email</h4>
+                    <p className="text-gray-600">
+                      {getContactByType('email')?.value || 'Limadesouzacreusa@gmail.com'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Business Hours */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-6 h-6 text-sage-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-darkgreen-800 mb-2">Horários</h4>
+                    <div className="text-gray-600 space-y-1">
+                      <p>Segunda à Sexta: 09:00 - 18:00</p>
+                      <p>Sábado: 09:00 - 18:00</p>
+                      <p className="text-red-500">Domingo: Fechado</p>
                     </div>
                   </div>
-                )}
-                {getContactByType('email') && (
-                  <div className="flex items-center space-x-3">
-                    <div className="p-1.5 bg-darkgreen-100 rounded-lg">
-                      <Mail className="h-4 w-4 text-darkgreen-800" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-forest-500">Email</p>
-                      <p className="text-forest-700 font-medium">{getContactByType('email')?.value}</p>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
+            </div>
+
+            {/* Testimonial CTA */}
+            <div className="bg-gradient-to-r from-sage-100 to-darkgreen-100 rounded-2xl p-8 text-center">
+              <h4 className="text-xl font-bold text-darkgreen-800 mb-3">
+                Partilhe a Sua Experiência
+              </h4>
+              <p className="text-gray-600 mb-4">
+                Ajude outras pessoas conhecendo o nosso trabalho
+              </p>
+              <a
+                href="#about"
+                className="inline-flex items-center px-6 py-3 bg-sage-600 hover:bg-sage-700 text-white rounded-lg transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const aboutSection = document.getElementById('about');
+                  if (aboutSection) {
+                    aboutSection.scrollIntoView({ behavior: 'smooth' });
+                    // Wait for scroll then trigger testimonial form
+                    setTimeout(() => {
+                      const testimonialButton = document.querySelector('[data-testid="testimonial-button"]') as HTMLButtonElement;
+                      if (testimonialButton) {
+                        testimonialButton.click();
+                      }
+                    }, 1000);
+                  }
+                }}
+              >
+                Enviar Depoimento
+              </a>
             </div>
           </div>
 
           {/* Map */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-sage-200">
-            <GoogleMap />
+          <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <GoogleMap className="w-full" />
           </div>
         </div>
       </div>
