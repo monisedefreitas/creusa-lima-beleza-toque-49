@@ -25,24 +25,26 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
     }
   });
 
-  // Use primary address or specific coordinates for the correct location
+  // Use primary address with the correct Sinergia Corpo & Mente coordinates
   const primaryAddress = addresses?.find(addr => addr.is_primary) || addresses?.[0];
   
-  // Coordinates extracted from the Google Maps link provided
+  // Coordenadas corretas da Sinergia Corpo & Mente
   const lat = primaryAddress?.latitude || 38.6964;
   const lng = primaryAddress?.longitude || -9.3334;
   const zoom = 16;
   
-  // Address details
+  // Address details for Sinergia Corpo & Mente
   const addressLine1 = primaryAddress?.street_address || 'R. Fernando Lopes Graça, 379 B';
   const addressLine2 = `${primaryAddress?.postal_code || '2775-571'} ${primaryAddress?.city || 'Carcavelos'}`;
   const country = primaryAddress?.country || 'Portugal';
+  const businessName = primaryAddress?.name || 'Sinergia Corpo & Mente';
   
-  // Updated Google Maps embed URL with the correct location from the provided link
-  const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3113.2!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd1ecfb1afc616d5%3A0xcdc0399346f7edd7!2zUi4gRmVybmFuZG8gTG9wZXMgR3Jh77+9YSwgMzc5IEIsIDI3NzUtNTcxIENhcmNhdmVsb3MsIFBvcnR1Z2Fs!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
+  // Google Maps embed URL com as coordenadas corretas da Sinergia Corpo & Mente
+  const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3113.2!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDQxJzQ3LjAiTiA5wrAyMCcwMC4yIlc!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
 
   const handleNavigate = () => {
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    // Usar as coordenadas exatas da Sinergia Corpo & Mente para navegação GPS
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=ChIJdRa2_KpMOA0R1732DDkDwMw`;
     window.open(googleMapsUrl, '_blank');
   };
 
@@ -57,7 +59,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          title={`Localização - ${addressLine1}, ${addressLine2}`}
+          title={`Localização - ${businessName}, ${addressLine1}, ${addressLine2}`}
           className="rounded-2xl transition-transform duration-300 group-hover:scale-105"
         />
         
@@ -69,6 +71,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
       <div className="mt-6 text-center space-y-4">
         <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg inline-block">
           <div className="text-sm text-darkgreen-600 space-y-1">
+            <div className="font-bold text-darkgreen-800">{businessName}</div>
             <div className="font-semibold text-darkgreen-800">{addressLine1}</div>
             <div>{addressLine2}</div>
             <div>{country}</div>

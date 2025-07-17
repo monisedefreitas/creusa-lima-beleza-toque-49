@@ -8,7 +8,8 @@ interface HeroContent {
   content: string;
   button_text: string;
   button_link: string;
-  background_image: string;
+  background_image_desktop: string;
+  background_image_mobile: string;
 }
 
 export const useHeroContent = () => {
@@ -27,16 +28,20 @@ export const useHeroContent = () => {
         console.error('Error fetching hero content:', heroError);
       }
 
-      // Fetch background image from site_settings
+      // Fetch both desktop and mobile background images from site_settings
       const { data: settingsData, error: settingsError } = await supabase
         .from('site_settings')
         .select('*')
-        .eq('key', 'hero_background_image')
-        .maybeSingle();
+        .in('key', ['hero_background_image_desktop', 'hero_background_image_mobile']);
 
       if (settingsError) {
-        console.error('Error fetching hero background:', settingsError);
+        console.error('Error fetching hero background images:', settingsError);
       }
+
+      // Extract images from settings
+      const desktopImage = settingsData?.find(s => s.key === 'hero_background_image_desktop')?.value;
+      const mobileImage = settingsData?.find(s => s.key === 'hero_background_image_mobile')?.value;
+      const fallbackImage = '/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png';
 
       // Return with fallbacks
       return {
@@ -45,7 +50,8 @@ export const useHeroContent = () => {
         content: heroData?.content || 'Especializados em drenagem linfática, massagens relaxantes e tratamentos estéticos personalizados',
         button_text: heroData?.button_text || 'Ver Serviços',
         button_link: heroData?.button_link || '#services',
-        background_image: settingsData?.value || '/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png'
+        background_image_desktop: desktopImage || fallbackImage,
+        background_image_mobile: mobileImage || fallbackImage
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

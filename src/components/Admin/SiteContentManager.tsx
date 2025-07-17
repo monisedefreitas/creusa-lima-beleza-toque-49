@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,11 +8,13 @@ import { Switch } from '@/components/ui/switch';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Upload, Image, Type } from 'lucide-react';
+import { Save, Upload, Image, Type, Monitor, Smartphone } from 'lucide-react';
 
 const SiteContentManager: React.FC = () => {
-  const [heroImage, setHeroImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [desktopImage, setDesktopImage] = useState<File | null>(null);
+  const [mobileImage, setMobileImage] = useState<File | null>(null);
+  const [desktopPreview, setDesktopPreview] = useState<string>('');
+  const [mobilePreview, setMobilePreview] = useState<string>('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
@@ -44,7 +45,7 @@ const SiteContentManager: React.FC = () => {
     }
   });
 
-  // Fetch site settings for background image and logo
+  // Fetch site settings for background images and logo
   const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ['site-settings-content'],
     queryFn: async () => {
@@ -152,13 +153,25 @@ const SiteContentManager: React.FC = () => {
     }
   });
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDesktopImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setHeroImage(file);
+      setDesktopImage(file);
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
+        setDesktopPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleMobileImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setMobileImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setMobilePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -176,9 +189,9 @@ const SiteContentManager: React.FC = () => {
     }
   };
 
-  const uploadImageToStorage = async (file: File): Promise<string> => {
+  const uploadImageToStorage = async (file: File, type: 'desktop' | 'mobile'): Promise<string> => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `hero_${Date.now()}.${fileExt}`;
+    const fileName = `hero_${type}_${Date.now()}.${fileExt}`;
     const filePath = `images/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
@@ -216,25 +229,25 @@ const SiteContentManager: React.FC = () => {
     return data.publicUrl;
   };
 
-  const handleSaveHeroImage = async () => {
-    if (!heroImage) return;
+  const handleSaveDesktopImage = async () => {
+    if (!desktopImage) return;
 
     setUploading(true);
     try {
-      const imageUrl = await uploadImageToStorage(heroImage);
+      const imageUrl = await uploadImageToStorage(desktopImage, 'desktop');
       
       await updateSettingMutation.mutateAsync({
-        key: 'hero_background_image',
+        key: 'hero_background_image_desktop',
         value: imageUrl
       });
 
-      setHeroImage(null);
-      setImagePreview('');
+      setDesktopImage(null);
+      setDesktopPreview('');
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Error uploading desktop image:', error);
       toast({
         title: "Erro",
-        description: "Erro ao fazer upload da imagem.",
+        description: "Erro ao fazer upload da imagem desktop.",
         variant: "destructive",
       });
     } finally {
@@ -242,25 +255,25 @@ const SiteContentManager: React.FC = () => {
     }
   };
 
-  const handleSaveLogo = async () => {
-    if (!logoFile) return;
+  const handleSaveMobileImage = async () => {
+    if (!mobileImage) return;
 
     setUploading(true);
     try {
-      const logoUrl = await uploadLogoToStorage(logoFile);
+      const imageUrl = await uploadImageToStorage(mobileImage, 'mobile');
       
       await updateSettingMutation.mutateAsync({
-        key: 'site_logo',
-        value: logoUrl
+        key: 'hero_background_image_mobile',
+        value: imageUrl
       });
 
-      setLogoFile(null);
-      setLogoPreview('');
+      setMobileImage(null);
+      setMobilePreview('');
     } catch (error) {
-      console.error('Error uploading logo:', error);
+      console.error('Error uploading mobile image:', error);
       toast({
         title: "Erro",
-        description: "Erro ao fazer upload da logo.",
+        description: "Erro ao fazer upload da imagem mobile.",
         variant: "destructive",
       });
     } finally {
@@ -276,7 +289,8 @@ const SiteContentManager: React.FC = () => {
     return settings?.find(s => s.key === key)?.value || '';
   };
 
-  const currentHeroImage = getSettingValue('hero_background_image');
+  const currentDesktopImage = getSettingValue('hero_background_image_desktop');
+  const currentMobileImage = getSettingValue('hero_background_image_mobile');
   const currentLogo = getSettingValue('site_logo');
 
   if (heroLoading || settingsLoading) {
@@ -440,22 +454,22 @@ const SiteContentManager: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Hero Background Image Management */}
+      {/* Hero Background Images Management - Desktop */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Image className="h-5 w-5" />
-            Imagem de Fundo do Hero
+            <Monitor className="h-5 w-5" />
+            Imagem de Fundo Hero - Desktop
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {currentHeroImage && (
+          {currentDesktopImage && (
             <div>
-              <Label>Imagem Atual</Label>
+              <Label>Imagem Desktop Atual</Label>
               <div className="mt-2 border rounded-lg overflow-hidden">
                 <img 
-                  src={currentHeroImage} 
-                  alt="Imagem atual do hero" 
+                  src={currentDesktopImage} 
+                  alt="Imagem desktop atual do hero" 
                   className="w-full h-48 object-cover"
                 />
               </div>
@@ -463,23 +477,26 @@ const SiteContentManager: React.FC = () => {
           )}
 
           <div>
-            <Label htmlFor="hero-image">Nova Imagem</Label>
+            <Label htmlFor="desktop-image">Nova Imagem Desktop</Label>
             <Input
-              id="hero-image"
+              id="desktop-image"
               type="file"
               accept="image/*"
-              onChange={handleImageUpload}
+              onChange={handleDesktopImageUpload}
               className="mt-1"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Recomendado: 1920x1080px ou superior para melhor qualidade em ecrãs grandes
+            </p>
           </div>
 
-          {imagePreview && (
+          {desktopPreview && (
             <div>
-              <Label>Pré-visualização</Label>
+              <Label>Pré-visualização Desktop</Label>
               <div className="mt-2 border rounded-lg overflow-hidden">
                 <img 
-                  src={imagePreview} 
-                  alt="Pré-visualização da nova imagem" 
+                  src={desktopPreview} 
+                  alt="Pré-visualização da nova imagem desktop" 
                   className="w-full h-48 object-cover"
                 />
               </div>
@@ -487,8 +504,8 @@ const SiteContentManager: React.FC = () => {
           )}
 
           <Button 
-            onClick={handleSaveHeroImage}
-            disabled={!heroImage || uploading || updateSettingMutation.isPending}
+            onClick={handleSaveDesktopImage}
+            disabled={!desktopImage || uploading || updateSettingMutation.isPending}
             className="w-full"
           >
             {(uploading || updateSettingMutation.isPending) ? (
@@ -496,7 +513,71 @@ const SiteContentManager: React.FC = () => {
             ) : (
               <Upload className="h-4 w-4 mr-2" />
             )}
-            {uploading ? 'A fazer upload...' : 'Guardar Nova Imagem'}
+            {uploading ? 'A fazer upload...' : 'Guardar Imagem Desktop'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Hero Background Images Management - Mobile */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Smartphone className="h-5 w-5" />
+            Imagem de Fundo Hero - Mobile
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {currentMobileImage && (
+            <div>
+              <Label>Imagem Mobile Atual</Label>
+              <div className="mt-2 border rounded-lg overflow-hidden">
+                <img 
+                  src={currentMobileImage} 
+                  alt="Imagem mobile atual do hero" 
+                  className="w-full h-48 object-cover"
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <Label htmlFor="mobile-image">Nova Imagem Mobile</Label>
+            <Input
+              id="mobile-image"
+              type="file"
+              accept="image/*"
+              onChange={handleMobileImageUpload}
+              className="mt-1"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Recomendado: 768x1024px (formato vertical) para melhor experiência em dispositivos móveis
+            </p>
+          </div>
+
+          {mobilePreview && (
+            <div>
+              <Label>Pré-visualização Mobile</Label>
+              <div className="mt-2 border rounded-lg overflow-hidden">
+                <img 
+                  src={mobilePreview} 
+                  alt="Pré-visualização da nova imagem mobile" 
+                  className="w-full h-48 object-cover"
+                />
+              </div>
+            </div>
+          )}
+
+          <Button 
+            onClick={handleSaveMobileImage}
+            disabled={!mobileImage || uploading || updateSettingMutation.isPending}
+            className="w-full"
+          >
+            {(uploading || updateSettingMutation.isPending) ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            ) : (
+              <Upload className="h-4 w-4 mr-2" />
+            )}
+            {uploading ? 'A fazer upload...' : 'Guardar Imagem Mobile'}
           </Button>
         </CardContent>
       </Card>
