@@ -119,36 +119,6 @@ const LocationSection: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Testimonial CTA */}
-            <div className="bg-gradient-to-r from-sage-100 to-darkgreen-100 rounded-2xl p-8 text-center">
-              <h4 className="text-xl font-bold text-darkgreen-800 mb-3">
-                Partilhe a Sua Experiência
-              </h4>
-              <p className="text-gray-600 mb-4">
-                Ajude outras pessoas conhecendo o nosso trabalho
-              </p>
-              <a
-                href="#about"
-                className="inline-flex items-center px-6 py-3 bg-sage-600 hover:bg-sage-700 text-white rounded-lg transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const aboutSection = document.getElementById('about');
-                  if (aboutSection) {
-                    aboutSection.scrollIntoView({ behavior: 'smooth' });
-                    // Wait for scroll then trigger testimonial form
-                    setTimeout(() => {
-                      const testimonialButton = document.querySelector('[data-testid="testimonial-button"]') as HTMLButtonElement;
-                      if (testimonialButton) {
-                        testimonialButton.click();
-                      }
-                    }, 1000);
-                  }
-                }}
-              >
-                Enviar Depoimento
-              </a>
-            </div>
           </div>
 
           {/* Map */}
