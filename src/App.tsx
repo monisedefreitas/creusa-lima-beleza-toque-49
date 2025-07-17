@@ -7,11 +7,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse";
 import AdminRoutes from "./pages/AdminRoutes";
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/Performance/ErrorBoundary";
-import GoogleAnalytics from "./components/Analytics/GoogleAnalytics";
+import ConditionalGoogleAnalytics from "./components/Analytics/ConditionalGoogleAnalytics";
 import SkipLinks from "./components/Accessibility/SkipLinks";
+import CookieBanner from "./components/GDPR/CookieBanner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,15 +33,18 @@ const App = () => (
           <AuthProvider>
             <BrowserRouter>
               <SkipLinks />
-              <GoogleAnalytics trackingId="G-XXXXXXXXXX" />
+              <ConditionalGoogleAnalytics trackingId="G-XXXXXXXXXX" />
               <div className="min-h-screen bg-background font-sans antialiased">
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-use" element={<TermsOfUse />} />
                   <Route path="/admin/*" element={<AdminRoutes />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <Toaster />
                 <Sonner />
+                <CookieBanner />
               </div>
             </BrowserRouter>
           </AuthProvider>
