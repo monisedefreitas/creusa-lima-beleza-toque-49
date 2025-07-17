@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,8 @@ import { Save, Upload, Image, Type } from 'lucide-react';
 const SiteContentManager: React.FC = () => {
   const [heroImage, setHeroImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const [heroContent, setHeroContent] = useState({
     title: '',
@@ -41,7 +44,7 @@ const SiteContentManager: React.FC = () => {
     }
   });
 
-  // Fetch site settings for background image
+  // Fetch site settings for background image and logo
   const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ['site-settings-content'],
     queryFn: async () => {
@@ -79,6 +82,7 @@ const SiteContentManager: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['site-settings-content'] });
       queryClient.invalidateQueries({ queryKey: ['site-settings'] });
       queryClient.invalidateQueries({ queryKey: ['hero-content'] });
+      queryClient.invalidateQueries({ queryKey: ['site-logo'] });
       toast({
         title: "Sucesso",
         description: "Configurações atualizadas com sucesso!",
@@ -160,9 +164,41 @@ const SiteContentManager: React.FC = () => {
     }
   };
 
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const uploadImageToStorage = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `hero_${Date.now()}.${fileExt}`;
+    const filePath = `images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('site-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('site-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
+  const uploadLogoToStorage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `logo_${Date.now()}.${fileExt}`;
     const filePath = `images/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
@@ -206,6 +242,32 @@ const SiteContentManager: React.FC = () => {
     }
   };
 
+  const handleSaveLogo = async () => {
+    if (!logoFile) return;
+
+    setUploading(true);
+    try {
+      const logoUrl = await uploadLogoToStorage(logoFile);
+      
+      await updateSettingMutation.mutateAsync({
+        key: 'site_logo',
+        value: logoUrl
+      });
+
+      setLogoFile(null);
+      setLogoPreview('');
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer upload da logo.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSaveHeroContent = () => {
     updateHeroContentMutation.mutate(heroContent);
   };
@@ -215,6 +277,7 @@ const SiteContentManager: React.FC = () => {
   };
 
   const currentHeroImage = getSettingValue('hero_background_image');
+  const currentLogo = getSettingValue('site_logo');
 
   if (heroLoading || settingsLoading) {
     return (
@@ -229,6 +292,67 @@ const SiteContentManager: React.FC = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestão de Conteúdo do Site</h1>
       </div>
+
+      {/* Logo Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Image className="h-5 w-5" />
+            Logo do Site
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {currentLogo && (
+            <div>
+              <Label>Logo Atual</Label>
+              <div className="mt-2 border rounded-lg overflow-hidden bg-gray-50 p-4">
+                <img 
+                  src={currentLogo} 
+                  alt="Logo atual" 
+                  className="h-12 w-auto"
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <Label htmlFor="logo-upload">Nova Logo</Label>
+            <Input
+              id="logo-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleLogoUpload}
+              className="mt-1"
+            />
+          </div>
+
+          {logoPreview && (
+            <div>
+              <Label>Pré-visualização</Label>
+              <div className="mt-2 border rounded-lg overflow-hidden bg-gray-50 p-4">
+                <img 
+                  src={logoPreview} 
+                  alt="Pré-visualização da nova logo" 
+                  className="h-12 w-auto"
+                />
+              </div>
+            </div>
+          )}
+
+          <Button 
+            onClick={handleSaveLogo}
+            disabled={!logoFile || uploading || updateSettingMutation.isPending}
+            className="w-full"
+          >
+            {(uploading || updateSettingMutation.isPending) ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            ) : (
+              <Upload className="h-4 w-4 mr-2" />
+            )}
+            {uploading ? 'A fazer upload...' : 'Guardar Nova Logo'}
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Hero Content Management */}
       <Card>

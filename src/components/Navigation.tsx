@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, Phone, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useSiteLogo } from '@/hooks/useSiteLogo';
 
 const Navigation: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const { data: logoUrl } = useSiteLogo();
 
   const menuItems = [
     { label: 'Início', href: '#hero' },
@@ -45,7 +47,7 @@ const Navigation: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center">
             <img 
-              src="/lovable-uploads/new-logo.png" 
+              src={logoUrl} 
               alt="Creusa Lima" 
               className="h-10 w-auto"
             />

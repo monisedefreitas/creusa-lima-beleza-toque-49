@@ -1,12 +1,10 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useHeroContent } from '@/hooks/useHeroContent';
 import LazyImage from '@/components/Performance/LazyImage';
 
 const HeroSection: React.FC = () => {
-  const { elementRef, isVisible } = useScrollAnimation();
   const { data: heroContent, isLoading } = useHeroContent();
 
   if (isLoading) {
@@ -21,13 +19,8 @@ const HeroSection: React.FC = () => {
   }
 
   return (
-    <section 
-      ref={elementRef}
-      className={`relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${
-        isVisible ? 'opacity-100' : 'opacity-0'
-      }`}
-    >
-      {/* Background Image with enhanced loading */}
+    <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <LazyImage
           src={heroContent?.background_image || '/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png'}
