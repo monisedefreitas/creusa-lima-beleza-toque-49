@@ -1,7 +1,7 @@
 
-import React from 'react';
+import * as React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import AdminLayout from '@/components/Admin/AdminLayout';
+import MobileAdminLayout from '@/components/Admin/MobileAdminLayout';
 import Dashboard from '@/components/Admin/Dashboard';
 import AppointmentsManager from '@/components/Admin/AppointmentsManager';
 import FixedAppointmentsManager from '@/components/Admin/FixedAppointmentsManager';
@@ -22,7 +22,7 @@ import TestimonialsManager from '@/components/Admin/TestimonialsManager';
 const AdminRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<AdminLayout />}>
+      <Route path="/" element={<MobileAdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="appointments" element={<AppointmentsManager />} />
         <Route path="create-appointment" element={<FixedAppointmentsManager />} />
