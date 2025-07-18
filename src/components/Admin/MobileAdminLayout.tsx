@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
@@ -24,6 +25,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -131,40 +133,42 @@ const MobileAdminLayout: React.FC = () => {
   };
 
   const SidebarContent = () => (
-    <>
-      <div className="p-6 border-b">
+    <div className="flex flex-col h-full">
+      <div className="p-6 border-b flex-shrink-0">
         <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
       </div>
       
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={handleMenuItemClick}
-              className={`flex items-center justify-between p-3 rounded-lg transition-colors min-h-[44px] ${
-                isActive 
-                  ? 'bg-primary text-white' 
-                  : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
-              }`}
-            >
-              <div className="flex items-center">
-                <item.icon className="h-5 w-5 mr-3" />
-                <span>{item.label}</span>
-              </div>
-              {item.badge && (
-                <Badge variant="destructive" className="text-xs">
-                  {item.badge}
-                </Badge>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
+      <ScrollArea className="flex-1 px-4">
+        <nav className="py-4 space-y-2">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={handleMenuItemClick}
+                className={`flex items-center justify-between p-3 rounded-lg transition-colors min-h-[44px] ${
+                  isActive 
+                    ? 'bg-primary text-white' 
+                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
+                }`}
+              >
+                <div className="flex items-center">
+                  <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge && (
+                  <Badge variant="destructive" className="text-xs">
+                    {item.badge}
+                  </Badge>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+      </ScrollArea>
       
-      <div className="p-4 border-t space-y-2">
+      <div className="p-4 border-t space-y-2 flex-shrink-0">
         <Button 
           variant="outline" 
           className="w-full min-h-[44px]" 
@@ -182,14 +186,14 @@ const MobileAdminLayout: React.FC = () => {
           Sair
         </Button>
       </div>
-    </>
+    </div>
   );
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 flex flex-col">
         {/* Mobile Header */}
-        <header className="bg-white shadow-sm border-b px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <header className="bg-white shadow-sm border-b px-4 py-3 flex items-center justify-between sticky top-0 z-40 flex-shrink-0">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]">
@@ -211,8 +215,10 @@ const MobileAdminLayout: React.FC = () => {
         </header>
 
         {/* Mobile Content */}
-        <main className="p-4">
-          <Outlet />
+        <main className="flex-1 overflow-auto">
+          <div className="p-4">
+            <Outlet />
+          </div>
         </main>
       </div>
     );

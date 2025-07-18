@@ -3,6 +3,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Calendar, 
@@ -18,6 +19,7 @@ import MobileDashboard from './MobileDashboard';
 
 const Dashboard: React.FC = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin-stats'],
@@ -170,13 +172,19 @@ const Dashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <Card className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+              <Card 
+                className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                onClick={() => navigate('/admin/appointments')}
+              >
                 <div className="text-center">
                   <Calendar className="h-6 w-6 mx-auto mb-2 text-blue-600" />
                   <p className="text-sm font-medium">Marcações</p>
                 </div>
               </Card>
-              <Card className="p-4 hover:bg-gray-50 cursor-pointer transition-colors">
+              <Card 
+                className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                onClick={() => navigate('/admin/services')}
+              >
                 <div className="text-center">
                   <Star className="h-6 w-6 mx-auto mb-2 text-green-600" />
                   <p className="text-sm font-medium">Serviços</p>
