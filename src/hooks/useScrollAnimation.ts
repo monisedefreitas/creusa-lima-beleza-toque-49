@@ -1,3 +1,5 @@
+
+import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 interface ScrollAnimationOptions {
