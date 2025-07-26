@@ -1,5 +1,5 @@
 
-import React from 'react';
+import * as React from 'react';
 import { useUpdateAppointmentStatus } from '@/hooks/useAppointments';
 import { useCreateNotification } from '@/hooks/useNotifications';
 import { useToast } from '@/hooks/use-toast';

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import * as React from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import SEOManager from '@/components/SEO/SEOManager';

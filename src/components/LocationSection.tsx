@@ -1,5 +1,5 @@
 
-import React from 'react';
+import * as React from 'react';
 import { MapPin, Clock, Phone, Mail } from 'lucide-react';
 import GoogleMap from '@/components/GoogleMap';
 import { useQuery } from '@tanstack/react-query';
