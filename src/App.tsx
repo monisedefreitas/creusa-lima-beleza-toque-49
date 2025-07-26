@@ -2,7 +2,6 @@
 import * as React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
@@ -30,26 +29,24 @@ const App = () => (
   <ErrorBoundary>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <AuthProvider>
-            <BrowserRouter>
-              <SkipLinks />
-              <ConditionalGoogleAnalytics trackingId="G-XXXXXXXXXX" />
-              <div className="min-h-screen bg-background font-sans antialiased">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-of-use" element={<TermsOfUse />} />
-                  <Route path="/admin/*" element={<AdminRoutes />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <Toaster />
-                <Sonner />
-                <CookieBanner />
-              </div>
-            </BrowserRouter>
-          </AuthProvider>
-        </TooltipProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <SkipLinks />
+            <ConditionalGoogleAnalytics trackingId="G-XXXXXXXXXX" />
+            <div className="min-h-screen bg-background font-sans antialiased">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-use" element={<TermsOfUse />} />
+                <Route path="/admin/*" element={<AdminRoutes />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+              <Sonner />
+              <CookieBanner />
+            </div>
+          </BrowserRouter>
+        </AuthProvider>
       </QueryClientProvider>
     </HelmetProvider>
   </ErrorBoundary>
