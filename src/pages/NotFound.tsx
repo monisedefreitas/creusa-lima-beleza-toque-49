@@ -3,7 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Home, ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import SEOManager from "@/components/SEO/SEOManager";
+
 
 const NotFound = () => {
   const location = useLocation();
@@ -17,10 +17,6 @@ const NotFound = () => {
 
   return (
     <>
-      <SEOManager 
-        title="Página não encontrada - Creusa Lima"
-        description="A página que procura não foi encontrada. Regresse à página inicial da Creusa Lima."
-      />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sage-50 to-white px-4">
         <div className="text-center max-w-md">
           <div className="mb-8">

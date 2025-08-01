@@ -1,6 +1,5 @@
 
-import * as React from 'react';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import AboutSection from '@/components/AboutSection';
@@ -11,7 +10,7 @@ import LocationSection from '@/components/LocationSection';
 import Footer from '@/components/Footer';
 import FloatingWhatsApp from '@/components/WhatsApp/FloatingWhatsApp';
 import ScrollToTop from '@/components/Performance/ScrollToTop';
-import SEOManager from '@/components/SEO/SEOManager';
+
 import SkipLinks from '@/components/Accessibility/SkipLinks';
 import { SectionDivider } from '@/components/SectionDivider';
 
@@ -32,7 +31,6 @@ const Index: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sage-50 to-white">
-      <SEOManager />
       <SkipLinks />
       <Navigation />
       

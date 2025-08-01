@@ -1,17 +1,13 @@
 
-import * as React from 'react';
+import React from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import SEOManager from '@/components/SEO/SEOManager';
+
 import { FileText, Scale, AlertCircle } from 'lucide-react';
 
 const TermsOfUse: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sage-50 to-white">
-      <SEOManager 
-        title="Termos de Uso - Creusa Lima"
-        description="Termos e condições de uso do website da Creusa Lima - Linfoterapia e Estética."
-      />
       <Navigation />
       
       <main className="pt-24 pb-16">
