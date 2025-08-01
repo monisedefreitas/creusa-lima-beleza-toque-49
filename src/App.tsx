@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from 'react-helmet-async';
+// import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -33,8 +33,7 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <ErrorBoundary>
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <BrowserRouter>
             <SkipLinks />
@@ -54,7 +53,6 @@ const App = () => (
           </BrowserRouter>
         </AuthProvider>
       </QueryClientProvider>
-    </HelmetProvider>
   </ErrorBoundary>
 );
 
