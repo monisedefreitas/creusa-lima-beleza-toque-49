@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface CookieConsent {
   necessary: boolean;
@@ -9,6 +9,12 @@ interface CookieConsent {
 }
 
 export const useCookieConsent = () => {
+  console.log('useCookieConsent: React hooks available?', { 
+    useState: typeof useState, 
+    useEffect: typeof useEffect,
+    React: typeof React
+  });
+
   const [consent, setConsent] = useState<CookieConsent | null>(null);
   const [hasConsent, setHasConsent] = useState(false);
 

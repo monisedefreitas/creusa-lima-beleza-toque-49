@@ -7,6 +7,8 @@ interface ConditionalGoogleAnalyticsProps {
 }
 
 const ConditionalGoogleAnalytics: React.FC<ConditionalGoogleAnalyticsProps> = ({ trackingId }) => {
+  console.log('ConditionalGoogleAnalytics rendering, React available?', typeof React);
+
   const { canUseAnalytics } = useCookieConsent();
 
   if (!canUseAnalytics()) {

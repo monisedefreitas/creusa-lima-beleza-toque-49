@@ -6,6 +6,8 @@ import './index.css';
 
 console.log('Main.tsx loading...');
 console.log('React version:', React.version);
+console.log('React object:', React);
+console.log('React.useState available?', typeof React.useState);
 
 const rootElement = document.getElementById("root");
 
