@@ -43,8 +43,9 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
   const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3113.2!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDQxJzQ3LjAiTiA5wrAyMCcwMC4yIlc!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
 
   const handleNavigate = () => {
-    // Usar as coordenadas exatas da Sinergia Corpo & Mente para navegação GPS
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=ChIJdRa2_KpMOA0R1732DDkDwMw`;
+    // Endereço completo: R. Fernando Lopes Graça, 379 B, 2775-571 Carcavelos, Portugal
+    const fullAddress = encodeURIComponent(`${addressLine1}, ${addressLine2}, ${country}`);
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${fullAddress}`;
     window.open(googleMapsUrl, '_blank');
   };
 

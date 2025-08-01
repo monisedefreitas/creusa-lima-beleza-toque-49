@@ -15,6 +15,9 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAvailableSlots } from '@/hooks/useAvailableSlots';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 interface Service {
   id: string;
@@ -50,6 +53,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, preSelecte
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  // Get the first selected service for availability checking
+  const firstServiceId = selectedServices.length > 0 ? selectedServices[0].id : undefined;
+  const { availableSlots, isDateAvailable, getUnavailabilityReason } = useAvailableSlots(selectedDate || new Date(), firstServiceId);
 
   useEffect(() => {
     if (isOpen) {
@@ -194,9 +201,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, preSelecte
       case 1:
         return selectedServices.length > 0;
       case 2:
-        return selectedDate !== undefined;
+        return selectedDate !== undefined && isDateAvailable;
       case 3:
-        return selectedTimeSlot !== null;
+        return selectedTimeSlot !== null && availableSlots.some(slot => slot.id === selectedTimeSlot.id);
       case 4:
         return clientInfo.name.trim() !== '' && clientInfo.phone.trim() !== '';
       default:
@@ -281,13 +288,34 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, preSelecte
                 <CalendarDays className="w-5 h-5" />
                 Escolha a Data
               </h3>
+              
+              {selectedDate && !isDateAvailable && getUnavailabilityReason && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    {getUnavailabilityReason}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <div className="flex justify-center">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   locale={pt}
-                  disabled={(date) => date < new Date()}
+                  disabled={(date) => {
+                    if (date < new Date()) return true;
+                    
+                    // Check if date is available for the selected service
+                    if (firstServiceId) {
+                      const dayOfWeek = date.getDay();
+                      // This is a simplified check - the full logic is in useAvailableSlots
+                      return false; // Let the hook handle the detailed validation
+                    }
+                    
+                    return false;
+                  }}
                   className="rounded-md border"
                 />
               </div>
@@ -301,8 +329,18 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, preSelecte
                 <Clock className="w-5 h-5" />
                 Escolha o Horário
               </h3>
+              
+              {availableSlots.length === 0 && (
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    Não há horários disponíveis para esta data. Tente escolher outra data.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <div className="grid grid-cols-3 gap-3">
-                {timeSlots.map((slot) => (
+                {availableSlots.map((slot) => (
                   <Button
                     key={slot.id}
                     variant={selectedTimeSlot?.id === slot.id ? "default" : "outline"}
