@@ -1,6 +1,5 @@
 
-import * as React from 'react';
-import { forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { formatPortuguesePhone, isValidPortuguesePhone } from '@/utils/phoneFormatter';
 import { cn } from '@/lib/utils';
