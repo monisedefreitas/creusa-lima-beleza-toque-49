@@ -21,17 +21,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  console.log('AuthProvider rendering...');
+  
 
   useEffect(() => {
-    console.log('Setting up auth state listener...');
     
     let mounted = true;
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
         
         if (!mounted) return;
         
@@ -65,8 +63,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         if (!mounted) return;
         
-        console.log('Initial session:', session?.user?.id);
-        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -97,7 +93,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const checkAdminStatus = async (userId: string) => {
     try {
-      console.log('Checking admin status for:', userId);
       
       const { data, error } = await supabase
         .from('admin_users')
@@ -107,10 +102,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .single();
       
       if (!error && data) {
-        console.log('User is admin');
         setIsAdmin(true);
       } else {
-        console.log('User is not admin or error:', error);
         setIsAdmin(false);
       }
     } catch (error) {

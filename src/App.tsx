@@ -16,12 +16,6 @@ import ConditionalGoogleAnalytics from "./components/Analytics/ConditionalGoogle
 import SkipLinks from "./components/Accessibility/SkipLinks";
 import CookieBanner from "./components/GDPR/CookieBanner";
 
-console.log('App.tsx: React object available?', { 
-  React: typeof React, 
-  version: React.version,
-  useState: typeof React.useState 
-});
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
