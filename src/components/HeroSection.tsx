@@ -20,8 +20,8 @@ const HeroSection: React.FC = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      {/* Background Images - Desktop */}
-      <div className="absolute inset-0 z-0 hidden md:block">
+      {/* Background Images - Desktop (lg breakpoint and up) */}
+      <div className="absolute inset-0 z-0 hidden lg:block">
         <LazyImage
           src={heroContent?.background_image_desktop || '/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png'}
           alt="Ambiente relaxante da clínica - Desktop"
@@ -32,8 +32,8 @@ const HeroSection: React.FC = () => {
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
-      {/* Background Images - Mobile */}
-      <div className="absolute inset-0 z-0 block md:hidden">
+      {/* Background Images - Mobile and Tablet (below lg breakpoint) */}
+      <div className="absolute inset-0 z-0 block lg:hidden">
         <LazyImage
           src={heroContent?.background_image_mobile || '/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png'}
           alt="Ambiente relaxante da clínica - Mobile"
