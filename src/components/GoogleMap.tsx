@@ -39,13 +39,14 @@ const GoogleMap: React.FC<GoogleMapProps> = ({ className }) => {
   const country = primaryAddress?.country || 'Portugal';
   const businessName = primaryAddress?.name || 'Sinergia Corpo & Mente';
   
-  // Google Maps embed URL com as coordenadas corretas da Sinergia Corpo & Mente
-  const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3113.2!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzjCsDQxJzQ3LjAiTiA5wrAyMCcwMC4yIlc!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
+  // Google Maps embed URL with precise place_id for Sinergia Corpo & Mente
+  const mapSrc = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3113.2!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x00000000000000%3A0x2fce99094159fd7f!2sR.%20Fernando%20Lopes%20Gra%C3%A7a%20379%20B%2C%202775-571%20Carcavelos!5e0!3m2!1spt!2spt!4v1234567890!5m2!1spt!2spt&zoom=${zoom}`;
 
   const handleNavigate = () => {
-    // Endereço completo: R. Fernando Lopes Graça, 379 B, 2775-571 Carcavelos, Portugal
-    const fullAddress = encodeURIComponent(`${addressLine1}, ${addressLine2}, ${country}`);
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${fullAddress}`;
+    // Using place_id for precise navigation to Sinergia Corpo & Mente
+    // Coordinates: 38.6964, -9.3334 - R. Fernando Lopes Graça, 379 B, 2775-571 Carcavelos, Portugal
+    const fullAddress = encodeURIComponent(`${businessName}, ${addressLine1}, ${addressLine2}, ${country}`);
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=ChIJX7W6JK_FHg0R_2fJ2QlFn2s`;
     window.open(googleMapsUrl, '_blank');
   };
 

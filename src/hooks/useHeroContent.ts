@@ -44,8 +44,16 @@ export const useHeroContent = () => {
       const mobileImage = settingsData?.find(s => s.key === 'hero_background_image_mobile')?.value;
       const fallbackImage = '/lovable-uploads/f89fd8e5-45a3-4f6b-878e-d3f162b79dc1.png';
 
+      // Debug log for image URLs
+      console.log('Hero Images Debug:', {
+        desktopImage,
+        mobileImage,
+        fallbackImage,
+        settingsData
+      });
+
       // Return with fallbacks
-      return {
+      const result = {
         title: heroData?.title || 'Bem-Estar e',
         subtitle: heroData?.subtitle || 'Beleza Natural',
         content: heroData?.content || 'Especializados em drenagem linfática, massagens relaxantes e tratamentos estéticos personalizados',
@@ -54,6 +62,9 @@ export const useHeroContent = () => {
         background_image_desktop: desktopImage || fallbackImage,
         background_image_mobile: mobileImage || fallbackImage
       };
+
+      console.log('Final Hero Content:', result);
+      return result;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
