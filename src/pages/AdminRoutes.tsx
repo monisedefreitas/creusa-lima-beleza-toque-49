@@ -1,5 +1,5 @@
 
-import * as React from 'react';
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MobileAdminLayout from '@/components/Admin/MobileAdminLayout';
 import Dashboard from '@/components/Admin/Dashboard';
