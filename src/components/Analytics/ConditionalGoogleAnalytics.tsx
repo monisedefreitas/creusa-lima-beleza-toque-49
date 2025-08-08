@@ -1,13 +1,12 @@
 
-import React from 'react';
+import type { FC } from 'react';
 import { useCookieConsent } from '@/hooks/useCookieConsent';
 
 interface ConditionalGoogleAnalyticsProps {
   trackingId: string;
 }
 
-const ConditionalGoogleAnalytics: React.FC<ConditionalGoogleAnalyticsProps> = ({ trackingId }) => {
-  console.log('ConditionalGoogleAnalytics rendering, React available?', typeof React);
+const ConditionalGoogleAnalytics: FC<ConditionalGoogleAnalyticsProps> = ({ trackingId }) => {
 
   const { canUseAnalytics } = useCookieConsent();
 
