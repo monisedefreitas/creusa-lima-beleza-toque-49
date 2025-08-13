@@ -1,0 +1,34 @@
+{
+  "name": "Creusa Lima - Linfoterapia e Estética Premium",
+  "short_name": "Creusa Lima",
+  "description": "Especialista em linfoterapia, pós-operatório e estética avançada. 20+ anos de experiência em Carcavelos, Portugal.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2D5016",
+  "orientation": "portrait-primary",
+  "categories": ["health", "lifestyle", "medical"],
+  "lang": "pt-PT",
+  "icons": [
+    {
+      "src": "/lovable-uploads/46b56184-9c80-42e2-9f4b-8fb2bf567b13.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/73d8cd7b-d053-484a-b84e-0c423886228f.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/lovable-uploads/f82463a1-3344-4535-86dd-071e92421715.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
+}

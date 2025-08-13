@@ -21,33 +21,93 @@ const SEOManager: React.FC<SEOManagerProps> = ({
 }) => {
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "BeautySalon",
-    "name": "Creusa Lima - Linfoterapia e Estética",
-    "description": description,
-    "url": url,
-    "image": image,
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Rua Fernando Lopes Graça 379 B",
-      "addressLocality": "Carcavelos",
-      "postalCode": "2775-571",
-      "addressCountry": "PT"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": "38.6917",
-      "longitude": "-9.3339"
-    },
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+351-964-481-966",
-      "contactType": "customer service"
-    },
-    "sameAs": [
-      "https://instagram.com/creusalima_estetica"
-    ],
-    "priceRange": "$$",
-    "openingHours": "Mo-Fr 09:00-18:00"
+    "@graph": [
+      {
+        "@type": ["BeautySalon", "MedicalBusiness", "LocalBusiness"],
+        "name": "Creusa Lima - Linfoterapia e Estética",
+        "description": description,
+        "url": url,
+        "image": [image, "/lovable-uploads/46b56184-9c80-42e2-9f4b-8fb2bf567b13.png"],
+        "logo": "/lovable-uploads/new-logo.png",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Rua Fernando Lopes Graça 379 B",
+          "addressLocality": "Carcavelos",
+          "addressRegion": "Lisboa",
+          "postalCode": "2775-571",
+          "addressCountry": "PT"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": "38.6917",
+          "longitude": "-9.3339"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+351-964-481-966",
+          "contactType": "customer service",
+          "areaServed": ["PT", "Cascais", "Carcavelos", "Lisboa"],
+          "availableLanguage": ["Portuguese"]
+        },
+        "sameAs": [
+          "https://instagram.com/creusalima_estetica"
+        ],
+        "priceRange": "$$",
+        "openingHours": "Mo-Fr 09:00-18:00",
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Serviços de Estética e Linfoterapia",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Linfoterapia",
+                "description": "Drenagem linfática manual especializada"
+              }
+            },
+            {
+              "@type": "Offer", 
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Tratamentos Pós-Operatório",
+                "description": "Cuidados especializados pós-cirúrgicos"
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service", 
+                "name": "Radiofrequência",
+                "description": "Tratamento de rejuvenescimento facial e corporal"
+              }
+            }
+          ]
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "5.0",
+          "bestRating": "5",
+          "ratingCount": "50+"
+        },
+        "founder": {
+          "@type": "Person",
+          "name": "Creusa Lima",
+          "jobTitle": "Especialista em Linfoterapia e Estética"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "url": url,
+        "name": "Creusa Lima - Linfoterapia e Estética",
+        "description": description,
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": url + "?search={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
   };
 
   return (

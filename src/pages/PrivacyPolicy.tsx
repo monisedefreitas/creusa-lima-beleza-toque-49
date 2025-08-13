@@ -1,5 +1,6 @@
 
 import React from 'react';
+import SEOManager from '@/components/SEO/SEOManager';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
@@ -8,6 +9,12 @@ import { Shield, Mail, Calendar, Database } from 'lucide-react';
 const PrivacyPolicy: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sage-50 to-white">
+      <SEOManager
+        title="Política de Privacidade - Creusa Lima Linfoterapia"
+        description="Política de privacidade e proteção de dados da clínica Creusa Lima. Saiba como tratamos e protegemos suas informações pessoais de acordo com o RGPD."
+        keywords="política privacidade, proteção dados, RGPD, Creusa Lima, linfoterapia"
+        type="article"
+      />
       <Navigation />
       
       <main className="pt-24 pb-16">

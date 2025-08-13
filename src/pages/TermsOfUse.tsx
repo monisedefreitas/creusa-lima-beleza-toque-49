@@ -1,5 +1,6 @@
 
 import React from 'react';
+import SEOManager from '@/components/SEO/SEOManager';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
@@ -8,6 +9,12 @@ import { FileText, Scale, AlertCircle } from 'lucide-react';
 const TermsOfUse: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sage-50 to-white">
+      <SEOManager
+        title="Termos de Uso - Creusa Lima Linfoterapia"
+        description="Termos e condições de uso dos serviços da clínica Creusa Lima. Conheça os direitos e deveres ao utilizar nossos serviços de linfoterapia e estética."
+        keywords="termos uso, condições serviço, Creusa Lima, linfoterapia, estética"
+        type="article"
+      />
       <Navigation />
       
       <main className="pt-24 pb-16">

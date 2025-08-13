@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import SEOManager from '@/components/SEO/SEOManager';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import AboutSection from '@/components/AboutSection';
@@ -31,6 +32,12 @@ const Index: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sage-50 to-white">
+      <SEOManager
+        title="Creusa Lima - Linfoterapia e Estética Premium em Carcavelos"
+        description="Especialista em linfoterapia, drenagem linfática e tratamentos pós-operatório. 20+ anos de experiência. Atendimento personalizado em Carcavelos, Cascais, Portugal."
+        keywords="linfoterapia Carcavelos, drenagem linfática Cascais, pós-operatório Portugal, estética avançada, radiofrequência, hifu, depilação laser, massagem terapêutica"
+        type="website"
+      />
       <SkipLinks />
       <Navigation />
       
